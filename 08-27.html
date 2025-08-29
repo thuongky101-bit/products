@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Ứng dụng Pomodoro hỗ trợ học tập với tích hợp Gemini AI và giao diện hiện đại." />
     <title>Pomodoro Study App — Tích hợp Gemini AI (Giao diện mới)</title>
     <style>
     /*
@@ -391,23 +392,23 @@
 <body>
   <div class="app" id="app">
     <nav class="app-nav">
-        <button class="nav-btn active" id="navBtnTimer" data-view="timer">
+        <button class="nav-btn active" id="navBtnTimer" data-view="timer" aria-label="Timer">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
             <span class="tooltip">Timer</span>
         </button>
-        <button class="nav-btn" id="navBtnTopics" data-view="topics">
+        <button class="nav-btn" id="navBtnTopics" data-view="topics" aria-label="Chủ đề">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg>
             <span class="tooltip">Chủ đề</span>
         </button>
-        <button class="nav-btn" id="navBtnStats" data-view="stats">
+        <button class="nav-btn" id="navBtnStats" data-view="stats" aria-label="Thống kê">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="m19 9-5 5-4-4-3 3"></path></svg>
             <span class="tooltip">Thống kê</span>
         </button>
-        <button class="nav-btn" id="navBtnTools" data-view="tools">
+        <button class="nav-btn" id="navBtnTools" data-view="tools" aria-label="Công cụ học">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
             <span class="tooltip">Công cụ học</span>
         </button>
-        <button class="nav-btn" id="btnSettings" style="margin-top: auto;">
+        <button class="nav-btn" id="btnSettings" style="margin-top: auto;" aria-label="Cài đặt">
              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 0 2l-.15.08a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1 0-2l.15.08a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
             <span class="tooltip">Cài đặt</span>
         </button>
@@ -652,7 +653,7 @@
                       <label>Gemini API Key
                           <input type="password" id="set_apiKey" placeholder="Dán API Key của bạn vào đây..." />
                       </label>
-                      <div class="tiny">Cần có để sử dụng các tính năng AI. Lấy key miễn phí tại <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">Google AI Studio</a>.</div>
+                      <div class="tiny">Cần có để sử dụng các tính năng AI. Lấy key miễn phí tại <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer">Google AI Studio</a>.</div>
                   </div>
                   <div>
                       <h4>🎵 Nhạc nền YouTube</h4>
@@ -876,8 +877,19 @@
     const store = {
       data:null,
       load(){
-        try{ const raw=localStorage.getItem(LS_KEY); this.data = raw? JSON.parse(raw) : defaultData(); }
-        catch(e){ this.data=defaultData(); console.error("Lỗi parse JSON, dùng dữ liệu mặc định:", e); }
+        try{
+          const raw = localStorage.getItem(LS_KEY);
+          this.data = raw ? JSON.parse(raw) : defaultData();
+        }catch(e){
+          console.error("Lỗi parse JSON, thử dùng bản sao lưu:", e);
+          try{
+            const backup = localStorage.getItem(LS_KEY + '_backup');
+            this.data = backup ? JSON.parse(backup) : defaultData();
+          }catch(err){
+            console.error("Không thể đọc bản sao lưu:", err);
+            this.data = defaultData();
+          }
+        }
 
         if (!this.data.version || this.data.version < 11) {
             // Nếu phiên bản cũ, có thể thêm logic chuyển đổi dữ liệu ở đây
@@ -892,7 +904,16 @@
         ensureValidSelection();
         return this.data;
       },
-      save(){ localStorage.setItem(LS_KEY, JSON.stringify(this.data)); },
+      save(){
+        try{
+          const current = localStorage.getItem(LS_KEY);
+          if(current) localStorage.setItem(LS_KEY + '_backup', current);
+          localStorage.setItem(LS_KEY, JSON.stringify(this.data));
+        }catch(e){
+          console.error('Không thể lưu dữ liệu:', e);
+          toast('Lưu thất bại: không đủ bộ nhớ.');
+        }
+      },
       export(){ const blob=new Blob([JSON.stringify(this.data,null,2)],{type:'application/json'}); const a=document.createElement('a'); const ts=new Date(); const pad=n=>`${n}`.padStart(2,'0'); a.href=URL.createObjectURL(blob); a.download=`pomodoro_backup_${ts.getFullYear()}${pad(ts.getMonth()+1)}${pad(ts.getDate())}.json`; a.click(); URL.revokeObjectURL(a.href); },
       async import(file){ const text=await file.text(); try{ const obj=JSON.parse(text); if(!obj.version||!obj.settings||!Array.isArray(obj.topics)) throw new Error('Tệp không đúng định dạng'); this.data=obj; this.save(); ensureValidSelection(); toast('Đã nhập dữ liệu thành công!'); renderAll(); }catch(e){ toast('Nhập thất bại: '+e.message); } }
     };
