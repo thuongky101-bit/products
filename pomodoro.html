@@ -743,14 +743,10 @@
         return text.replace(/(\*\*|__|\*|_|#+\s*)/g, '');
     }
     function extractYouTubeID(url) {
-        let videoId = null;
         if (!url) return null;
-        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+        const regExp = /^.*(?:youtu.be\/|shorts\/|live\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([A-Za-z0-9_-]{11}).*/;
         const match = url.match(regExp);
-        if (match && match[2].length === 11) {
-            videoId = match[2];
-        }
-        return videoId;
+        return match ? match[1] : null;
     }
     function applyTheme() {
         const theme = store.data.settings.theme || 'default';
@@ -1586,35 +1582,37 @@
         if (!ytPlayer || !ytPlayer.loadVideoById) return;
         const videoId = extractYouTubeID(store.data.settings.youtubeUrl);
 
-        if (store.data.settings.useYtThumbnailAsBg) {
-            if (videoId) {
-                const thumbUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
-                const img = new Image();
-                img.onload = () => {
-                    store.data.settings.customBg = thumbUrl;
-                    store.save();
-                    applyCustomBg();
-                };
-                img.onerror = () => {
-                    const fallbackUrl = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
-                    store.data.settings.customBg = fallbackUrl;
-                    store.save();
-                    applyCustomBg();
-                }
-                img.src = thumbUrl;
-            } else {
+        if (!videoId) {
+            if (store.data.settings.useYtThumbnailAsBg) {
                 store.data.settings.customBg = '';
                 store.save();
                 applyCustomBg();
             }
+            if (ytPlayer && ytPlayer.stopVideo) {
+                ytPlayer.stopVideo();
+            }
+            return;
         }
 
-        if (videoId) {
-            ytPlayer.loadVideoById(videoId);
-            ytPlayer.setVolume(store.data.settings.youtubeVolume);
-        } else {
-            ytPlayer.stopVideo();
+        if (store.data.settings.useYtThumbnailAsBg) {
+            const thumbUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+            const img = new Image();
+            img.onload = () => {
+                store.data.settings.customBg = thumbUrl;
+                store.save();
+                applyCustomBg();
+            };
+            img.onerror = () => {
+                const fallbackUrl = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+                store.data.settings.customBg = fallbackUrl;
+                store.save();
+                applyCustomBg();
+            };
+            img.src = thumbUrl;
         }
+
+        ytPlayer.loadVideoById(videoId);
+        ytPlayer.setVolume(store.data.settings.youtubeVolume);
     }
 
     function toggleYtSound() {
