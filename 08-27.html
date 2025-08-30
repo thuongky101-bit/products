@@ -539,7 +539,23 @@
       </div>
 
       <!-- VIEW: TOOLS -->
-      <div id="view-tools" class="view"></div>
+      <div id="view-tools" class="view">
+        <section class="panel panel-bg aux-panel">
+          <nav class="tab-nav">
+            <button class="tab-btn active" data-tab="quiz">Quiz</button>
+          </nav>
+          <div id="quiz" class="tab-content active">
+            <div id="quizQuestion" style="margin-bottom:12px;"></div>
+            <div id="quizOptions" style="display:flex; flex-direction:column; gap:8px;"></div>
+            <div id="quizScore" style="margin-top:12px;"></div>
+            <div class="row" style="gap:8px; margin-top:12px;">
+              <button class="btn small acc" id="btnGenerateQuiz">Tạo Quiz</button>
+              <button class="btn small" id="btnNextQuestion">Câu tiếp</button>
+              <button class="btn small danger" id="btnFinishQuiz">Kết thúc</button>
+            </div>
+          </div>
+        </section>
+      </div>
 
     </main>
   </div>
@@ -839,7 +855,7 @@
         useYtThumbnailAsBg: true,
         panelOpacity: 0.85
       },
-      topics:[ { id: uid('t'), name:'Chủ đề mẫu', subtopics:[ { id: uid('s'), name:'Subtopic mẫu', tasks: [], generalNotes: [], chatHistory: [],
+      topics:[ { id: uid('t'), name:'Chủ đề mẫu', subtopics:[ { id: uid('s'), name:'Subtopic mẫu', tasks: [], generalNotes: [], chatHistory: [], quizHistory: [],
       stats:{totalMinutes:0,sessionsCompleted:0, tasksCompleted: 0},
       sessions:[],
       timerState: {
@@ -945,6 +961,9 @@
         if (viewId === 'stats') {
             renderDashboard();
         }
+        if (viewId === 'tools') {
+            renderQuiz();
+        }
     }
 
     // =============================
@@ -978,7 +997,7 @@
           del.addEventListener('click', ()=> showConfirmModal('Xác nhận xóa', `Bạn có chắc muốn xóa Subtopic "${st.name}"? Mọi dữ liệu liên quan sẽ bị mất.`, (ok) => { if(!ok) return; topic.subtopics = topic.subtopics.filter(x=>x.id!==st.id); const set=store.data.settings; if(set.selectedSubtopicId===st.id){ set.selectedSubtopicId=''; set.selectedTopicId=''; ensureValidSelection(); } store.save(); renderAll(); }));
         });
         chev.addEventListener('click', ()=>{ if(isCollapsed){ delete collapsedMap[topic.id]; } else { collapsedMap[topic.id] = true; } store.data.settings.collapsedTopics = collapsedMap; store.save(); renderTopics(); });
-        bAdd.addEventListener('click', ()=> showInputModal('Tên Subtopic mới?', (name) => { if(!name) return; topic.subtopics.push({ id: uid('s'), name, tasks: [], generalNotes: [], chatHistory: [], stats:{ totalMinutes:0, sessionsCompleted:0, tasksCompleted: 0 }, sessions: [], timerState: { state: 'idle', remaining: 0, segmentTotal: 0, cycleIndex: 0 } }); store.save(); renderTopics(); }));
+        bAdd.addEventListener('click', ()=> showInputModal('Tên Subtopic mới?', (name) => { if(!name) return; topic.subtopics.push({ id: uid('s'), name, tasks: [], generalNotes: [], chatHistory: [], quizHistory: [], stats:{ totalMinutes:0, sessionsCompleted:0, tasksCompleted: 0 }, sessions: [], timerState: { state: 'idle', remaining: 0, segmentTotal: 0, cycleIndex: 0 } }); store.save(); renderTopics(); }));
         bEdit.addEventListener('click', ()=> showInputModal('Đổi tên Topic', (newName) => { if(!newName) return; topic.name=newName; store.save(); renderTopics(); }, topic.name));
         bDel.addEventListener('click', ()=> showConfirmModal('Xác nhận xóa', `Bạn có chắc muốn xóa Topic "${topic.name}"? Mọi subtopic và dữ liệu liên quan sẽ bị mất.`, (ok) => { if(!ok) return; store.data.topics = store.data.topics.filter(t=>t.id!==topic.id); delete collapsedMap[topic.id]; if(store.data.settings.selectedTopicId===topic.id){ store.data.settings.selectedTopicId=''; store.data.settings.selectedSubtopicId=''; ensureValidSelection(); } store.save(); renderAll(); }));
         box.append(header, subs);
@@ -1469,6 +1488,116 @@
         });
     }
 
+    // =============================
+    // Quiz
+    // =============================
+    let currentQuiz = null;
+
+    async function generateQuiz() {
+        const s = getCurrentSubtopic();
+        if (!s) { toast("Vui lòng chọn subtopic."); return; }
+        const content = (s.generalNotes || []).map(n => n.content).join('\n');
+        if (!content) { toast("Không có nội dung để tạo quiz."); return; }
+        const prompt = `Hãy tạo 5 câu hỏi trắc nghiệm dạng JSON dựa trên nội dung sau:\n${content}\n`+
+            `Trả về JSON với cấu trúc {\"questions\":[{\"q\":\"câu hỏi\",\"options\":[\"A\",\"B\",\"C\",\"D\"],\"answer\":0}]}`;
+        const res = await callGeminiAPI(prompt);
+        if (!res) return;
+        let text = res.trim();
+        const match = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+        if (match) text = match[1];
+        try {
+            const quiz = JSON.parse(text);
+            quiz.current = 0;
+            quiz.score = 0;
+            quiz.answers = [];
+            currentQuiz = quiz;
+            renderQuiz();
+        } catch (e) {
+            console.error('Quiz parse error', e, text);
+            toast('Không thể tạo quiz.');
+        }
+    }
+
+    function renderQuiz() {
+        const questionEl = $('#quizQuestion');
+        const optionsEl = $('#quizOptions');
+        const scoreEl = $('#quizScore');
+        const nextBtn = $('#btnNextQuestion');
+        const finishBtn = $('#btnFinishQuiz');
+        const genBtn = $('#btnGenerateQuiz');
+
+        if (!questionEl) return;
+
+        if (!currentQuiz) {
+            questionEl.textContent = 'Nhấn "Tạo Quiz" để bắt đầu.';
+            optionsEl.innerHTML = '';
+            scoreEl.textContent = '';
+            nextBtn.style.display = 'none';
+            finishBtn.style.display = 'none';
+            genBtn.style.display = 'inline-block';
+            return;
+        }
+
+        const idx = currentQuiz.current;
+        const q = currentQuiz.questions[idx];
+        questionEl.textContent = `${idx + 1}. ${q.q}`;
+        optionsEl.innerHTML = '';
+        const selected = currentQuiz.answers[idx];
+        q.options.forEach((opt, i) => {
+            const b = document.createElement('button');
+            b.className = 'btn small';
+            b.textContent = opt;
+            if (selected !== undefined) {
+                b.disabled = true;
+                if (i === q.answer) b.classList.add('acc');
+                if (i === selected && i !== q.answer) b.classList.add('danger');
+            } else {
+                b.addEventListener('click', () => selectQuizOption(i));
+            }
+            optionsEl.appendChild(b);
+        });
+        scoreEl.textContent = `Điểm: ${currentQuiz.score} / ${currentQuiz.questions.length}`;
+        nextBtn.style.display = idx < currentQuiz.questions.length - 1 ? 'inline-block' : 'none';
+        finishBtn.style.display = 'inline-block';
+        genBtn.style.display = 'none';
+    }
+
+    function selectQuizOption(i) {
+        const q = currentQuiz.questions[currentQuiz.current];
+        if (currentQuiz.answers[currentQuiz.current] !== undefined) return;
+        currentQuiz.answers[currentQuiz.current] = i;
+        if (i === q.answer) currentQuiz.score++;
+        renderQuiz();
+    }
+
+    function nextQuizQuestion() {
+        if (!currentQuiz) return;
+        if (currentQuiz.current < currentQuiz.questions.length - 1) {
+            currentQuiz.current++;
+            renderQuiz();
+        }
+    }
+
+    function finishQuiz() {
+        if (!currentQuiz) return;
+        const s = getCurrentSubtopic();
+        if (s) {
+            if (!s.quizHistory) s.quizHistory = [];
+            const wrong = [];
+            currentQuiz.questions.forEach((q, idx) => {
+                const ans = currentQuiz.answers[idx];
+                if (ans !== q.answer) {
+                    wrong.push({ question: q.q, correct: q.options[q.answer], chosen: ans != null ? q.options[ans] : null });
+                }
+            });
+            s.quizHistory.push({ score: currentQuiz.score, total: currentQuiz.questions.length, wrong });
+            store.save();
+        }
+        toast(`Hoàn thành quiz: ${currentQuiz.score}/${currentQuiz.questions.length}`);
+        currentQuiz = null;
+        renderQuiz();
+    }
+
 
     // =============================
     // YouTube Player
@@ -1581,6 +1710,9 @@
 
       $('#btnClearChat').addEventListener('click', clearChat);
       $('#btnNewChat').addEventListener('click', clearChat);
+      $('#btnGenerateQuiz').addEventListener('click', generateQuiz);
+      $('#btnNextQuestion').addEventListener('click', nextQuizQuestion);
+      $('#btnFinishQuiz').addEventListener('click', finishQuiz);
       $('#btnAddSubtopicTask').addEventListener('click', addSubtopicTask);
       $('#newSubtopicTaskInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') addSubtopicTask(); });
 
@@ -1613,6 +1745,9 @@
                   if(parent.closest('#modalSettings')) {
                       activeContent.style.display = 'flex';
                   }
+              }
+              if(tabId === 'quiz') {
+                  renderQuiz();
               }
           });
       });
@@ -1685,6 +1820,7 @@
         renderStatsHistory();
         renderGeneralNotes();
         renderChat();
+        renderQuiz();
         applyCustomBg();
         applyPanelOpacity();
         renderSubtopicTasks();
