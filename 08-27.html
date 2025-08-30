@@ -539,24 +539,7 @@
       </div>
 
       <!-- VIEW: TOOLS -->
-      <div id="view-tools" class="view">
-        <section class="panel panel-bg">
-            <h3 style="margin:0 0 12px 0;">🤔 Chế độ Hỏi-Đáp Socratic</h3>
-            <p class="tiny" style="margin-top: -8px; margin-bottom: 12px;">Sử dụng các câu hỏi này để đào sâu tư duy, thử thách các giả định và hiểu rõ vấn đề hơn.</p>
-            <div id="socraticMethodsList" style="display: flex; flex-direction: column; gap: 8px;"></div>
-        </section>
-        <section class="panel panel-bg">
-            <h3 style="margin:0 0 12px 0;">Các phương pháp học</h3>
-            <ul id="learningMethodsList" class="methods-list" style="max-height: none;"></ul>
-            <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 8px;">
-                <input type="text" id="newMethodNameInput" placeholder="Tên phương pháp mới...">
-                <textarea id="newMethodConceptInput" placeholder="Khái niệm (không bắt buộc)..." style="min-height: 60px;"></textarea>
-                <div style="text-align: right;">
-                    <button id="btnAddMethod" class="btn small" style="flex: 0 1 auto;">Thêm</button>
-                </div>
-            </div>
-        </section>
-      </div>
+      <div id="view-tools" class="view"></div>
 
     </main>
   </div>
@@ -857,12 +840,6 @@
         panelOpacity: 0.85
       },
       topics:[ { id: uid('t'), name:'Chủ đề mẫu', subtopics:[ { id: uid('s'), name:'Subtopic mẫu', tasks: [], generalNotes: [], chatHistory: [],
-      learningMethods: [
-            { id: uid('m'), text: 'Gợi Nhớ Chủ Động (Active Recall)', concept: 'Chủ động tái tạo thông tin từ ký ức thay vì đọc lại thụ động. Não bộ học bằng cách lấy thông tin ra, không phải nhét vào. Sử dụng câu hỏi, flashcard, tóm tắt từ ký ức để rèn luyện khả năng recall.', completed: false },
-            { id: uid('m'), text: 'Lặp Lại Có Khoảng Cách (Spaced Repetition)', concept: 'Ôn lại kiến thức theo khoảng thời gian tăng dần (1 ngày → 3 ngày → 1 tuần → 1 tháng). Não bộ ghi nhớ lâu dài khi thông tin xuất hiện nhiều lần với khoảng cách thích hợp, chống quên theo đường cong Ebbinghaus.', completed: false },
-            { id: uid('m'), text: 'Kỹ Thuật Feynman', concept: 'Giải thích kiến thức bằng ngôn ngữ đơn giản như dạy cho trẻ em. Nếu không giải thích được đơn giản, bạn chưa hiểu thật sự. Quy trình: Viết chủ đề → Giải thích bằng từ ngữ thường ngày → Tìm lỗ hổng kiến thức → Học lại → Giải thích lại đơn giản hơn.', completed: false },
-            { id: uid('m'), text: 'Học Đắm Chìm (Immersion Learning)', concept: 'Tạo môi trường ngôn ngữ bao quanh (đọc sách, xem phim, nghe nhạc bằng ngôn ngữ mục tiêu). Não bộ học ngôn ngữ qua exposure tự nhiên và context phong phú.', completed: false }
-        ],
       stats:{totalMinutes:0,sessionsCompleted:0, tasksCompleted: 0},
       sessions:[],
       timerState: {
@@ -1001,7 +978,7 @@
           del.addEventListener('click', ()=> showConfirmModal('Xác nhận xóa', `Bạn có chắc muốn xóa Subtopic "${st.name}"? Mọi dữ liệu liên quan sẽ bị mất.`, (ok) => { if(!ok) return; topic.subtopics = topic.subtopics.filter(x=>x.id!==st.id); const set=store.data.settings; if(set.selectedSubtopicId===st.id){ set.selectedSubtopicId=''; set.selectedTopicId=''; ensureValidSelection(); } store.save(); renderAll(); }));
         });
         chev.addEventListener('click', ()=>{ if(isCollapsed){ delete collapsedMap[topic.id]; } else { collapsedMap[topic.id] = true; } store.data.settings.collapsedTopics = collapsedMap; store.save(); renderTopics(); });
-        bAdd.addEventListener('click', ()=> showInputModal('Tên Subtopic mới?', (name) => { if(!name) return; topic.subtopics.push({ id: uid('s'), name, tasks: [], generalNotes: [], chatHistory: [], learningMethods: [], stats:{ totalMinutes:0, sessionsCompleted:0, tasksCompleted: 0 }, sessions: [], timerState: { state: 'idle', remaining: 0, segmentTotal: 0, cycleIndex: 0 } }); store.save(); renderTopics(); }));
+        bAdd.addEventListener('click', ()=> showInputModal('Tên Subtopic mới?', (name) => { if(!name) return; topic.subtopics.push({ id: uid('s'), name, tasks: [], generalNotes: [], chatHistory: [], stats:{ totalMinutes:0, sessionsCompleted:0, tasksCompleted: 0 }, sessions: [], timerState: { state: 'idle', remaining: 0, segmentTotal: 0, cycleIndex: 0 } }); store.save(); renderTopics(); }));
         bEdit.addEventListener('click', ()=> showInputModal('Đổi tên Topic', (newName) => { if(!newName) return; topic.name=newName; store.save(); renderTopics(); }, topic.name));
         bDel.addEventListener('click', ()=> showConfirmModal('Xác nhận xóa', `Bạn có chắc muốn xóa Topic "${topic.name}"? Mọi subtopic và dữ liệu liên quan sẽ bị mất.`, (ok) => { if(!ok) return; store.data.topics = store.data.topics.filter(t=>t.id!==topic.id); delete collapsedMap[topic.id]; if(store.data.settings.selectedTopicId===topic.id){ store.data.settings.selectedTopicId=''; store.data.settings.selectedSubtopicId=''; ensureValidSelection(); } store.save(); renderAll(); }));
         box.append(header, subs);
@@ -1479,92 +1456,6 @@
         btn.innerHTML = originalContent; btn.disabled = false;
     }
 
-    function renderLearningMethods() {
-        const s = getCurrentSubtopic();
-        const listEl = $('#learningMethodsList');
-        const addArea = $('#newMethodNameInput').parentElement;
-        if (!s) {
-            listEl.innerHTML = '<li class="tiny">Chọn subtopic để xem các phương pháp học.</li>';
-            addArea.classList.add('hidden'); return;
-        }
-        addArea.classList.remove('hidden');
-        listEl.innerHTML = '';
-        if (!s.learningMethods || s.learningMethods.length === 0) {
-            listEl.innerHTML = '<li class="tiny">Chưa có phương pháp nào. Hãy thêm một phương pháp mới.</li>';
-            return;
-        }
-
-        s.learningMethods.forEach(method => {
-            const item = document.createElement('li');
-            item.className = 'method-item';
-            const conceptHTML = method.concept ? `<div class="concept hidden">${escapeHTML(method.concept)}</div>` : '';
-
-            item.innerHTML = `
-                <input type="checkbox" id="${method.id}" ${method.completed ? 'checked' : ''}>
-                <div class="content-wrapper">
-                    <label for="${method.id}" class="${method.completed ? 'completed' : ''}">${escapeHTML(method.text)}</label>
-                    ${conceptHTML}
-                </div>
-                <button class="btn small danger" data-method-id="${method.id}">Xóa</button>
-            `;
-
-            item.querySelector('.content-wrapper').addEventListener('click', (e) => {
-                if (e.target.tagName !== 'INPUT') {
-                    const conceptEl = item.querySelector('.concept');
-                    if (conceptEl) conceptEl.classList.toggle('hidden');
-                }
-            });
-
-            item.querySelector('input[type="checkbox"]').addEventListener('change', () => toggleMethod(method.id));
-            item.querySelector('.btn.danger').addEventListener('click', () => deleteMethod(method.id));
-
-            listEl.appendChild(item);
-        });
-    }
-
-    function addMethod() {
-        const s = getCurrentSubtopic();
-        if (!s) { toast("Vui lòng chọn subtopic."); return; }
-        const nameInput = $('#newMethodNameInput');
-        const conceptInput = $('#newMethodConceptInput');
-        const name = nameInput.value.trim();
-        const concept = conceptInput.value.trim();
-
-        if (!name) { toast("Tên phương pháp không được để trống."); return; }
-        if (!s.learningMethods) s.learningMethods = [];
-
-        s.learningMethods.push({ id: uid('m'), text: name, concept: concept, completed: false });
-        store.save();
-        renderLearningMethods();
-        nameInput.value = '';
-        conceptInput.value = '';
-    }
-
-    function deleteMethod(methodId) {
-        const s = getCurrentSubtopic();
-        if (!s) return;
-
-        showConfirmModal('Xác nhận xóa', 'Bạn có chắc muốn xóa phương pháp này?', (ok) => {
-            if (ok) {
-                s.learningMethods = s.learningMethods.filter(m => m.id !== methodId);
-                store.save();
-                renderLearningMethods();
-                toast('Đã xóa phương pháp.');
-            }
-        });
-    }
-
-    function toggleMethod(methodId) {
-        const s = getCurrentSubtopic();
-        if (!s) return;
-        const method = s.learningMethods.find(m => m.id === methodId);
-        if (method) {
-            method.completed = !method.completed;
-            store.save();
-            renderLearningMethods();
-        }
-    }
-
     function clearChat() {
         const s = getCurrentSubtopic();
         if (!s) { toast("Vui lòng chọn subtopic."); return; }
@@ -1575,33 +1466,6 @@
                 renderChat();
                 toast("Đã xóa lịch sử chat.");
             }
-        });
-    }
-
-    // =============================
-    // Socratic Questions
-    // =============================
-    const socraticQuestions = [
-        { title: '1. Câu hỏi làm rõ', content: `"Bạn có thể nói rõ hơn về điều đó không?"\n"Bạn có thể cho một ví dụ cụ thể về điều đó được không?"\n"Ý của bạn khi nói '...' là gì?"\n"Tại sao bạn nghĩ điều này lại quan trọng?"` },
-        { title: '2. Câu hỏi thăm dò giả định', content: `"Bạn đang giả định điều gì khi nói '...'?"\n"Làm thế nào bạn có thể kiểm chứng giả định đó?"\n"Giả sử '...' không đúng, thì điều gì sẽ xảy ra?"` },
-        { title: '3. Câu hỏi thăm dò lý do và bằng chứng', content: `"Làm thế nào bạn biết điều đó là đúng?"\n"Bạn có bằng chứng nào để ủng hộ quan điểm này không?"\n"Tại sao bạn lại tin rằng điều đó đúng?"\n"Điều gì sẽ thay đổi suy nghĩ của bạn?"` },
-        { title: '4. Câu hỏi về quan điểm và góc nhìn', content: `"Điều này có ý nghĩa như thế nào đối với người khác?"\n"Có ai có thể nhìn vấn đề này theo cách khác không?"\n"Bạn sẽ phản ứng thế nào nếu ở vị trí của người đó?"` },
-        { title: '5. Câu hỏi suy luận và hệ quả', content: `"Hậu quả của việc này sẽ là gì?"\n"Nếu bạn làm điều đó, chuyện gì sẽ xảy ra tiếp theo?"\n"Làm thế nào bạn có thể áp dụng điều này vào một tình huống khác?"` },
-        { title: '6. Câu hỏi về siêu nhận thức (Metacognitive)', content: `"Bạn đã đạt được kết luận này như thế nào?"\n"Bạn cảm thấy quá trình suy nghĩ của mình diễn ra như thế nào?"\n"Khi nào bạn nghĩ rằng bạn nên cân nhắc lại quan điểm của mình?"` }
-    ];
-
-    function renderSocraticQuestions() {
-        const listEl = $('#socraticMethodsList');
-        listEl.innerHTML = '';
-        socraticQuestions.forEach(q => {
-            const item = document.createElement('details');
-            item.className = 'topic-item';
-            item.style.padding = '12px';
-            item.innerHTML = `
-                <summary style="font-weight: 600; cursor: pointer;">${q.title}</summary>
-                <div class="concept" style="margin-top: 10px; border: none; padding: 0; white-space: pre-wrap;">${escapeHTML(q.content)}</div>
-            `;
-            listEl.appendChild(item);
         });
     }
 
@@ -1714,9 +1578,6 @@
       $('#btnSummarizeNote').addEventListener('click', handleSummarizeNote);
       $('#btnSendMessage').addEventListener('click', handleSendMessage);
       $('#chatInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') handleSendMessage(); });
-      $('#btnAddMethod').addEventListener('click', addMethod);
-      $('#newMethodNameInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') addMethod(); });
-      $('#newMethodConceptInput').addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.ctrlKey) addMethod(); });
 
       $('#btnClearChat').addEventListener('click', clearChat);
       $('#btnNewChat').addEventListener('click', clearChat);
@@ -1824,8 +1685,6 @@
         renderStatsHistory();
         renderGeneralNotes();
         renderChat();
-        renderLearningMethods();
-        renderSocraticQuestions();
         applyCustomBg();
         applyPanelOpacity();
         renderSubtopicTasks();
