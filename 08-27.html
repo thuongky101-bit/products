@@ -275,6 +275,12 @@
     .chat-msg.model { background: var(--muted); align-self: flex-start; border-bottom-left-radius: 4px; }
     .chat-input-area { display: flex; gap: 8px; }
 
+    #flashcardsList { display:flex; flex-direction:column; gap:8px; }
+    .flashcard { border:1px solid var(--muted); border-radius:8px; padding:8px; }
+    .flashcard.learned { opacity:0.6; }
+    .flashcard .fc-q { font-weight:600; }
+    .flashcard .actions { margin-top:6px; display:flex; gap:6px; }
+
     .methods-list { list-style: none; padding: 0; }
     .method-item { align-items: flex-start; padding: 12px; display: flex; gap: 10px; border-radius: 8px; }
     .method-item:hover { background: rgba(255,255,255,0.05); }
@@ -539,7 +545,18 @@
       </div>
 
       <!-- VIEW: TOOLS -->
-      <div id="view-tools" class="view"></div>
+      <div id="view-tools" class="view">
+        <section class="panel panel-bg">
+          <div class="panel-header">
+            <h3 style="margin:0;">Flashcards — <span id="flashcardSubtopicName">(chưa chọn)</span></h3>
+            <div class="actions">
+              <button id="btnGenFlashcard" class="btn small ghost" title="Tạo flashcard từ AI">🤖</button>
+              <button id="btnAddFlashcard" class="btn small acc" title="Thêm flashcard">＋</button>
+            </div>
+          </div>
+          <div id="flashcardsList"></div>
+        </section>
+      </div>
 
     </main>
   </div>
@@ -815,9 +832,9 @@
     // =============================
     // Storage
     // =============================
-    const LS_KEY = 'pomodoro_data_v11'; // Cập nhật phiên bản để tránh xung đột
+    const LS_KEY = 'pomodoro_data_v12'; // Cập nhật phiên bản để tránh xung đột
     const defaultData = () => ({
-      version:11,
+      version:12,
       settings:{
         apiKey: "",
         currentView: 'timer', // Thêm trạng thái view mới
@@ -839,7 +856,7 @@
         useYtThumbnailAsBg: true,
         panelOpacity: 0.85
       },
-      topics:[ { id: uid('t'), name:'Chủ đề mẫu', subtopics:[ { id: uid('s'), name:'Subtopic mẫu', tasks: [], generalNotes: [], chatHistory: [],
+      topics:[ { id: uid('t'), name:'Chủ đề mẫu', subtopics:[ { id: uid('s'), name:'Subtopic mẫu', tasks: [], generalNotes: [], chatHistory: [], flashcards: [],
       stats:{totalMinutes:0,sessionsCompleted:0, tasksCompleted: 0},
       sessions:[],
       timerState: {
@@ -868,12 +885,16 @@
           }
         }
 
-        if (!this.data.version || this.data.version < 11) {
-            // Nếu phiên bản cũ, có thể thêm logic chuyển đổi dữ liệu ở đây
-            // Hiện tại, chỉ đơn giản là reset về mặc định để đảm bảo tương thích
+        if (!this.data.version || this.data.version < 12) {
+            // Nếu phiên bản cũ, reset về mặc định để đảm bảo tương thích
             this.data = defaultData();
         }
-        
+
+        // Đảm bảo mỗi subtopic có mảng flashcards
+        this.data.topics.forEach(t => t.subtopics.forEach(s => {
+            if (!Array.isArray(s.flashcards)) s.flashcards = [];
+        }));
+
         const set = this.data.settings;
         if (set.currentView === undefined) set.currentView = 'timer';
 
@@ -978,7 +999,7 @@
           del.addEventListener('click', ()=> showConfirmModal('Xác nhận xóa', `Bạn có chắc muốn xóa Subtopic "${st.name}"? Mọi dữ liệu liên quan sẽ bị mất.`, (ok) => { if(!ok) return; topic.subtopics = topic.subtopics.filter(x=>x.id!==st.id); const set=store.data.settings; if(set.selectedSubtopicId===st.id){ set.selectedSubtopicId=''; set.selectedTopicId=''; ensureValidSelection(); } store.save(); renderAll(); }));
         });
         chev.addEventListener('click', ()=>{ if(isCollapsed){ delete collapsedMap[topic.id]; } else { collapsedMap[topic.id] = true; } store.data.settings.collapsedTopics = collapsedMap; store.save(); renderTopics(); });
-        bAdd.addEventListener('click', ()=> showInputModal('Tên Subtopic mới?', (name) => { if(!name) return; topic.subtopics.push({ id: uid('s'), name, tasks: [], generalNotes: [], chatHistory: [], stats:{ totalMinutes:0, sessionsCompleted:0, tasksCompleted: 0 }, sessions: [], timerState: { state: 'idle', remaining: 0, segmentTotal: 0, cycleIndex: 0 } }); store.save(); renderTopics(); }));
+        bAdd.addEventListener('click', ()=> showInputModal('Tên Subtopic mới?', (name) => { if(!name) return; topic.subtopics.push({ id: uid('s'), name, tasks: [], generalNotes: [], chatHistory: [], flashcards: [], stats:{ totalMinutes:0, sessionsCompleted:0, tasksCompleted: 0 }, sessions: [], timerState: { state: 'idle', remaining: 0, segmentTotal: 0, cycleIndex: 0 } }); store.save(); renderTopics(); }));
         bEdit.addEventListener('click', ()=> showInputModal('Đổi tên Topic', (newName) => { if(!newName) return; topic.name=newName; store.save(); renderTopics(); }, topic.name));
         bDel.addEventListener('click', ()=> showConfirmModal('Xác nhận xóa', `Bạn có chắc muốn xóa Topic "${topic.name}"? Mọi subtopic và dữ liệu liên quan sẽ bị mất.`, (ok) => { if(!ok) return; store.data.topics = store.data.topics.filter(t=>t.id!==topic.id); delete collapsedMap[topic.id]; if(store.data.settings.selectedTopicId===topic.id){ store.data.settings.selectedTopicId=''; store.data.settings.selectedSubtopicId=''; ensureValidSelection(); } store.save(); renderAll(); }));
         box.append(header, subs);
@@ -1469,6 +1490,96 @@
         });
     }
 
+    // =============================
+    // Flashcards
+    // =============================
+    function renderFlashcards() {
+        const list = $('#flashcardsList');
+        const nameEl = $('#flashcardSubtopicName');
+        const s = getCurrentSubtopic();
+        if (!list) return;
+        if (!s) {
+            list.innerHTML = '<div class="tiny">Chọn subtopic để xem flashcards.</div>';
+            if (nameEl) nameEl.textContent = '(chưa chọn)';
+            return;
+        }
+        nameEl.textContent = s.name;
+        if (!Array.isArray(s.flashcards)) s.flashcards = [];
+        if (s.flashcards.length === 0) {
+            list.innerHTML = '<div class="tiny">Chưa có flashcard nào.</div>';
+            return;
+        }
+        list.innerHTML = '';
+        s.flashcards.forEach(fc => {
+            const card = document.createElement('div');
+            card.className = 'flashcard' + (fc.learned ? ' learned' : '');
+            card.dataset.id = fc.id;
+            card.innerHTML = `<div class="fc-q">${escapeHTML(fc.question)}</div><div class="fc-a">${escapeHTML(fc.answer)}</div><div class="actions"><button class="btn tiny mark">${fc.learned ? '↩️' : '✔️'}</button><button class="btn tiny danger del">🗑️</button></div>`;
+            list.appendChild(card);
+        });
+    }
+
+    function addFlashcard() {
+        const s = getCurrentSubtopic();
+        if (!s) { toast('Vui lòng chọn subtopic.'); return; }
+        showInputModal('Câu hỏi?', q => {
+            if (!q) return;
+            showInputModal('Đáp án?', a => {
+                if (!a) return;
+                s.flashcards.push({ id: uid('fc'), question: q, answer: a, learned: false });
+                store.save();
+                renderFlashcards();
+            });
+        });
+    }
+
+    function handleFlashcardClick(e) {
+        const card = e.target.closest('.flashcard');
+        if (!card) return;
+        const s = getCurrentSubtopic();
+        if (!s) return;
+        const id = card.dataset.id;
+        if (e.target.classList.contains('del')) {
+            s.flashcards = s.flashcards.filter(fc => fc.id !== id);
+        } else if (e.target.classList.contains('mark')) {
+            const fc = s.flashcards.find(fc => fc.id === id);
+            if (fc) fc.learned = !fc.learned;
+        }
+        store.save();
+        renderFlashcards();
+    }
+
+    async function generateFlashcardsFromAI() {
+        const s = getCurrentSubtopic();
+        if (!s) { toast('Vui lòng chọn subtopic.'); return; }
+        const notes = (s.generalNotes || []).map(n => n.content).join('\n');
+        if (!notes) { toast('Chưa có ghi chú nào.'); return; }
+        const btn = $('#btnGenFlashcard');
+        const original = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<div class="spinner"></div>';
+        const prompt = `Tạo tối đa 5 flashcard (q&a) từ ghi chú sau:\n${notes}\nTrả về JSON dạng [{"q":"","a":""}]`;
+        const res = await callGeminiAPI(prompt);
+        btn.disabled = false;
+        btn.innerHTML = original;
+        if (!res) return;
+        try {
+            const arr = JSON.parse(res);
+            if (Array.isArray(arr)) {
+                arr.forEach(item => {
+                    if (item.q && item.a) {
+                        s.flashcards.push({ id: uid('fc'), question: item.q, answer: item.a, learned: false });
+                    }
+                });
+                store.save();
+                renderFlashcards();
+            }
+        } catch (err) {
+            console.error('Parse flashcards thất bại', err);
+            toast('AI trả về định dạng không hợp lệ.');
+        }
+    }
+
 
     // =============================
     // YouTube Player
@@ -1584,6 +1695,10 @@
       $('#btnAddSubtopicTask').addEventListener('click', addSubtopicTask);
       $('#newSubtopicTaskInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') addSubtopicTask(); });
 
+      $('#btnAddFlashcard').addEventListener('click', addFlashcard);
+      $('#btnGenFlashcard').addEventListener('click', generateFlashcardsFromAI);
+      $('#flashcardsList').addEventListener('click', handleFlashcardClick);
+
       $('#btnToggleYtSound').addEventListener('click', toggleYtSound);
       $('#ytSoundVolume').addEventListener('input', (e) => {
           const vol = parseInt(e.target.value, 10);
@@ -1685,6 +1800,7 @@
         renderStatsHistory();
         renderGeneralNotes();
         renderChat();
+        renderFlashcards();
         applyCustomBg();
         applyPanelOpacity();
         renderSubtopicTasks();
