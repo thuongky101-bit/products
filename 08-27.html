@@ -539,7 +539,16 @@
       </div>
 
       <!-- VIEW: TOOLS -->
-      <div id="view-tools" class="view"></div>
+      <div id="view-tools" class="view">
+        <section class="panel panel-bg">
+          <h3>Tóm tắt ghi chú</h3>
+          <textarea id="summaryInput" rows="4" placeholder="Nhập nội dung hoặc để trống để dùng ghi chú hiện có"></textarea>
+          <div style="margin-top:8px;">
+            <button class="btn acc" id="btnSummarize">Tóm tắt</button>
+          </div>
+          <div id="summariesList" class="notes-list" style="margin-top:12px;"></div>
+        </section>
+      </div>
 
     </main>
   </div>
@@ -839,7 +848,7 @@
         useYtThumbnailAsBg: true,
         panelOpacity: 0.85
       },
-      topics:[ { id: uid('t'), name:'Chủ đề mẫu', subtopics:[ { id: uid('s'), name:'Subtopic mẫu', tasks: [], generalNotes: [], chatHistory: [],
+      topics:[ { id: uid('t'), name:'Chủ đề mẫu', subtopics:[ { id: uid('s'), name:'Subtopic mẫu', tasks: [], generalNotes: [], summaries: [], chatHistory: [],
       stats:{totalMinutes:0,sessionsCompleted:0, tasksCompleted: 0},
       sessions:[],
       timerState: {
@@ -978,7 +987,7 @@
           del.addEventListener('click', ()=> showConfirmModal('Xác nhận xóa', `Bạn có chắc muốn xóa Subtopic "${st.name}"? Mọi dữ liệu liên quan sẽ bị mất.`, (ok) => { if(!ok) return; topic.subtopics = topic.subtopics.filter(x=>x.id!==st.id); const set=store.data.settings; if(set.selectedSubtopicId===st.id){ set.selectedSubtopicId=''; set.selectedTopicId=''; ensureValidSelection(); } store.save(); renderAll(); }));
         });
         chev.addEventListener('click', ()=>{ if(isCollapsed){ delete collapsedMap[topic.id]; } else { collapsedMap[topic.id] = true; } store.data.settings.collapsedTopics = collapsedMap; store.save(); renderTopics(); });
-        bAdd.addEventListener('click', ()=> showInputModal('Tên Subtopic mới?', (name) => { if(!name) return; topic.subtopics.push({ id: uid('s'), name, tasks: [], generalNotes: [], chatHistory: [], stats:{ totalMinutes:0, sessionsCompleted:0, tasksCompleted: 0 }, sessions: [], timerState: { state: 'idle', remaining: 0, segmentTotal: 0, cycleIndex: 0 } }); store.save(); renderTopics(); }));
+        bAdd.addEventListener('click', ()=> showInputModal('Tên Subtopic mới?', (name) => { if(!name) return; topic.subtopics.push({ id: uid('s'), name, tasks: [], generalNotes: [], summaries: [], chatHistory: [], stats:{ totalMinutes:0, sessionsCompleted:0, tasksCompleted: 0 }, sessions: [], timerState: { state: 'idle', remaining: 0, segmentTotal: 0, cycleIndex: 0 } }); store.save(); renderTopics(); }));
         bEdit.addEventListener('click', ()=> showInputModal('Đổi tên Topic', (newName) => { if(!newName) return; topic.name=newName; store.save(); renderTopics(); }, topic.name));
         bDel.addEventListener('click', ()=> showConfirmModal('Xác nhận xóa', `Bạn có chắc muốn xóa Topic "${topic.name}"? Mọi subtopic và dữ liệu liên quan sẽ bị mất.`, (ok) => { if(!ok) return; store.data.topics = store.data.topics.filter(t=>t.id!==topic.id); delete collapsedMap[topic.id]; if(store.data.settings.selectedTopicId===topic.id){ store.data.settings.selectedTopicId=''; store.data.settings.selectedSubtopicId=''; ensureValidSelection(); } store.save(); renderAll(); }));
         box.append(header, subs);
@@ -1294,6 +1303,77 @@
         });
     }
 
+    async function summarizeNotes() {
+        const s = getCurrentSubtopic();
+        if (!s) { toast("Vui lòng chọn một subtopic trước."); return; }
+        const input = $('#summaryInput').value.trim();
+        let notesText = input;
+        if (!notesText) {
+            if (!s.generalNotes || s.generalNotes.length === 0) { toast("Không có ghi chú để tóm tắt."); return; }
+            notesText = s.generalNotes.map(n => `- ${n.content}`).join('\n');
+        }
+        const prompt = `Hãy tóm tắt hoặc liệt kê các điểm chính từ các ghi chú sau:\n${notesText}`;
+        const btn = $('#btnSummarize');
+        btn.disabled = true;
+        try {
+            const result = await callGeminiAPI(prompt);
+            if (!s.summaries) s.summaries = [];
+            s.summaries.unshift({ id: uid('sum'), content: result, createdAt: todayISO() });
+            store.save();
+            $('#summaryInput').value = '';
+            renderSummaries();
+        } catch (e) {
+            console.error(e);
+            toast('Tóm tắt thất bại.');
+        }
+        btn.disabled = false;
+    }
+
+    function deleteSummary(id) {
+        showConfirmModal('Xác nhận xóa', 'Bạn có chắc muốn xóa tóm tắt này?', (ok) => {
+            if (!ok) return;
+            const s = getCurrentSubtopic();
+            if (!s || !s.summaries) return;
+            s.summaries = s.summaries.filter(x => x.id !== id);
+            store.save();
+            renderSummaries();
+            toast('Đã xóa tóm tắt.');
+        });
+    }
+
+    function exportSummary(sum) {
+        const blob = new Blob([sum.content], { type: 'text/plain' });
+        const a = document.createElement('a');
+        const ts = new Date(sum.createdAt);
+        const pad = n => `${n}`.padStart(2, '0');
+        a.href = URL.createObjectURL(blob);
+        a.download = `summary_${ts.getFullYear()}${pad(ts.getMonth()+1)}${pad(ts.getDate())}.txt`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+    }
+
+    function renderSummaries() {
+        const listEl = $('#summariesList');
+        const s = getCurrentSubtopic();
+        if (!s) { listEl.innerHTML = '<div class="tiny">Vui lòng chọn một subtopic để xem tóm tắt.</div>'; return; }
+        listEl.innerHTML = '';
+        if (!s.summaries || s.summaries.length === 0) { listEl.innerHTML = '<div class="tiny">Chưa có tóm tắt nào.</div>'; return; }
+        s.summaries.forEach(sum => {
+            const item = document.createElement('div'); item.className = 'note-item';
+            const contentWrapper = document.createElement('div'); contentWrapper.className = 'note-content-wrapper';
+            const sumContent = document.createElement('div'); sumContent.className = 'note-content'; sumContent.textContent = sum.content;
+            const sumMeta = document.createElement('div'); sumMeta.className = 'note-meta'; sumMeta.textContent = new Date(sum.createdAt).toLocaleString();
+            contentWrapper.append(sumContent, sumMeta);
+            const actions = document.createElement('div');
+            const expBtn = document.createElement('button'); expBtn.className = 'btn small'; expBtn.textContent = 'Xuất'; expBtn.onclick = (e)=>{ e.stopPropagation(); exportSummary(sum); };
+            const delBtn = document.createElement('button'); delBtn.className = 'btn small danger'; delBtn.textContent = 'Xóa'; delBtn.onclick = (e)=>{ e.stopPropagation(); deleteSummary(sum.id); };
+            actions.append(expBtn, delBtn);
+            item.append(contentWrapper, actions);
+            item.addEventListener('click', ()=> sumContent.classList.toggle('expanded'));
+            listEl.appendChild(item);
+        });
+    }
+
     // =============================
     // Settings & Customization
     // =============================
@@ -1574,6 +1654,7 @@
       $('#btnSaveNote').addEventListener('click', ()=>{ const s=getCurrentSubtopic(); if(!s) return; const id=pendingNoteSessionId; const sess=s.sessions.find(x=>x.id===id); if(sess){ sess.note=$('#noteText').value.trim(); store.save(); renderStatsHistory(); toast('Đã lưu ghi chú'); } closeNoteModal(); });
       $('#btnSkipNote').addEventListener('click', ()=> closeNoteModal());
       $('#btnAddGeneralNote').addEventListener('click', addGeneralNote);
+      $('#btnSummarize').addEventListener('click', summarizeNotes);
 
       $('#btnSummarizeNote').addEventListener('click', handleSummarizeNote);
       $('#btnSendMessage').addEventListener('click', handleSendMessage);
@@ -1685,6 +1766,7 @@
         renderStatsHistory();
         renderGeneralNotes();
         renderChat();
+        renderSummaries();
         applyCustomBg();
         applyPanelOpacity();
         renderSubtopicTasks();
