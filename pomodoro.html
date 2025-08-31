@@ -1622,9 +1622,9 @@
     // Bindings
     // =============================
     function bindEvents(){
-      $('#btnAddTopic').addEventListener('click', () => showInputModal('Tên Topic mới?', (name) => { if (!name) return; data.topics.push({ id: uid('t'), name, subtopics: [] }); save(); renderTopics(); }));
-      $('#btnExport').addEventListener('click', ()=> exportData());
-        $('#importFile').addEventListener('change', (e)=>{
+      $('#btnAddTopic')?.addEventListener('click', () => showInputModal('Tên Topic mới?', (name) => { if (!name) return; data.topics.push({ id: uid('t'), name, subtopics: [] }); save(); renderTopics(); }));
+      $('#btnExport')?.addEventListener('click', ()=> exportData());
+        $('#importFile')?.addEventListener('change', (e)=>{
           const f = e.target.files[0];
           if (f) {
             importData(f).then(() => {
@@ -1635,39 +1635,39 @@
           }
           e.target.value = null;
         });
-      $('#btnSettings').addEventListener('click', openSettings);
+      $('#btnSettings')?.addEventListener('click', openSettings);
       
-      $('#btnHelpCreateTopic').addEventListener('click', () => {
+      $('#btnHelpCreateTopic')?.addEventListener('click', () => {
           switchView('topics');
           $('#btnAddTopic').click();
       });
 
-      $('#btnDashboard').addEventListener('click', () => {
+      $('#btnDashboard')?.addEventListener('click', () => {
           renderDashboard(); // Tạo nội dung mới nhất
           $('#modalDashboard').classList.add('show'); // Hiển thị modal
       });
 
-      $('#btnCloseSettings').addEventListener('click', closeSettings);
-      $('#btnSaveSettings').addEventListener('click', saveSettings);
-      $('#btnDefaults').addEventListener('click', setDefaults);
-      $('#btnTestSound').addEventListener('click', ()=>{ ensureAudio(); playSound('work_end'); });
+      $('#btnCloseSettings')?.addEventListener('click', closeSettings);
+      $('#btnSaveSettings')?.addEventListener('click', saveSettings);
+      $('#btnDefaults')?.addEventListener('click', setDefaults);
+      $('#btnTestSound')?.addEventListener('click', ()=>{ ensureAudio(); playSound('work_end'); });
 
-      $('#btnSaveNote').addEventListener('click', ()=>{ const s=getCurrentSubtopic(); if(!s) return; const id=pendingNoteSessionId; const sess=s.sessions.find(x=>x.id===id); if(sess){ sess.note=$('#noteText').value.trim(); save(); renderStatsHistory(); toast('Đã lưu ghi chú'); } closeNoteModal(); });
-      $('#btnSkipNote').addEventListener('click', ()=> closeNoteModal());
-      $('#btnAddGeneralNote').addEventListener('click', addGeneralNote);
-      $('#btnSummarize').addEventListener('click', summarizeNotes);
+      $('#btnSaveNote')?.addEventListener('click', ()=>{ const s=getCurrentSubtopic(); if(!s) return; const id=pendingNoteSessionId; const sess=s.sessions.find(x=>x.id===id); if(sess){ sess.note=$('#noteText').value.trim(); save(); renderStatsHistory(); toast('Đã lưu ghi chú'); } closeNoteModal(); });
+      $('#btnSkipNote')?.addEventListener('click', ()=> closeNoteModal());
+      $('#btnAddGeneralNote')?.addEventListener('click', addGeneralNote);
+      $('#btnSummarize')?.addEventListener('click', summarizeNotes);
 
-      $('#btnSummarizeNote').addEventListener('click', handleSummarizeNote);
-      $('#btnSendMessage').addEventListener('click', handleSendMessage);
-      $('#chatInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') handleSendMessage(); });
+      $('#btnSummarizeNote')?.addEventListener('click', handleSummarizeNote);
+      $('#btnSendMessage')?.addEventListener('click', handleSendMessage);
+      $('#chatInput')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleSendMessage(); });
 
-      $('#btnClearChat').addEventListener('click', clearChat);
-      $('#btnNewChat').addEventListener('click', clearChat);
-      $('#btnAddSubtopicTask').addEventListener('click', addSubtopicTask);
-      $('#newSubtopicTaskInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') addSubtopicTask(); });
+      $('#btnClearChat')?.addEventListener('click', clearChat);
+      $('#btnNewChat')?.addEventListener('click', clearChat);
+      $('#btnAddSubtopicTask')?.addEventListener('click', addSubtopicTask);
+      $('#newSubtopicTaskInput')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') addSubtopicTask(); });
 
-      $('#btnToggleYtSound').addEventListener('click', toggleYtSound);
-      $('#ytSoundVolume').addEventListener('input', (e) => {
+      $('#btnToggleYtSound')?.addEventListener('click', toggleYtSound);
+      $('#ytSoundVolume')?.addEventListener('input', (e) => {
           const vol = parseInt(e.target.value, 10);
           if (ytPlayer && ytPlayer.setVolume) {
               ytPlayer.setVolume(vol);
@@ -1707,14 +1707,14 @@
         });
       });
 
-      $('#btnStart').addEventListener('click', ()=> timer.start());
-      $('#btnPause').addEventListener('click', ()=> timer.pause());
-      $('#btnResume').addEventListener('click', ()=> timer.resume());
-      $('#btnSkip').addEventListener('click', ()=> timer.skip());
-      $('#btnReset').addEventListener('click', ()=> timer.reset());
+      $('#btnStart')?.addEventListener('click', ()=> timer.start());
+      $('#btnPause')?.addEventListener('click', ()=> timer.pause());
+      $('#btnResume')?.addEventListener('click', ()=> timer.resume());
+      $('#btnSkip')?.addEventListener('click', ()=> timer.skip());
+      $('#btnReset')?.addEventListener('click', ()=> timer.reset());
 
-      $('#uploadBg').addEventListener('change', (e) => { handleFileUpload(e.target.files[0], (id) => { data.settings.customBg = id; save(); applyCustomBg(); toast("Đã cập nhật hình nền."); }); e.target.value = null; });
-      $('#btnClearBg').addEventListener('click', () => {
+      $('#uploadBg')?.addEventListener('change', (e) => { handleFileUpload(e.target.files[0], (id) => { data.settings.customBg = id; save(); applyCustomBg(); toast("Đã cập nhật hình nền."); }); e.target.value = null; });
+      $('#btnClearBg')?.addEventListener('click', () => {
           data.settings.customBg = '';
           data.settings.useYtThumbnailAsBg = false;
           save();
@@ -1724,11 +1724,11 @@
               openSettings();
           }
       });
-      $('#uploadSoundWork').addEventListener('change', (e) => { handleFileUpload(e.target.files[0], (id) => { data.settings.customSounds.work_end = id; save(); toast("Đã lưu âm báo hết WORK."); }); e.target.value = null; });
-      $('#uploadSoundBreak').addEventListener('change', (e) => { handleFileUpload(e.target.files[0], (id) => { data.settings.customSounds.break_end = id; save(); toast("Đã lưu âm báo hết BREAK."); }); e.target.value = null; });
-      $('#uploadSoundLong').addEventListener('change', (e) => { handleFileUpload(e.target.files[0], (id) => { data.settings.customSounds.long_end = id; save(); toast("Đã lưu âm báo hết LONG BREAK."); }); e.target.value = null; });
+      $('#uploadSoundWork')?.addEventListener('change', (e) => { handleFileUpload(e.target.files[0], (id) => { data.settings.customSounds.work_end = id; save(); toast("Đã lưu âm báo hết WORK."); }); e.target.value = null; });
+      $('#uploadSoundBreak')?.addEventListener('change', (e) => { handleFileUpload(e.target.files[0], (id) => { data.settings.customSounds.break_end = id; save(); toast("Đã lưu âm báo hết BREAK."); }); e.target.value = null; });
+      $('#uploadSoundLong')?.addEventListener('change', (e) => { handleFileUpload(e.target.files[0], (id) => { data.settings.customSounds.long_end = id; save(); toast("Đã lưu âm báo hết LONG BREAK."); }); e.target.value = null; });
 
-      $('#btnFullscreen').addEventListener('click', toggleFullScreen);
+      $('#btnFullscreen')?.addEventListener('click', toggleFullScreen);
       document.addEventListener('fullscreenchange', updateFullscreenButton);
 
       window.addEventListener('keydown', (e)=>{ const tag=(e.target.tagName||'').toLowerCase(); const isTyping=['input','textarea','select'].includes(tag); if(e.code==='Space' && !isTyping){ e.preventDefault(); if(timer.state==='idle'||timer.state==='paused') timer.start(); else timer.pause(); } if(e.key==='n'||e.key==='N'){ if(!isTyping){ e.preventDefault(); timer.skip(); } } if(e.key==='Escape'){ $$('.modal').forEach(m => m.classList.remove('show')); } });
