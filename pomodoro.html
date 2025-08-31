@@ -860,6 +860,14 @@
     } ] } ]
     });
 
+    // Chuyển đổi dữ liệu từ các phiên bản cũ sang cấu trúc mới
+    function migrateData(oldData){
+      const data = defaultData();
+      if(oldData.settings) data.settings = { ...data.settings, ...oldData.settings };
+      if(oldData.topics) data.topics = oldData.topics;
+      return data;
+    }
+
     const store = {
       data:null,
       load(){
@@ -878,9 +886,7 @@
         }
 
         if (!this.data.version || this.data.version < 11) {
-            // Nếu phiên bản cũ, có thể thêm logic chuyển đổi dữ liệu ở đây
-            // Hiện tại, chỉ đơn giản là reset về mặc định để đảm bảo tương thích
-            this.data = defaultData();
+            this.data = migrateData(this.data);
         }
         
         const set = this.data.settings;
