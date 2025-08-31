@@ -723,6 +723,7 @@
     // =============================
     const $ = (sel, root=document) => root.querySelector(sel);
     const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+    function on(el, evt, handler){ if(!el){ console.warn('Missing element', evt); return; } el.addEventListener(evt, handler); }
     const formatMMSS = (s) => { const m = Math.floor(s/60).toString().padStart(2,'0'); const ss = Math.floor(s%60).toString().padStart(2,'0'); return `${m}:${ss}`; };
     const uid = (p='id') => `${p}_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
     const todayISO = () => new Date().toISOString();
@@ -1646,9 +1647,9 @@
     // Bindings
     // =============================
     function bindEvents(){
-      $('#btnAddTopic')?.addEventListener('click', () => showInputModal('Tên Topic mới?', (name) => { if (!name) return; data.topics.push({ id: uid('t'), name, subtopics: [] }); save(); renderTopics(); }));
-      $('#btnExport')?.addEventListener('click', ()=> exportData());
-        $('#importFile')?.addEventListener('change', (e)=>{
+      on($('#btnAddTopic'), 'click', () => showInputModal('Tên Topic mới?', (name) => { if (!name) return; data.topics.push({ id: uid('t'), name, subtopics: [] }); save(); renderTopics(); }));
+      on($('#btnExport'), 'click', ()=> exportData());
+        on($('#importFile'), 'change', (e)=>{
           const f = e.target.files[0];
           if (f) {
             importData(f).then(() => {
@@ -1659,39 +1660,39 @@
           }
           e.target.value = null;
         });
-      $('#btnSettings')?.addEventListener('click', openSettings);
+      on($('#btnSettings'), 'click', openSettings);
       
-      $('#btnHelpCreateTopic')?.addEventListener('click', () => {
+      on($('#btnHelpCreateTopic'), 'click', () => {
           switchView('topics');
           $('#btnAddTopic').click();
       });
 
-      $('#btnDashboard')?.addEventListener('click', () => {
+      on($('#btnDashboard'), 'click', () => {
           renderDashboard(); // Tạo nội dung mới nhất
           $('#modalDashboard').classList.add('show'); // Hiển thị modal
       });
 
-      $('#btnCloseSettings')?.addEventListener('click', closeSettings);
-      $('#btnSaveSettings')?.addEventListener('click', saveSettings);
-      $('#btnDefaults')?.addEventListener('click', setDefaults);
-      $('#btnTestSound')?.addEventListener('click', ()=>{ ensureAudio(); playSound('work_end'); });
+      on($('#btnCloseSettings'), 'click', closeSettings);
+      on($('#btnSaveSettings'), 'click', saveSettings);
+      on($('#btnDefaults'), 'click', setDefaults);
+      on($('#btnTestSound'), 'click', ()=>{ ensureAudio(); playSound('work_end'); });
 
-      $('#btnSaveNote')?.addEventListener('click', ()=>{ const s=getCurrentSubtopic(); if(!s) return; const id=pendingNoteSessionId; const sess=s.sessions.find(x=>x.id===id); if(sess){ sess.note=$('#noteText').value.trim(); save(); renderStatsHistory(); toast('Đã lưu ghi chú'); } closeNoteModal(); });
-      $('#btnSkipNote')?.addEventListener('click', ()=> closeNoteModal());
-      $('#btnAddGeneralNote')?.addEventListener('click', addGeneralNote);
-      $('#btnSummarize')?.addEventListener('click', summarizeNotes);
+      on($('#btnSaveNote'), 'click', ()=>{ const s=getCurrentSubtopic(); if(!s) return; const id=pendingNoteSessionId; const sess=s.sessions.find(x=>x.id===id); if(sess){ sess.note=$('#noteText').value.trim(); save(); renderStatsHistory(); toast('Đã lưu ghi chú'); } closeNoteModal(); });
+      on($('#btnSkipNote'), 'click', ()=> closeNoteModal());
+      on($('#btnAddGeneralNote'), 'click', addGeneralNote);
+      on($('#btnSummarize'), 'click', summarizeNotes);
 
-      $('#btnSummarizeNote')?.addEventListener('click', handleSummarizeNote);
-      $('#btnSendMessage')?.addEventListener('click', handleSendMessage);
-      $('#chatInput')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleSendMessage(); });
+      on($('#btnSummarizeNote'), 'click', handleSummarizeNote);
+      on($('#btnSendMessage'), 'click', handleSendMessage);
+      on($('#chatInput'), 'keydown', (e) => { if (e.key === 'Enter') handleSendMessage(); });
 
-      $('#btnClearChat')?.addEventListener('click', clearChat);
-      $('#btnNewChat')?.addEventListener('click', clearChat);
-      $('#btnAddSubtopicTask')?.addEventListener('click', addSubtopicTask);
-      $('#newSubtopicTaskInput')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') addSubtopicTask(); });
+      on($('#btnClearChat'), 'click', clearChat);
+      on($('#btnNewChat'), 'click', clearChat);
+      on($('#btnAddSubtopicTask'), 'click', addSubtopicTask);
+      on($('#newSubtopicTaskInput'), 'keydown', (e) => { if (e.key === 'Enter') addSubtopicTask(); });
 
-      $('#btnToggleYtSound')?.addEventListener('click', toggleYtSound);
-      $('#ytSoundVolume')?.addEventListener('input', (e) => {
+      on($('#btnToggleYtSound'), 'click', toggleYtSound);
+      on($('#ytSoundVolume'), 'input', (e) => {
           const vol = parseInt(e.target.value, 10);
           if (ytPlayer && ytPlayer.setVolume) {
               ytPlayer.setVolume(vol);
@@ -1731,14 +1732,14 @@
         });
       });
 
-      $('#btnStart')?.addEventListener('click', ()=> timer.start());
-      $('#btnPause')?.addEventListener('click', ()=> timer.pause());
-      $('#btnResume')?.addEventListener('click', ()=> timer.resume());
-      $('#btnSkip')?.addEventListener('click', ()=> timer.skip());
-      $('#btnReset')?.addEventListener('click', ()=> timer.reset());
+      on($('#btnStart'), 'click', ()=> timer.start());
+      on($('#btnPause'), 'click', ()=> timer.pause());
+      on($('#btnResume'), 'click', ()=> timer.resume());
+      on($('#btnSkip'), 'click', ()=> timer.skip());
+      on($('#btnReset'), 'click', ()=> timer.reset());
 
-      $('#uploadBg')?.addEventListener('change', (e) => { handleFileUpload(e.target.files[0], (id) => { data.settings.customBg = id; save(); applyCustomBg(); toast("Đã cập nhật hình nền."); }); e.target.value = null; });
-      $('#btnClearBg')?.addEventListener('click', () => {
+      on($('#uploadBg'), 'change', (e) => { handleFileUpload(e.target.files[0], (id) => { data.settings.customBg = id; save(); applyCustomBg(); toast("Đã cập nhật hình nền."); }); e.target.value = null; });
+      on($('#btnClearBg'), 'click', () => {
           data.settings.customBg = '';
           data.settings.useYtThumbnailAsBg = false;
           save();
@@ -1748,11 +1749,11 @@
               openSettings();
           }
       });
-      $('#uploadSoundWork')?.addEventListener('change', (e) => { handleFileUpload(e.target.files[0], (id) => { data.settings.customSounds.work_end = id; save(); toast("Đã lưu âm báo hết WORK."); }); e.target.value = null; });
-      $('#uploadSoundBreak')?.addEventListener('change', (e) => { handleFileUpload(e.target.files[0], (id) => { data.settings.customSounds.break_end = id; save(); toast("Đã lưu âm báo hết BREAK."); }); e.target.value = null; });
-      $('#uploadSoundLong')?.addEventListener('change', (e) => { handleFileUpload(e.target.files[0], (id) => { data.settings.customSounds.long_end = id; save(); toast("Đã lưu âm báo hết LONG BREAK."); }); e.target.value = null; });
+      on($('#uploadSoundWork'), 'change', (e) => { handleFileUpload(e.target.files[0], (id) => { data.settings.customSounds.work_end = id; save(); toast("Đã lưu âm báo hết WORK."); }); e.target.value = null; });
+      on($('#uploadSoundBreak'), 'change', (e) => { handleFileUpload(e.target.files[0], (id) => { data.settings.customSounds.break_end = id; save(); toast("Đã lưu âm báo hết BREAK."); }); e.target.value = null; });
+      on($('#uploadSoundLong'), 'change', (e) => { handleFileUpload(e.target.files[0], (id) => { data.settings.customSounds.long_end = id; save(); toast("Đã lưu âm báo hết LONG BREAK."); }); e.target.value = null; });
 
-      $('#btnFullscreen')?.addEventListener('click', toggleFullScreen);
+      on($('#btnFullscreen'), 'click', toggleFullScreen);
       document.addEventListener('fullscreenchange', updateFullscreenButton);
 
       window.addEventListener('keydown', (e)=>{ const tag=(e.target.tagName||'').toLowerCase(); const isTyping=['input','textarea','select'].includes(tag); if(e.code==='Space' && !isTyping){ e.preventDefault(); if(timer.state==='idle'||timer.state==='paused') timer.start(); else timer.pause(); } if(e.key==='n'||e.key==='N'){ if(!isTyping){ e.preventDefault(); timer.skip(); } } if(e.key==='Escape'){ $$('.modal').forEach(m => m.classList.remove('show')); } });
