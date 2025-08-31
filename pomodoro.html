@@ -439,8 +439,8 @@
                 <button class="btn acc" id="btnHelpCreateTopic">＋ Tạo Topic Mới</button>
             </div>
             <div class="presets" role="group" aria-label="Chọn chế độ preset">
-                <button class="btn small ghost" data-preset="A"></button>
-                <button class="btn small ghost" data-preset="B"></button>
+                <button id="btnPresetA" class="btn small ghost" data-preset="A"></button>
+                <button id="btnPresetB" class="btn small ghost" data-preset="B"></button>
             </div>
           </div>
           <hr style="border-color:rgba(255,255,255,.08)" />
@@ -570,18 +570,14 @@
                           <label>WORK (phút)<input type="number" id="set_A_work" min="1" /></label>
                           <label>BREAK (phút)<input type="number" id="set_A_short" min="1" /></label>
                           <label>LONG BREAK (phút)<input type="number" id="set_A_long" min="1" /></label>
+                          <label>Chu kỳ Pomodoro<input type="number" id="set_A_cycles" min="1" /></label>
                       </div>
                       <div class="row" style="margin-top:8px"><strong>Kiểu B (50/10) — Long break 30</strong></div>
                       <div class="row">
                           <label>WORK (phút)<input type="number" id="set_B_work" min="1" /></label>
                           <label>BREAK (phút)<input type="number" id="set_B_short" min="1" /></label>
                           <label>LONG BREAK (phút)<input type="number" id="set_B_long" min="1" /></label>
-                      </div>
-                  </div>
-                  <div>
-                      <h4>Chu kỳ</h4>
-                      <div class="row">
-                          <label>Long break mỗi <input type="number" id="set_interval" min="2" /> phiên WORK</label>
+                          <label>Chu kỳ Pomodoro<input type="number" id="set_B_cycles" min="1" /></label>
                       </div>
                   </div>
               </div>
@@ -831,9 +827,8 @@
         volume:0.8,
         soundTheme:'beep',
         theme: 'default',
-        longBreakInterval:4,
-        durations:{A_work:25,A_short:5,A_long:15,B_work:50,B_short:10,B_long:30},
         cycles:{A:4,B:2},
+        durations:{A_work:25,A_short:5,A_long:15,B_work:50,B_short:10,B_long:30},
         selectedTopicId:'',
         selectedSubtopicId:'',
         collapsedTopics:{},
@@ -881,7 +876,6 @@
         
         const set = this.data.settings;
         if (set.currentView === undefined) set.currentView = 'timer';
-        if (!set.cycles) set.cycles = {A:4,B:2};
         if (set.preset === '4x25') set.preset = 'A';
         if (set.preset === '2x50' || set.preset === '4x50') set.preset = 'B';
 
@@ -1097,13 +1091,11 @@
       state:'idle', prevState:null, interval:null, endAt:null,
       remaining:0, segmentTotal:0, cyclesTarget:4, cycleIndex:0, mode:'A',
       setPreset(p, {silent=false}={}){
-        const st=store.data.settings;
-        if(p==='2x50'){ this.mode='B'; this.cyclesTarget=2; p='B'; }
-        if(p==='4x25'){ this.mode='A'; this.cyclesTarget=4; p='A'; }
-        if(p==='4x50'){ this.mode='B'; this.cyclesTarget=4; p='B'; }
-        if(p==='A'){ this.mode='A'; this.cyclesTarget = st.cycles?.A ?? 4; }
-        if(p==='B'){ this.mode='B'; this.cyclesTarget = st.cycles?.B ?? 2; }
-        st.preset=p; store.save();
+        const st = store.data.settings;
+        this.mode = p;
+        this.cyclesTarget = st.cycles[p];
+        st.preset = p;
+        store.save();
         if (this.state === 'idle') {
             this.reset();
         }
@@ -1163,7 +1155,7 @@
       },
       start(){ if(!getCurrentSubtopic()){ toast('Hãy chọn một Subtopic trước khi bắt đầu'); return; } ensureAudio(); if(this.state==='idle'){ this.cycleIndex = this.cycleIndex || 0; this.beginWork(); } else if(this.state==='paused'){ this.resume(); } },
       beginWork(){ const {work}=this.currentDurations(); this.state='work'; if(this.cycleIndex===0) this.cycleIndex=1; this.remaining=work*60; this.segmentTotal=this.remaining; this.tickStart(); },
-      beginBreak(){ const {short,long}=this.currentDurations(); const interval=store.data.settings.longBreakInterval; const isLong=(this.cycleIndex % interval===0) && (this.cyclesTarget>=interval); if(isLong){ this.state='long_break'; this.remaining=long*60; } else { this.state='break'; this.remaining=short*60; } this.segmentTotal=this.remaining; this.tickStart(); },
+      beginBreak(){ const {short,long}=this.currentDurations(); const interval=store.data.settings.cycles[this.mode]; const isLong=(this.cycleIndex % interval===0) && (this.cyclesTarget>=interval); if(isLong){ this.state='long_break'; this.remaining=long*60; } else { this.state='break'; this.remaining=short*60; } this.segmentTotal=this.remaining; this.tickStart(); },
       tickStart(){ clearInterval(this.interval); this.endAt = Date.now() + this.remaining*1000; this.updateUI(); this.interval=setInterval(()=>{ const now=Date.now(); this.remaining = Math.max(0, Math.ceil((this.endAt - now)/1000)); this.updateUI(); if(this.remaining<=0){ clearInterval(this.interval); this.interval=null; this.segmentFinished(); } }, 250); },
       pause(){ if(this.interval){ clearInterval(this.interval); this.interval=null; this.prevState=this.state; this.state='paused'; this.updateUI(); } },
       resume(){ if(this.state==='paused'){ this.state = this.prevState || 'work'; this.endAt = Date.now() + this.remaining*1000; this.tickStart(); } },
@@ -1206,7 +1198,7 @@
         }
 
         if(lastState==='work'){
-          const interval = store.data.settings.longBreakInterval;
+          const interval = store.data.settings.cycles[this.mode];
           const shouldLong = (this.cycleIndex % interval === 0) && (this.cyclesTarget >= interval);
           if(this.cycleIndex >= this.cyclesTarget){
             if(shouldLong){ this.beginBreak(); if(!store.data.settings.autoStartNext) this.pause(); return; }
@@ -1382,9 +1374,8 @@
         const s = store.data.settings;
         $('#set_apiKey').value = s.apiKey || '';
         const d=s.durations;
-        $('#set_A_work').value=d.A_work; $('#set_A_short').value=d.A_short; $('#set_A_long').value=d.A_long;
-        $('#set_B_work').value=d.B_work; $('#set_B_short').value=d.B_short; $('#set_B_long').value=d.B_long;
-        $('#set_interval').value=s.longBreakInterval;
+        $('#set_A_work').value=d.A_work; $('#set_A_short').value=d.A_short; $('#set_A_long').value=d.A_long; $('#set_A_cycles').value=s.cycles.A;
+        $('#set_B_work').value=d.B_work; $('#set_B_short').value=d.B_short; $('#set_B_long').value=d.B_long; $('#set_B_cycles').value=s.cycles.B;
         $('#set_volume').value=s.volume ?? 0.8;
         $('#set_theme').value=s.soundTheme || 'beep';
         $('#set_theme_color').value = s.theme || 'default';
@@ -1396,14 +1387,14 @@
     }
 
     function closeSettings(){ $('#modalSettings').classList.remove('show'); }
-    function setDefaults(){ store.data.settings.durations={A_work:25,A_short:5,A_long:15,B_work:50,B_short:10,B_long:30}; store.data.settings.cycles={A:4,B:2}; store.data.settings.longBreakInterval=4; store.data.settings.preset='A'; store.data.settings.volume=0.8; store.data.settings.soundTheme='beep'; store.save(); openSettings(); toast('Đã khôi phục mặc định'); }
+    function setDefaults(){ store.data.settings.durations={A_work:25,A_short:5,A_long:15,B_work:50,B_short:10,B_long:30}; store.data.settings.cycles={A:4,B:2}; store.data.settings.preset='A'; store.data.settings.volume=0.8; store.data.settings.soundTheme='beep'; store.save(); openSettings(); toast('Đã khôi phục mặc định'); }
     function saveSettings(){
         const s = store.data.settings;
         s.apiKey = $('#set_apiKey').value.trim();
         const d=s.durations;
         d.A_work=clampInt($('#set_A_work').value,1,999); d.A_short=clampInt($('#set_A_short').value,1,999); d.A_long=clampInt($('#set_A_long').value,1,999);
         d.B_work=clampInt($('#set_B_work').value,1,999); d.B_short=clampInt($('#set_B_short').value,1,999); d.B_long=clampInt($('#set_B_long').value,1,999);
-        s.longBreakInterval=clampInt($('#set_interval').value,2,12);
+        const c=s.cycles; c.A=clampInt($('#set_A_cycles').value,1,12); c.B=clampInt($('#set_B_cycles').value,1,12);
         s.volume = clampFloat($('#set_volume').value,0,1,0.8);
         s.soundTheme = $('#set_theme').value==='chime' ? 'chime':'beep';
         s.theme = $('#set_theme_color').value;
@@ -1423,7 +1414,8 @@
         store.save();
         applyTheme();
         applyPanelOpacity();
-        updatePresetLabels();
+        updatePresetButtonsText();
+        timer.setPreset(s.preset, {silent:true});
 
         closeSettings();
         toast('Đã lưu cài đặt');
@@ -1753,20 +1745,24 @@
         }
     }
 
-    function updatePresetLabels() {
-        const { durations, cycles } = store.data.settings;
-        const btnA = $('.presets [data-preset="A"]');
-        const btnB = $('.presets [data-preset="B"]');
-        if (btnA && cycles && durations) {
-            btnA.textContent = `${cycles.A}×${durations.A_work} (A)`;
+    function updatePresetButtonsText() {
+        const settings = store.data.settings;
+        const workA = settings.durations.A_work;
+        const workB = settings.durations.B_work;
+        const cyclesA = settings.cycles.A;
+        const cyclesB = settings.cycles.B;
+        const btnA = $('#btnPresetA');
+        const btnB = $('#btnPresetB');
+        if (btnA) {
+            btnA.textContent = `${cyclesA}×${workA} (A)`;
         }
-        if (btnB && cycles && durations) {
-            btnB.textContent = `${cycles.B}×${durations.B_work} (B)`;
+        if (btnB) {
+            btnB.textContent = `${cyclesB}×${workB} (B)`;
         }
     }
 
     function renderAll(){
-        updatePresetLabels();
+        updatePresetButtonsText();
         const currentPreset = store.data.settings.preset;
         $$('.presets button').forEach(button => {
           const isSelected = button.dataset.preset === currentPreset;
