@@ -894,7 +894,9 @@
     // Sidebar: Topics & Subtopics
     // =============================
     function renderTopics(){
-      const wrap = $('#topicsList'); wrap.innerHTML='';
+      const wrap = $('#topicsList');
+      if (!wrap) return;
+      wrap.innerHTML='';
       const collapsedMap = data.settings.collapsedTopics || {};
       data.topics.forEach(topic => {
         const box = document.createElement('div'); box.className='topic-item';
@@ -967,7 +969,16 @@
         }, 200);
     }
     function getCurrentSubtopic(){ const tid=data.settings.selectedTopicId, sid=data.settings.selectedSubtopicId; if(!tid||!sid) return null; const t=data.topics.find(x=>x.id===tid); if(!t) return null; return t.subtopics.find(x=>x.id===sid) || null; }
-    function renderContextBadge(){ const s=getCurrentSubtopic(); const name = s ? s.name : '(chưa chọn)'; $('#selectedContext').textContent = s? `Subtopic: ${s.name}`:'Chưa chọn Subtopic'; $('#currentSubtopicName').textContent = name; $('#currentSubtopicNameChat').textContent = name; }
+    function renderContextBadge(){
+      const s=getCurrentSubtopic();
+      const name = s ? s.name : '(chưa chọn)';
+      const selectedContext = $('#selectedContext');
+      const currentName = $('#currentSubtopicName');
+      const currentChatName = $('#currentSubtopicNameChat');
+      if (selectedContext) selectedContext.textContent = s? `Subtopic: ${s.name}`:'Chưa chọn Subtopic';
+      if (currentName) currentName.textContent = name;
+      if (currentChatName) currentChatName.textContent = name;
+    }
 
     // =============================
     // Timer & Session To-Do List
@@ -975,7 +986,9 @@
     function renderSubtopicTasks() {
         const s = getCurrentSubtopic();
         const listEl = $('#subtopicTasksList');
-        const addArea = $('#newSubtopicTaskInput').parentElement;
+        const inputEl = $('#newSubtopicTaskInput');
+        if (!listEl || !inputEl) return;
+        const addArea = inputEl.parentElement;
         if (!s) {
             listEl.innerHTML = '<li class="tiny" style="opacity: 0.7;">Chọn subtopic để xem to-do list.</li>';
             addArea.classList.add('hidden'); return;
@@ -1162,9 +1175,16 @@
     // =============================
     function renderStatsHistory(){
         const s = getCurrentSubtopic();
+        const statTotal = $('#statTotal');
+        const statSessions = $('#statSessions');
+        const statTasks = $('#statTasks');
+        const list = $('#historyList');
+        if (!statTotal || !statSessions || !statTasks || !list) return;
         if(!s){
-            $('#statTotal').textContent='0 phút'; $('#statSessions').textContent='0'; $('#statTasks').textContent='0';
-            $('#historyList').innerHTML='<div class="tiny">Chưa có dữ liệu</div>';
+            statTotal.textContent='0 phút';
+            statSessions.textContent='0';
+            statTasks.textContent='0';
+            list.innerHTML='<div class="tiny">Chưa có dữ liệu</div>';
             return;
         }
         const total=s.stats.totalMinutes||0;
@@ -1172,10 +1192,10 @@
         const tasks = s.tasks ? s.tasks.filter(t => t.isCompleted).length : 0;
         s.stats.tasksCompleted = tasks;
 
-        $('#statTotal').textContent= formatDaysHoursMinutes(total);
-        $('#statSessions').textContent = count;
-        $('#statTasks').textContent = tasks;
-        const list=$('#historyList'); list.innerHTML='';
+        statTotal.textContent= formatDaysHoursMinutes(total);
+        statSessions.textContent = count;
+        statTasks.textContent = tasks;
+        list.innerHTML='';
         if(s.sessions.length===0){ list.innerHTML='<div class="tiny">Chưa có phiên nào</div>'; }
         s.sessions.forEach(sess=>{
             const row=document.createElement('div'); row.className='hist-item';
@@ -1198,6 +1218,7 @@
         const s = getCurrentSubtopic();
         const listEl = $('#generalNotesList');
         const addArea = $('.add-note-area');
+        if (!listEl || !addArea) return;
         if (!s) { listEl.innerHTML = '<div class="tiny">Vui lòng chọn một subtopic để xem ghi chú.</div>'; addArea.classList.add('hidden'); return; }
         addArea.classList.remove('hidden'); listEl.innerHTML = '';
         if (!s.generalNotes || s.generalNotes.length === 0) { listEl.innerHTML = '<div class="tiny">Chưa có ghi chú chung nào.</div>'; return; }
@@ -1289,6 +1310,7 @@
 
     function renderSummaries() {
         const listEl = $('#summariesList');
+        if (!listEl) return;
         const s = getCurrentSubtopic();
         if (!s) { listEl.innerHTML = '<div class="tiny">Vui lòng chọn một subtopic để xem tóm tắt.</div>'; return; }
         listEl.innerHTML = '';
@@ -1447,7 +1469,8 @@
         });
 
         tableHTML += '</tbody></table>';
-        $('#dashboardContent').innerHTML = tableHTML;
+        const contentEl = $('#dashboardContent');
+        if (contentEl) contentEl.innerHTML = tableHTML;
     }
 
     // =============================
@@ -1485,6 +1508,7 @@
         const messagesEl = $('#chatMessages');
         const chatInput = $('#chatInput');
         const sendBtn = $('#btnSendMessage');
+        if (!messagesEl || !chatInput || !sendBtn) return;
 
         if (!s) {
             messagesEl.innerHTML = '<div class="tiny">Chọn subtopic để bắt đầu chat.</div>';
@@ -1738,15 +1762,20 @@
     function updateMainViewVisibility() {
         const hasSubtopic = !!getCurrentSubtopic();
         const timerView = $('#view-timer');
+        const welcomePanel = $('#welcomePanel');
 
         // Hiển thị/ẩn panel chào mừng
-        $('#welcomePanel').classList.toggle('hidden', hasSubtopic);
+        if (welcomePanel) {
+            welcomePanel.classList.toggle('hidden', hasSubtopic);
+        }
 
         // Thêm/xóa class để CSS có thể ẩn các phần không cần thiết
-        if (hasSubtopic) {
-            timerView.classList.remove('no-subtopic-selected');
-        } else {
-            timerView.classList.add('no-subtopic-selected');
+        if (timerView) {
+            if (hasSubtopic) {
+                timerView.classList.remove('no-subtopic-selected');
+            } else {
+                timerView.classList.add('no-subtopic-selected');
+            }
         }
     }
 
