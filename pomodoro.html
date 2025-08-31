@@ -664,6 +664,14 @@
                           <input type="range" id="ytSoundVolume" min="0" max="100" step="1" value="80" style="flex: 1;">
                       </div>
                   </div>
+                  <div>
+                      <h4>🛡️ Phục hồi dữ liệu</h4>
+                      <p class="tiny">Phục hồi dữ liệu từ một bản sao lưu tự động hàng ngày. Hành động này sẽ ghi đè lên dữ liệu hiện tại của bạn.</p>
+                      <div class="row">
+                          <select id="backupList" style="flex: 3;"></select>
+                          <button id="btnRestoreBackup" class="btn warn small" style="flex: 1;">Phục hồi</button>
+                      </div>
+                  </div>
               </div>
           </div>
           <div class="row" style="margin-top:16px; justify-content:flex-end">
@@ -717,7 +725,139 @@
 
   <script src="https://www.youtube.com/iframe_api"></script>
   <script type="module">
-    import { data, load, save, export as exportData, import as importData } from './storage.js';
+    // storageManager will manage persistence
+    // =============================
+    // STORAGE MANAGER - Quản lý Dữ liệu và Sao lưu
+    // =============================
+    const storageManager = {
+        DB_NAME: 'PomodoroDB',
+        DB_VERSION: 1,
+        BACKUP_STORE_NAME: 'backups',
+        db: null,
+        async initDB() {
+            return new Promise((resolve, reject) => {
+                if (this.db) return resolve(this.db);
+                const request = indexedDB.open(this.DB_NAME, this.DB_VERSION);
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains(this.BACKUP_STORE_NAME)) {
+                        db.createObjectStore(this.BACKUP_STORE_NAME, { keyPath: 'date' });
+                    }
+                };
+                request.onsuccess = (event) => {
+                    this.db = event.target.result;
+                    console.log('IndexedDB initialized successfully.');
+                    resolve(this.db);
+                };
+                request.onerror = (event) => {
+                    console.error('IndexedDB error:', event.target.errorCode);
+                    reject(event.target.error);
+                };
+            });
+        },
+        load(defaults) {
+            const stored = localStorage.getItem('pomodoroData_v11');
+            let data = {};
+            if (stored) {
+                data = JSON.parse(stored);
+                data.settings = { ...defaults.settings, ...data.settings };
+            } else {
+                data = JSON.parse(JSON.stringify(defaults));
+            }
+            return data;
+        },
+        async save(data) {
+            try {
+                localStorage.setItem('pomodoroData_v11', JSON.stringify(data));
+                await this.autoBackup(data);
+            } catch (e) {
+                console.error('Error saving to localStorage', e);
+            }
+        },
+        async autoBackup(data) {
+            await this.initDB();
+            const today = new Date().toISOString().slice(0, 10);
+            const lastBackupDate = localStorage.getItem('lastBackupDate');
+            if (today !== lastBackupDate) {
+                console.log(`Creating backup for ${today}...`);
+                const backupData = { date: today, data: JSON.parse(JSON.stringify(data)) };
+                const transaction = this.db.transaction([this.BACKUP_STORE_NAME], 'readwrite');
+                const store = transaction.objectStore(this.BACKUP_STORE_NAME);
+                const request = store.put(backupData);
+                request.onsuccess = () => {
+                    localStorage.setItem('lastBackupDate', today);
+                    console.log('Daily backup successful.');
+                    this.cleanupOldBackups(14);
+                };
+                request.onerror = (event) => {
+                    console.error('Backup failed:', event.target.error);
+                };
+            }
+        },
+        async cleanupOldBackups(daysToKeep) {
+            await this.initDB();
+            const transaction = this.db.transaction([this.BACKUP_STORE_NAME], 'readwrite');
+            const store = transaction.objectStore(this.BACKUP_STORE_NAME);
+            const request = store.getAllKeys();
+            request.onsuccess = () => {
+                const allKeys = request.result.sort().reverse();
+                if (allKeys.length > daysToKeep) {
+                    const keysToDelete = allKeys.slice(daysToKeep);
+                    keysToDelete.forEach(key => {
+                        store.delete(key);
+                        console.log(`Deleted old backup: ${key}`);
+                    });
+                }
+            };
+        },
+        async getBackupList() {
+            await this.initDB();
+            return new Promise((resolve, reject) => {
+                const transaction = this.db.transaction([this.BACKUP_STORE_NAME], 'readonly');
+                const store = transaction.objectStore(this.BACKUP_STORE_NAME);
+                const request = store.getAll();
+                request.onsuccess = () => resolve(request.result.sort((a, b) => b.date.localeCompare(a.date)));
+                request.onerror = (event) => reject(event.target.error);
+            });
+        },
+        async restoreBackup(date) {
+            await this.initDB();
+            return new Promise((resolve, reject) => {
+                const transaction = this.db.transaction([this.BACKUP_STORE_NAME], 'readonly');
+                const store = transaction.objectStore(this.BACKUP_STORE_NAME);
+                const request = store.get(date);
+                request.onsuccess = () => {
+                    if (request.result && request.result.data) {
+                        localStorage.setItem('pomodoroData_v11', JSON.stringify(request.result.data));
+                        resolve(request.result.data);
+                    } else {
+                        reject(new Error('Không tìm thấy bản sao lưu.'));
+                    }
+                };
+                request.onerror = (event) => reject(event.target.error);
+            });
+        },
+        exportData(data) {
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            const ts = new Date();
+            const pad = n => `${n}`.padStart(2, '0');
+            a.href = URL.createObjectURL(blob);
+            a.download = `pomodoro_backup_${ts.getFullYear()}${pad(ts.getMonth() + 1)}${pad(ts.getDate())}.json`;
+            a.click();
+            URL.revokeObjectURL(a.href);
+        },
+        async importData(file) {
+            const text = await file.text();
+            const obj = JSON.parse(text);
+            if (!obj.version || !obj.settings || !Array.isArray(obj.topics)) {
+                throw new Error('Tệp không đúng định dạng');
+            }
+            localStorage.setItem('pomodoroData_v11', JSON.stringify(obj));
+            return obj;
+        }
+    };
+
     // =============================
     // Helpers
     // =============================
@@ -758,6 +898,50 @@
             document.body.classList.add(theme);
         }
     }
+
+    const defaults = {
+        version: 11,
+        settings: {
+            apiKey: "",
+            currentView: 'timer',
+            preset: 'A',
+            autoStartNext: true,
+            soundOn: true,
+            volume: 0.8,
+            soundTheme: 'beep',
+            theme: 'default',
+            cyclesA: 4,
+            longBreakIntervalA: 4,
+            cyclesB: 4,
+            longBreakIntervalB: 4,
+            durations: { A_work: 25, A_short: 5, A_long: 15, B_work: 50, B_short: 10, B_long: 30 },
+            selectedTopicId: '',
+            selectedSubtopicId: '',
+            collapsedTopics: {},
+            customBg: '',
+            customSounds: { work_end: '', break_end: '', long_end: '' },
+            youtubeUrl: '',
+            youtubeVolume: 80,
+            useYtThumbnailAsBg: true,
+            panelOpacity: 0.85
+        },
+        topics: [{
+            id: uid('t'),
+            name: 'Chủ đề mẫu',
+            subtopics: [{
+                id: uid('s'),
+                name: 'Subtopic mẫu',
+                tasks: [],
+                generalNotes: [],
+                summaries: [],
+                chatHistory: [],
+                stats: { totalMinutes: 0, sessionsCompleted: 0, tasksCompleted: 0 },
+                sessions: [],
+                timerState: { state: 'idle', remaining: 0, segmentTotal: 0, cycleIndex: 0 }
+            }]
+        }]
+    };
+    let data;
 
     // =============================
     // Gemini API Integration
@@ -841,7 +1025,7 @@
 
       function ensureValidSelection(){
         const set = data.settings;
-        if (!data.topics || data.topics.length === 0) { set.selectedTopicId = ''; set.selectedSubtopicId = ''; save(); return; }
+        if (!data.topics || data.topics.length === 0) { set.selectedTopicId = ''; set.selectedSubtopicId = ''; storageManager.save(data); return; }
         const t = data.topics.find(x=>x.id===set.selectedTopicId);
         const s = t?.subtopics.find(x=>x.id===set.selectedSubtopicId);
         if(!t || !s){
@@ -849,7 +1033,7 @@
           const s0 = t0?.subtopics?.[0];
           set.selectedTopicId = t0?.id || '';
           set.selectedSubtopicId = s0?.id || '';
-          save();
+          storageManager.save(data);
         }
       }
 
@@ -885,7 +1069,7 @@
         const navBtn = $(`.nav-btn[data-view="${viewId}"]`);
         if (navBtn) navBtn.classList.add('active');
         data.settings.currentView = viewId;
-        save();
+        storageManager.save(data);
         if (viewId === 'stats') {
             renderDashboard();
         }
@@ -920,13 +1104,13 @@
           row.append(btn, edit, del);
           subs.appendChild(row);
           btn.addEventListener('click', ()=> selectSubtopic(topic.id, st.id));
-          edit.addEventListener('click', ()=> showInputModal('Đổi tên Subtopic', (newName) => { if(!newName) return; st.name=newName; save(); renderAll(); }, st.name));
-          del.addEventListener('click', ()=> showConfirmModal('Xác nhận xóa', `Bạn có chắc muốn xóa Subtopic "${st.name}"? Mọi dữ liệu liên quan sẽ bị mất.`, (ok) => { if(!ok) return; topic.subtopics = topic.subtopics.filter(x=>x.id!==st.id); const set=data.settings; if(set.selectedSubtopicId===st.id){ set.selectedSubtopicId=''; set.selectedTopicId=''; ensureValidSelection(); } save(); renderAll(); }));
+          edit.addEventListener('click', ()=> showInputModal('Đổi tên Subtopic', (newName) => { if(!newName) return; st.name=newName; storageManager.save(data); renderAll(); }, st.name));
+          del.addEventListener('click', ()=> showConfirmModal('Xác nhận xóa', `Bạn có chắc muốn xóa Subtopic "${st.name}"? Mọi dữ liệu liên quan sẽ bị mất.`, (ok) => { if(!ok) return; topic.subtopics = topic.subtopics.filter(x=>x.id!==st.id); const set=data.settings; if(set.selectedSubtopicId===st.id){ set.selectedSubtopicId=''; set.selectedTopicId=''; ensureValidSelection(); } storageManager.save(data); renderAll(); }));
         });
-        chev.addEventListener('click', ()=>{ if(isCollapsed){ delete collapsedMap[topic.id]; } else { collapsedMap[topic.id] = true; } data.settings.collapsedTopics = collapsedMap; save(); renderTopics(); });
-        bAdd.addEventListener('click', ()=> showInputModal('Tên Subtopic mới?', (name) => { if(!name) return; topic.subtopics.push({ id: uid('s'), name, tasks: [], generalNotes: [], summaries: [], chatHistory: [], stats:{ totalMinutes:0, sessionsCompleted:0, tasksCompleted: 0 }, sessions: [], timerState: { state: 'idle', remaining: 0, segmentTotal: 0, cycleIndex: 0 } }); save(); renderTopics(); }));
-        bEdit.addEventListener('click', ()=> showInputModal('Đổi tên Topic', (newName) => { if(!newName) return; topic.name=newName; save(); renderTopics(); }, topic.name));
-        bDel.addEventListener('click', ()=> showConfirmModal('Xác nhận xóa', `Bạn có chắc muốn xóa Topic "${topic.name}"? Mọi subtopic và dữ liệu liên quan sẽ bị mất.`, (ok) => { if(!ok) return; data.topics = data.topics.filter(t=>t.id!==topic.id); delete collapsedMap[topic.id]; if(data.settings.selectedTopicId===topic.id){ data.settings.selectedTopicId=''; data.settings.selectedSubtopicId=''; ensureValidSelection(); } save(); renderAll(); }));
+        chev.addEventListener('click', ()=>{ if(isCollapsed){ delete collapsedMap[topic.id]; } else { collapsedMap[topic.id] = true; } data.settings.collapsedTopics = collapsedMap; storageManager.save(data); renderTopics(); });
+        bAdd.addEventListener('click', ()=> showInputModal('Tên Subtopic mới?', (name) => { if(!name) return; topic.subtopics.push({ id: uid('s'), name, tasks: [], generalNotes: [], summaries: [], chatHistory: [], stats:{ totalMinutes:0, sessionsCompleted:0, tasksCompleted: 0 }, sessions: [], timerState: { state: 'idle', remaining: 0, segmentTotal: 0, cycleIndex: 0 } }); storageManager.save(data); renderTopics(); }));
+        bEdit.addEventListener('click', ()=> showInputModal('Đổi tên Topic', (newName) => { if(!newName) return; topic.name=newName; storageManager.save(data); renderTopics(); }, topic.name));
+        bDel.addEventListener('click', ()=> showConfirmModal('Xác nhận xóa', `Bạn có chắc muốn xóa Topic "${topic.name}"? Mọi subtopic và dữ liệu liên quan sẽ bị mất.`, (ok) => { if(!ok) return; data.topics = data.topics.filter(t=>t.id!==topic.id); delete collapsedMap[topic.id]; if(data.settings.selectedTopicId===topic.id){ data.settings.selectedTopicId=''; data.settings.selectedSubtopicId=''; ensureValidSelection(); } storageManager.save(data); renderAll(); }));
         box.append(header, subs);
         wrap.appendChild(box);
       });
@@ -962,7 +1146,7 @@
                 timer.reset();
             }
 
-            save();
+            storageManager.save(data);
             timer.updateUI();
             renderAll();
             switchView('timer'); // Quay về màn hình timer sau khi chọn
@@ -1017,7 +1201,7 @@
         if (text) {
             if (!s.tasks) s.tasks = [];
             s.tasks.push({ id: uid('task'), text, isCompleted: false, createdAt: todayISO() });
-            save();
+            storageManager.save(data);
             renderSubtopicTasks();
             input.value = '';
         }
@@ -1031,7 +1215,7 @@
         if (task) {
             task.isCompleted = true;
             s.stats.tasksCompleted = (s.stats.tasksCompleted || 0) + 1;
-            save();
+            storageManager.save(data);
 
             listItemElement.classList.add('removing');
             setTimeout(() => {
@@ -1050,7 +1234,7 @@
         this.mode = p;
         this.cyclesTarget = (p==='A' ? st.cyclesA : st.cyclesB);
         st.preset = p;
-        save();
+        storageManager.save(data);
         if (this.state === 'idle') {
             this.reset();
         }
@@ -1129,7 +1313,7 @@
           const currentSubtopic = getCurrentSubtopic();
           if (currentSubtopic) {
               currentSubtopic.timerState = { state: 'idle', remaining: 0, segmentTotal: 0, cycleIndex: 0 };
-              save();
+              storageManager.save(data);
           }
       },
       segmentFinished(skipped=false){
@@ -1147,7 +1331,7 @@
                 s.sessions.unshift(entry);
                 s.stats.sessionsCompleted = (s.stats.sessionsCompleted || 0) + 1;
                 s.stats.totalMinutes = (s.stats.totalMinutes || 0) + work;
-                save();
+                storageManager.save(data);
                 openNoteModal(entry.id);
                 renderStatsHistory();
             }
@@ -1247,7 +1431,7 @@
         if (!content) { toast("Nội dung ghi chú không được để trống."); return; }
         if (!s.generalNotes) s.generalNotes = [];
         s.generalNotes.unshift({ id: uid('note'), content, createdAt: todayISO() });
-        save(); renderGeneralNotes(); textInput.value = ''; toast("Đã thêm ghi chú.");
+        storageManager.save(data); renderGeneralNotes(); textInput.value = ''; toast("Đã thêm ghi chú.");
     }
 
     function deleteGeneralNote(noteId) {
@@ -1256,7 +1440,7 @@
             const s = getCurrentSubtopic();
             if (!s || !s.generalNotes) return;
             s.generalNotes = s.generalNotes.filter(note => note.id !== noteId);
-            save(); renderGeneralNotes(); toast("Đã xóa ghi chú.");
+            storageManager.save(data); renderGeneralNotes(); toast("Đã xóa ghi chú.");
         });
     }
 
@@ -1276,7 +1460,7 @@
             const result = await callGeminiAPI(prompt);
             if (!s.summaries) s.summaries = [];
             s.summaries.unshift({ id: uid('sum'), content: result, createdAt: todayISO() });
-            save();
+            storageManager.save(data);
             $('#summaryInput').value = '';
             renderSummaries();
         } catch (e) {
@@ -1292,7 +1476,7 @@
             const s = getCurrentSubtopic();
             if (!s || !s.summaries) return;
             s.summaries = s.summaries.filter(x => x.id !== id);
-            save();
+            storageManager.save(data);
             renderSummaries();
             toast('Đã xóa tóm tắt.');
         });
@@ -1352,6 +1536,22 @@
         $('#ytSoundVolume').value = s.youtubeVolume || 80;
         $('#set_ytThumbAsBg').checked = !!s.useYtThumbnailAsBg;
         $('#set_panelOpacity').value = s.panelOpacity || 0.85;
+        const backupListEl = $('#backupList');
+        if (backupListEl) {
+            storageManager.getBackupList().then(backups => {
+                backupListEl.innerHTML = '<option value="">-- Chọn ngày để phục hồi --</option>';
+                if (backups && backups.length > 0) {
+                    backups.forEach(backup => {
+                        const option = document.createElement('option');
+                        option.value = backup.date;
+                        option.textContent = `Bản sao lưu ngày: ${new Date(backup.date).toLocaleDateString('vi-VN')}`;
+                        backupListEl.appendChild(option);
+                    });
+                } else {
+                    backupListEl.innerHTML = '<option value="">Không có bản sao lưu nào</option>';
+                }
+            });
+        }
         $('#modalSettings').classList.add('show');
     }
 
@@ -1365,7 +1565,7 @@
         data.settings.preset='A';
         data.settings.volume=0.8;
         data.settings.soundTheme='beep';
-        save(); openSettings(); toast('Đã khôi phục mặc định'); }
+        storageManager.save(data); openSettings(); toast('Đã khôi phục mặc định'); }
     function saveSettings(){
         const s = data.settings;
         s.apiKey = $('#set_apiKey').value.trim();
@@ -1392,7 +1592,7 @@
             ytPlayer.setVolume(s.youtubeVolume);
         }
 
-        save();
+        storageManager.save(data);
         applyTheme();
         applyPanelOpacity();
         updatePresetButtonsText();
@@ -1496,7 +1696,7 @@
         const response = await callGeminiAPI(query);
         if (response) {
             subtopic.chatHistory.push({ role: 'model', text: response });
-            save();
+            storageManager.save(data);
             renderChat();
         }
 
@@ -1556,7 +1756,7 @@
         showConfirmModal('Xác nhận xóa', 'Bạn có chắc muốn xóa toàn bộ lịch sử chat của subtopic này?', (ok) => {
             if (ok) {
                 s.chatHistory = [];
-                save();
+                storageManager.save(data);
                 renderChat();
                 toast("Đã xóa lịch sử chat.");
             }
@@ -1603,7 +1803,7 @@
         if (!videoId) {
             if (data.settings.useYtThumbnailAsBg) {
                 data.settings.customBg = '';
-                save();
+                storageManager.save(data);
                 applyCustomBg();
             }
             if (ytPlayer && ytPlayer.stopVideo) {
@@ -1617,13 +1817,13 @@
             const img = new Image();
             img.onload = () => {
                 data.settings.customBg = thumbUrl;
-                save();
+                storageManager.save(data);
                 applyCustomBg();
             };
             img.onerror = () => {
                 const fallbackUrl = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
                 data.settings.customBg = fallbackUrl;
-                save();
+                storageManager.save(data);
                 applyCustomBg();
             };
             img.src = thumbUrl;
@@ -1647,12 +1847,13 @@
     // Bindings
     // =============================
     function bindEvents(){
-      on($('#btnAddTopic'), 'click', () => showInputModal('Tên Topic mới?', (name) => { if (!name) return; data.topics.push({ id: uid('t'), name, subtopics: [] }); save(); renderTopics(); }));
-      on($('#btnExport'), 'click', ()=> exportData());
+      on($('#btnAddTopic'), 'click', () => showInputModal('Tên Topic mới?', (name) => { if (!name) return; data.topics.push({ id: uid('t'), name, subtopics: [] }); storageManager.save(data); renderTopics(); }));
+      on($('#btnExport'), 'click', ()=> storageManager.exportData(data));
         on($('#importFile'), 'change', (e)=>{
           const f = e.target.files[0];
           if (f) {
-            importData(f).then(() => {
+            storageManager.importData(f).then((d) => {
+              data = d;
               ensureValidSelection();
               toast('Đã nhập dữ liệu thành công!');
               renderAll();
@@ -1660,6 +1861,20 @@
           }
           e.target.value = null;
         });
+      on($('#btnRestoreBackup'), 'click', () => {
+          const backupListEl = $('#backupList');
+          const selectedDate = backupListEl ? backupListEl.value : '';
+          if (!selectedDate) { toast('Vui lòng chọn một bản sao lưu.'); return; }
+          if (confirm(`Bạn có chắc muốn phục hồi dữ liệu từ ngày ${selectedDate}? Dữ liệu hiện tại sẽ bị ghi đè.`)) {
+              storageManager.restoreBackup(selectedDate).then((d) => {
+                  data = d;
+                  toast('Phục hồi dữ liệu thành công! Tải lại trang...');
+                  setTimeout(() => window.location.reload(), 1500);
+              }).catch(err => {
+                  toast(`Lỗi: ${err.message}`);
+              });
+          }
+      });
       on($('#btnSettings'), 'click', openSettings);
       
       on($('#btnHelpCreateTopic'), 'click', () => {
@@ -1677,7 +1892,7 @@
       on($('#btnDefaults'), 'click', setDefaults);
       on($('#btnTestSound'), 'click', ()=>{ ensureAudio(); playSound('work_end'); });
 
-      on($('#btnSaveNote'), 'click', ()=>{ const s=getCurrentSubtopic(); if(!s) return; const id=pendingNoteSessionId; const sess=s.sessions.find(x=>x.id===id); if(sess){ sess.note=$('#noteText').value.trim(); save(); renderStatsHistory(); toast('Đã lưu ghi chú'); } closeNoteModal(); });
+      on($('#btnSaveNote'), 'click', ()=>{ const s=getCurrentSubtopic(); if(!s) return; const id=pendingNoteSessionId; const sess=s.sessions.find(x=>x.id===id); if(sess){ sess.note=$('#noteText').value.trim(); storageManager.save(data); renderStatsHistory(); toast('Đã lưu ghi chú'); } closeNoteModal(); });
       on($('#btnSkipNote'), 'click', ()=> closeNoteModal());
       on($('#btnAddGeneralNote'), 'click', addGeneralNote);
       on($('#btnSummarize'), 'click', summarizeNotes);
@@ -1738,20 +1953,20 @@
       on($('#btnSkip'), 'click', ()=> timer.skip());
       on($('#btnReset'), 'click', ()=> timer.reset());
 
-      on($('#uploadBg'), 'change', (e) => { handleFileUpload(e.target.files[0], (id) => { data.settings.customBg = id; save(); applyCustomBg(); toast("Đã cập nhật hình nền."); }); e.target.value = null; });
+      on($('#uploadBg'), 'change', (e) => { handleFileUpload(e.target.files[0], (id) => { data.settings.customBg = id; storageManager.save(data); applyCustomBg(); toast("Đã cập nhật hình nền."); }); e.target.value = null; });
       on($('#btnClearBg'), 'click', () => {
           data.settings.customBg = '';
           data.settings.useYtThumbnailAsBg = false;
-          save();
+          storageManager.save(data);
           applyCustomBg();
           toast("Đã xóa hình nền tùy chỉnh.");
           if ($('#modalSettings').classList.contains('show')) {
               openSettings();
           }
       });
-      on($('#uploadSoundWork'), 'change', (e) => { handleFileUpload(e.target.files[0], (id) => { data.settings.customSounds.work_end = id; save(); toast("Đã lưu âm báo hết WORK."); }); e.target.value = null; });
-      on($('#uploadSoundBreak'), 'change', (e) => { handleFileUpload(e.target.files[0], (id) => { data.settings.customSounds.break_end = id; save(); toast("Đã lưu âm báo hết BREAK."); }); e.target.value = null; });
-      on($('#uploadSoundLong'), 'change', (e) => { handleFileUpload(e.target.files[0], (id) => { data.settings.customSounds.long_end = id; save(); toast("Đã lưu âm báo hết LONG BREAK."); }); e.target.value = null; });
+      on($('#uploadSoundWork'), 'change', (e) => { handleFileUpload(e.target.files[0], (id) => { data.settings.customSounds.work_end = id; storageManager.save(data); toast("Đã lưu âm báo hết WORK."); }); e.target.value = null; });
+      on($('#uploadSoundBreak'), 'change', (e) => { handleFileUpload(e.target.files[0], (id) => { data.settings.customSounds.break_end = id; storageManager.save(data); toast("Đã lưu âm báo hết BREAK."); }); e.target.value = null; });
+      on($('#uploadSoundLong'), 'change', (e) => { handleFileUpload(e.target.files[0], (id) => { data.settings.customSounds.long_end = id; storageManager.save(data); toast("Đã lưu âm báo hết LONG BREAK."); }); e.target.value = null; });
 
       on($('#btnFullscreen'), 'click', toggleFullScreen);
       document.addEventListener('fullscreenchange', updateFullscreenButton);
@@ -1850,7 +2065,8 @@
 
     // Boot
     try {
-      load();
+      data = storageManager.load(defaults);
+      storageManager.initDB();
       ensureValidSelection();
       renderAll();
     } catch (err) {
