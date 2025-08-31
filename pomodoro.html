@@ -439,9 +439,8 @@
                 <button class="btn acc" id="btnHelpCreateTopic">＋ Tạo Topic Mới</button>
             </div>
             <div class="presets" role="group" aria-label="Chọn chế độ preset">
-                <button class="btn small ghost" data-preset="2x50">2×50 (B)</button>
-                <button class="btn small ghost" data-preset="4x25">4×25 (A)</button>
-                <button class="btn small ghost" data-preset="4x50">4×50 (B)</button>
+                <button class="btn small ghost" data-preset="A"></button>
+                <button class="btn small ghost" data-preset="B"></button>
             </div>
           </div>
           <hr style="border-color:rgba(255,255,255,.08)" />
@@ -826,7 +825,7 @@
       settings:{
         apiKey: "",
         currentView: 'timer', // Thêm trạng thái view mới
-        preset:'4x25',
+        preset:'A',
         autoStartNext:true,
         soundOn:true,
         volume:0.8,
@@ -834,6 +833,7 @@
         theme: 'default',
         longBreakInterval:4,
         durations:{A_work:25,A_short:5,A_long:15,B_work:50,B_short:10,B_long:30},
+        cycles:{A:4,B:2},
         selectedTopicId:'',
         selectedSubtopicId:'',
         collapsedTopics:{},
@@ -881,6 +881,9 @@
         
         const set = this.data.settings;
         if (set.currentView === undefined) set.currentView = 'timer';
+        if (!set.cycles) set.cycles = {A:4,B:2};
+        if (set.preset === '4x25') set.preset = 'A';
+        if (set.preset === '2x50' || set.preset === '4x50') set.preset = 'B';
 
         this.save();
         ensureValidSelection();
@@ -1095,9 +1098,11 @@
       remaining:0, segmentTotal:0, cyclesTarget:4, cycleIndex:0, mode:'A',
       setPreset(p, {silent=false}={}){
         const st=store.data.settings;
-        if(p==='2x50'){ this.mode='B'; this.cyclesTarget=2; }
-        if(p==='4x25'){ this.mode='A'; this.cyclesTarget=4; }
-        if(p==='4x50'){ this.mode='B'; this.cyclesTarget=4; }
+        if(p==='2x50'){ this.mode='B'; this.cyclesTarget=2; p='B'; }
+        if(p==='4x25'){ this.mode='A'; this.cyclesTarget=4; p='A'; }
+        if(p==='4x50'){ this.mode='B'; this.cyclesTarget=4; p='B'; }
+        if(p==='A'){ this.mode='A'; this.cyclesTarget = st.cycles?.A ?? 4; }
+        if(p==='B'){ this.mode='B'; this.cyclesTarget = st.cycles?.B ?? 2; }
         st.preset=p; store.save();
         if (this.state === 'idle') {
             this.reset();
@@ -1391,7 +1396,7 @@
     }
 
     function closeSettings(){ $('#modalSettings').classList.remove('show'); }
-    function setDefaults(){ store.data.settings.durations={A_work:25,A_short:5,A_long:15,B_work:50,B_short:10,B_long:30}; store.data.settings.longBreakInterval=4; store.data.settings.volume=0.8; store.data.settings.soundTheme='beep'; store.save(); openSettings(); toast('Đã khôi phục mặc định'); }
+    function setDefaults(){ store.data.settings.durations={A_work:25,A_short:5,A_long:15,B_work:50,B_short:10,B_long:30}; store.data.settings.cycles={A:4,B:2}; store.data.settings.longBreakInterval=4; store.data.settings.preset='A'; store.data.settings.volume=0.8; store.data.settings.soundTheme='beep'; store.save(); openSettings(); toast('Đã khôi phục mặc định'); }
     function saveSettings(){
         const s = store.data.settings;
         s.apiKey = $('#set_apiKey').value.trim();
@@ -1418,6 +1423,7 @@
         store.save();
         applyTheme();
         applyPanelOpacity();
+        updatePresetLabels();
 
         closeSettings();
         toast('Đã lưu cài đặt');
@@ -1747,7 +1753,20 @@
         }
     }
 
+    function updatePresetLabels() {
+        const { durations, cycles } = store.data.settings;
+        const btnA = $('.presets [data-preset="A"]');
+        const btnB = $('.presets [data-preset="B"]');
+        if (btnA && cycles && durations) {
+            btnA.textContent = `${cycles.A}×${durations.A_work} (A)`;
+        }
+        if (btnB && cycles && durations) {
+            btnB.textContent = `${cycles.B}×${durations.B_work} (B)`;
+        }
+    }
+
     function renderAll(){
+        updatePresetLabels();
         const currentPreset = store.data.settings.preset;
         $$('.presets button').forEach(button => {
           const isSelected = button.dataset.preset === currentPreset;
