@@ -806,10 +806,25 @@
     function playSound(kind){
       if(!store.data.settings.soundOn) return;
       const vol = Math.max(0, Math.min(1, store.data.settings.volume ?? 0.8));
-      const customSoundUrl = store.data.settings.customSounds?.[kind];
+      const ref = store.data.settings.customSounds?.[kind];
       let audioEl;
       if (kind === 'work_end') audioEl = $('#audioWorkEnd'); else if (kind === 'break_end') audioEl = $('#audioBreakEnd'); else if (kind === 'long_end') audioEl = $('#audioLongEnd');
-      if (customSoundUrl && audioEl) { audioEl.src = customSoundUrl; audioEl.volume = vol; audioEl.play().catch(e => console.error("Lỗi phát âm thanh:", e)); return; }
+      if (ref && audioEl) {
+        if (ref.startsWith('data:') || ref.startsWith('http') || ref.startsWith('blob:')) {
+            audioEl.src = ref;
+            audioEl.volume = vol;
+            audioEl.play().catch(e => console.error("Lỗi phát âm thanh:", e));
+        } else {
+            getStoredFileUrl(ref).then(url => {
+                if (url) {
+                    audioEl.src = url;
+                    audioEl.volume = vol;
+                    audioEl.play().catch(e => console.error("Lỗi phát âm thanh:", e));
+                }
+            });
+        }
+        return;
+      }
       const theme = store.data.settings.soundTheme || 'beep';
       if(theme==='beep'){
         if(kind==='work_end') { tone(880,250,vol); tone(660,180,vol*0.8, 'sine', 0.22); } else if(kind==='break_end') { tone(660,220,vol*0.9); } else if(kind==='long_end') { tone(520,200,vol); tone(780,200,vol, 'sine', 0.22); tone(1040,220,vol, 'sine', 0.44); }
@@ -841,8 +856,8 @@
         selectedTopicId:'',
         selectedSubtopicId:'',
         collapsedTopics:{},
-        customBg: '',
-        customSounds: { work_end: '', break_end: '', long_end: '' },
+        customBg: '', // lưu id hoặc URL
+        customSounds: { work_end: '', break_end: '', long_end: '' }, // lưu id hoặc URL
         youtubeUrl: '',
         youtubeVolume: 80,
         useYtThumbnailAsBg: true,
@@ -1461,14 +1476,51 @@
     function clampInt(v,min,max){ v=parseInt(v||0,10); if(isNaN(v)) v=min; return Math.max(min, Math.min(max, v)); }
     function clampFloat(v,min,max,def){ v=parseFloat(v); if(Number.isNaN(v)) v=def; return Math.max(min, Math.min(max, v)); }
 
+    const dbPromise = new Promise((resolve, reject) => {
+        const req = indexedDB.open('pomodoro_files', 1);
+        req.onupgradeneeded = (e) => e.target.result.createObjectStore('files');
+        req.onsuccess = (e) => resolve(e.target.result);
+        req.onerror = (e) => reject(e);
+    });
+    const fileCache = {};
     function handleFileUpload(file, callback) {
         if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (e) => callback(e.target.result);
-        reader.onerror = () => toast("Lỗi đọc file.");
-        reader.readAsDataURL(file);
+        dbPromise.then(db => {
+            const id = uid('file');
+            const tx = db.transaction('files', 'readwrite');
+            tx.objectStore('files').put(file, id);
+            tx.oncomplete = () => callback(id);
+            tx.onerror = () => toast("Lỗi lưu file.");
+        });
     }
-    function applyCustomBg() { document.body.style.setProperty('--bg-image', store.data.settings.customBg ? `url(${store.data.settings.customBg})` : ''); }
+    function getStoredFileUrl(id){
+        if (!id) return Promise.resolve('');
+        if (fileCache[id]) return Promise.resolve(fileCache[id]);
+        return dbPromise.then(db => new Promise((resolve) => {
+            const tx = db.transaction('files', 'readonly');
+            const req = tx.objectStore('files').get(id);
+            req.onsuccess = (e) => {
+                const file = e.target.result;
+                if (file) {
+                    const url = URL.createObjectURL(file);
+                    fileCache[id] = url;
+                    resolve(url);
+                } else resolve('');
+            };
+            req.onerror = () => resolve('');
+        }));
+    }
+    function applyCustomBg() {
+        const ref = store.data.settings.customBg;
+        if (!ref) { document.body.style.setProperty('--bg-image', ''); return; }
+        if (ref.startsWith('data:') || ref.startsWith('http') || ref.startsWith('blob:')) {
+            document.body.style.setProperty('--bg-image', `url(${ref})`);
+        } else {
+            getStoredFileUrl(ref).then(url => {
+                document.body.style.setProperty('--bg-image', url ? `url(${url})` : '');
+            });
+        }
+    }
     function applyPanelOpacity() { document.documentElement.style.setProperty('--panel-opacity', store.data.settings.panelOpacity); }
 
     // =============================
@@ -1746,7 +1798,7 @@
       $('#btnSkip').addEventListener('click', ()=> timer.skip());
       $('#btnReset').addEventListener('click', ()=> timer.reset());
 
-      $('#uploadBg').addEventListener('change', (e) => { handleFileUpload(e.target.files[0], (dataUrl) => { store.data.settings.customBg = dataUrl; store.save(); applyCustomBg(); toast("Đã cập nhật hình nền."); }); e.target.value = null; });
+      $('#uploadBg').addEventListener('change', (e) => { handleFileUpload(e.target.files[0], (id) => { store.data.settings.customBg = id; store.save(); applyCustomBg(); toast("Đã cập nhật hình nền."); }); e.target.value = null; });
       $('#btnClearBg').addEventListener('click', () => {
           store.data.settings.customBg = '';
           store.data.settings.useYtThumbnailAsBg = false;
@@ -1757,9 +1809,9 @@
               openSettings();
           }
       });
-      $('#uploadSoundWork').addEventListener('change', (e) => { handleFileUpload(e.target.files[0], (dataUrl) => { store.data.settings.customSounds.work_end = dataUrl; store.save(); toast("Đã lưu âm báo hết WORK."); }); e.target.value = null; });
-      $('#uploadSoundBreak').addEventListener('change', (e) => { handleFileUpload(e.target.files[0], (dataUrl) => { store.data.settings.customSounds.break_end = dataUrl; store.save(); toast("Đã lưu âm báo hết BREAK."); }); e.target.value = null; });
-      $('#uploadSoundLong').addEventListener('change', (e) => { handleFileUpload(e.target.files[0], (dataUrl) => { store.data.settings.customSounds.long_end = dataUrl; store.save(); toast("Đã lưu âm báo hết LONG BREAK."); }); e.target.value = null; });
+      $('#uploadSoundWork').addEventListener('change', (e) => { handleFileUpload(e.target.files[0], (id) => { store.data.settings.customSounds.work_end = id; store.save(); toast("Đã lưu âm báo hết WORK."); }); e.target.value = null; });
+      $('#uploadSoundBreak').addEventListener('change', (e) => { handleFileUpload(e.target.files[0], (id) => { store.data.settings.customSounds.break_end = id; store.save(); toast("Đã lưu âm báo hết BREAK."); }); e.target.value = null; });
+      $('#uploadSoundLong').addEventListener('change', (e) => { handleFileUpload(e.target.files[0], (id) => { store.data.settings.customSounds.long_end = id; store.save(); toast("Đã lưu âm báo hết LONG BREAK."); }); e.target.value = null; });
 
       $('#btnFullscreen').addEventListener('click', toggleFullScreen);
       document.addEventListener('fullscreenchange', updateFullscreenButton);
