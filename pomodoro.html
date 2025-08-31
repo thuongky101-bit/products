@@ -1819,11 +1819,17 @@
     }
 
     // Boot
+    try {
       load();
       ensureValidSelection();
       renderAll();
+    } catch (err) {
+      console.error('Initialization error:', err);
+      toast(`Lỗi khởi tạo: ${err.message}`);
+    } finally {
       bindEvents();
-      applyTheme();
+    }
+    applyTheme();
     </script>
 </body>
 </html>
