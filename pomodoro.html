@@ -580,9 +580,11 @@
                       </div>
                   </div>
                   <div>
-                      <h4>Chu kỳ</h4>
+                  <h4>Chu kỳ</h4>
                       <div class="row">
                           <label>Long break mỗi <input type="number" id="set_interval" min="2" /> phiên WORK</label>
+                          <label>Kiểu A <input type="number" id="set_A_cycles" min="1" /> chu kỳ</label>
+                          <label>Kiểu B <input type="number" id="set_B_cycles" min="1" /> chu kỳ</label>
                       </div>
                   </div>
               </div>
@@ -833,6 +835,7 @@
         soundTheme:'beep',
         theme: 'default',
         longBreakInterval:4,
+        cycles:{A:4,B:4},
         durations:{A_work:25,A_short:5,A_long:15,B_work:50,B_short:10,B_long:30},
         selectedTopicId:'',
         selectedSubtopicId:'',
@@ -1095,9 +1098,9 @@
       remaining:0, segmentTotal:0, cyclesTarget:4, cycleIndex:0, mode:'A',
       setPreset(p, {silent=false}={}){
         const st=store.data.settings;
-        if(p==='2x50'){ this.mode='B'; this.cyclesTarget=2; }
-        if(p==='4x25'){ this.mode='A'; this.cyclesTarget=4; }
-        if(p==='4x50'){ this.mode='B'; this.cyclesTarget=4; }
+        if(p==='2x50'){ this.mode='B'; this.cyclesTarget=st.cycles?.B || 2; }
+        if(p==='4x25'){ this.mode='A'; this.cyclesTarget=st.cycles?.A || 4; }
+        if(p==='4x50'){ this.mode='B'; this.cyclesTarget=st.cycles?.B || 4; }
         st.preset=p; store.save();
         if (this.state === 'idle') {
             this.reset();
@@ -1380,6 +1383,8 @@
         $('#set_A_work').value=d.A_work; $('#set_A_short').value=d.A_short; $('#set_A_long').value=d.A_long;
         $('#set_B_work').value=d.B_work; $('#set_B_short').value=d.B_short; $('#set_B_long').value=d.B_long;
         $('#set_interval').value=s.longBreakInterval;
+        $('#set_A_cycles').value = s.cycles?.A || 4;
+        $('#set_B_cycles').value = s.cycles?.B || 4;
         $('#set_volume').value=s.volume ?? 0.8;
         $('#set_theme').value=s.soundTheme || 'beep';
         $('#set_theme_color').value = s.theme || 'default';
@@ -1391,7 +1396,7 @@
     }
 
     function closeSettings(){ $('#modalSettings').classList.remove('show'); }
-    function setDefaults(){ store.data.settings.durations={A_work:25,A_short:5,A_long:15,B_work:50,B_short:10,B_long:30}; store.data.settings.longBreakInterval=4; store.data.settings.volume=0.8; store.data.settings.soundTheme='beep'; store.save(); openSettings(); toast('Đã khôi phục mặc định'); }
+    function setDefaults(){ store.data.settings.durations={A_work:25,A_short:5,A_long:15,B_work:50,B_short:10,B_long:30}; store.data.settings.longBreakInterval=4; store.data.settings.cycles={A:4,B:4}; store.data.settings.volume=0.8; store.data.settings.soundTheme='beep'; store.save(); openSettings(); toast('Đã khôi phục mặc định'); }
     function saveSettings(){
         const s = store.data.settings;
         s.apiKey = $('#set_apiKey').value.trim();
@@ -1399,6 +1404,9 @@
         d.A_work=clampInt($('#set_A_work').value,1,999); d.A_short=clampInt($('#set_A_short').value,1,999); d.A_long=clampInt($('#set_A_long').value,1,999);
         d.B_work=clampInt($('#set_B_work').value,1,999); d.B_short=clampInt($('#set_B_short').value,1,999); d.B_long=clampInt($('#set_B_long').value,1,999);
         s.longBreakInterval=clampInt($('#set_interval').value,2,12);
+        s.cycles = s.cycles || {A:4,B:4};
+        s.cycles.A = clampInt($('#set_A_cycles').value,1,999);
+        s.cycles.B = clampInt($('#set_B_cycles').value,1,999);
         s.volume = clampFloat($('#set_volume').value,0,1,0.8);
         s.soundTheme = $('#set_theme').value==='chime' ? 'chime':'beep';
         s.theme = $('#set_theme_color').value;
@@ -1418,6 +1426,7 @@
         store.save();
         applyTheme();
         applyPanelOpacity();
+        renderAll();
 
         closeSettings();
         toast('Đã lưu cài đặt');
