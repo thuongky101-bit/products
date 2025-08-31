@@ -716,7 +716,8 @@
   <div id="youtube-player-container"></div>
 
   <script src="https://www.youtube.com/iframe_api"></script>
-  <script>
+  <script type="module">
+    import { data, load, save, export as exportData, import as importData } from './storage.js';
     // =============================
     // Helpers
     // =============================
@@ -750,7 +751,7 @@
         return match ? match[1] : null;
     }
     function applyTheme() {
-        const theme = store.data.settings.theme || 'default';
+        const theme = data.settings.theme || 'default';
         document.body.className = ''; // Xóa tất cả các class cũ
         if (theme !== 'default') {
             document.body.classList.add(theme);
@@ -761,7 +762,7 @@
     // Gemini API Integration
     // =============================
     async function callGeminiAPI(prompt, retries = 3, delay = 1000) {
-        const apiKey = store.data.settings.apiKey || "";
+        const apiKey = data.settings.apiKey || "";
         if (!apiKey) {
             toast("Vui lòng nhập Gemini API Key trong phần Cài đặt.");
             return null;
@@ -804,9 +805,9 @@
     function tone(freq=880, durMs=200, vol=0.2, type='sine', when=0){ ensureAudio(); const ctx=AUDIO_CTX; const o=ctx.createOscillator(); const g=ctx.createGain(); o.type=type; o.frequency.value=freq; o.connect(g); g.connect(ctx.destination); const t = ctx.currentTime + when; g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t+0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + durMs/1000); o.start(t); o.stop(t + durMs/1000 + 0.05); }
 
     function playSound(kind){
-      if(!store.data.settings.soundOn) return;
-      const vol = Math.max(0, Math.min(1, store.data.settings.volume ?? 0.8));
-      const ref = store.data.settings.customSounds?.[kind];
+      if(!data.settings.soundOn) return;
+      const vol = Math.max(0, Math.min(1, data.settings.volume ?? 0.8));
+      const ref = data.settings.customSounds?.[kind];
       let audioEl;
       if (kind === 'work_end') audioEl = $('#audioWorkEnd'); else if (kind === 'break_end') audioEl = $('#audioBreakEnd'); else if (kind === 'long_end') audioEl = $('#audioLongEnd');
       if (ref && audioEl) {
@@ -825,7 +826,7 @@
         }
         return;
       }
-      const theme = store.data.settings.soundTheme || 'beep';
+      const theme = data.settings.soundTheme || 'beep';
       if(theme==='beep'){
         if(kind==='work_end') { tone(880,250,vol); tone(660,180,vol*0.8, 'sine', 0.22); } else if(kind==='break_end') { tone(660,220,vol*0.9); } else if(kind==='long_end') { tone(520,200,vol); tone(780,200,vol, 'sine', 0.22); tone(1040,220,vol, 'sine', 0.44); }
       } else {
@@ -836,116 +837,20 @@
     // =============================
     // Storage
     // =============================
-    const LS_KEY = 'pomodoro_data_v11'; // Cập nhật phiên bản để tránh xung đột
-    const defaultData = () => ({
-      version:11,
-      settings:{
-        apiKey: "",
-        currentView: 'timer', // Thêm trạng thái view mới
-        preset:'A',
-        autoStartNext:true,
-        soundOn:true,
-        volume:0.8,
-        soundTheme:'beep',
-        theme: 'default',
-        cyclesA:4,
-        longBreakIntervalA:4,
-        cyclesB:4,
-        longBreakIntervalB:4,
-        durations:{A_work:25,A_short:5,A_long:15,B_work:50,B_short:10,B_long:30},
-        selectedTopicId:'',
-        selectedSubtopicId:'',
-        collapsedTopics:{},
-        customBg: '', // lưu id hoặc URL
-        customSounds: { work_end: '', break_end: '', long_end: '' }, // lưu id hoặc URL
-        youtubeUrl: '',
-        youtubeVolume: 80,
-        useYtThumbnailAsBg: true,
-        panelOpacity: 0.85
-      },
-      topics:[ { id: uid('t'), name:'Chủ đề mẫu', subtopics:[ { id: uid('s'), name:'Subtopic mẫu', tasks: [], generalNotes: [], summaries: [], chatHistory: [],
-      stats:{totalMinutes:0,sessionsCompleted:0, tasksCompleted: 0},
-      sessions:[],
-      timerState: {
-            state: 'idle',
-            remaining: 0,
-            segmentTotal: 0,
-            cycleIndex: 0
+
+      function ensureValidSelection(){
+        const set = data.settings;
+        if (!data.topics || data.topics.length === 0) { set.selectedTopicId = ''; set.selectedSubtopicId = ''; save(); return; }
+        const t = data.topics.find(x=>x.id===set.selectedTopicId);
+        const s = t?.subtopics.find(x=>x.id===set.selectedSubtopicId);
+        if(!t || !s){
+          const t0 = data.topics[0];
+          const s0 = t0?.subtopics?.[0];
+          set.selectedTopicId = t0?.id || '';
+          set.selectedSubtopicId = s0?.id || '';
+          save();
         }
-    } ] } ]
-    });
-
-    // Chuyển đổi dữ liệu từ các phiên bản cũ sang cấu trúc mới
-    function migrateData(oldData){
-      const data = defaultData();
-      if(oldData.settings) data.settings = { ...data.settings, ...oldData.settings };
-      if(oldData.topics) data.topics = oldData.topics;
-      return data;
-    }
-
-    const store = {
-      data:null,
-      load(){
-        try{
-          const raw = localStorage.getItem(LS_KEY);
-          this.data = raw ? JSON.parse(raw) : defaultData();
-        }catch(e){
-          console.error("Lỗi parse JSON, thử dùng bản sao lưu:", e);
-          try{
-            const backup = localStorage.getItem(LS_KEY + '_backup');
-            this.data = backup ? JSON.parse(backup) : defaultData();
-          }catch(err){
-            console.error("Không thể đọc bản sao lưu:", err);
-            this.data = defaultData();
-          }
-        }
-
-        if (!this.data.version || this.data.version < 11) {
-            this.data = migrateData(this.data);
-        }
-        
-        const set = this.data.settings;
-        if (set.currentView === undefined) set.currentView = 'timer';
-        if (set.preset === '4x25') set.preset = 'A';
-        if (set.preset === '2x50' || set.preset === '4x50') set.preset = 'B';
-
-        if (set.cyclesA === undefined) set.cyclesA = set.longBreakInterval || 4;
-        if (set.longBreakIntervalA === undefined) set.longBreakIntervalA = set.longBreakInterval || 4;
-        if (set.cyclesB === undefined) set.cyclesB = set.longBreakInterval || 4;
-        if (set.longBreakIntervalB === undefined) set.longBreakIntervalB = set.longBreakInterval || 4;
-        delete set.longBreakInterval;
-
-        this.save();
-        ensureValidSelection();
-        return this.data;
-      },
-      save(){
-        try{
-          const current = localStorage.getItem(LS_KEY);
-          if(current) localStorage.setItem(LS_KEY + '_backup', current);
-          localStorage.setItem(LS_KEY, JSON.stringify(this.data));
-        }catch(e){
-          console.error('Không thể lưu dữ liệu:', e);
-          toast('Lưu thất bại: không đủ bộ nhớ.');
-        }
-      },
-      export(){ const blob=new Blob([JSON.stringify(this.data,null,2)],{type:'application/json'}); const a=document.createElement('a'); const ts=new Date(); const pad=n=>`${n}`.padStart(2,'0'); a.href=URL.createObjectURL(blob); a.download=`pomodoro_backup_${ts.getFullYear()}${pad(ts.getMonth()+1)}${pad(ts.getDate())}.json`; a.click(); URL.revokeObjectURL(a.href); },
-      async import(file){ const text=await file.text(); try{ const obj=JSON.parse(text); if(!obj.version||!obj.settings||!Array.isArray(obj.topics)) throw new Error('Tệp không đúng định dạng'); this.data=obj; this.save(); ensureValidSelection(); toast('Đã nhập dữ liệu thành công!'); renderAll(); }catch(e){ toast('Nhập thất bại: '+e.message); } }
-    };
-
-    function ensureValidSelection(){
-      const set = store.data.settings;
-      if (!store.data.topics || store.data.topics.length === 0) { set.selectedTopicId = ''; set.selectedSubtopicId = ''; store.save(); return; }
-      const t = store.data.topics.find(x=>x.id===set.selectedTopicId);
-      const s = t?.subtopics.find(x=>x.id===set.selectedSubtopicId);
-      if(!t || !s){
-        const t0 = store.data.topics[0];
-        const s0 = t0?.subtopics?.[0];
-        set.selectedTopicId = t0?.id || '';
-        set.selectedSubtopicId = s0?.id || '';
-        store.save();
       }
-    }
 
     // =============================
     // Generic Modals & View Switching
@@ -978,8 +883,8 @@
         $$('.nav-btn').forEach(b => b.classList.remove('active'));
         const navBtn = $(`.nav-btn[data-view="${viewId}"]`);
         if (navBtn) navBtn.classList.add('active');
-        store.data.settings.currentView = viewId;
-        store.save();
+        data.settings.currentView = viewId;
+        save();
         if (viewId === 'stats') {
             renderDashboard();
         }
@@ -990,8 +895,8 @@
     // =============================
     function renderTopics(){
       const wrap = $('#topicsList'); wrap.innerHTML='';
-      const collapsedMap = store.data.settings.collapsedTopics || {};
-      store.data.topics.forEach(topic => {
+      const collapsedMap = data.settings.collapsedTopics || {};
+      data.topics.forEach(topic => {
         const box = document.createElement('div'); box.className='topic-item';
         const header = document.createElement('div'); header.className='topic-header';
         const isCollapsed = !!collapsedMap[topic.id];
@@ -1006,19 +911,19 @@
         const subs = document.createElement('div'); subs.className='subtopics' + (isCollapsed? ' hidden':'');
         topic.subtopics.forEach(st => {
           const row = document.createElement('div'); row.className='sub-row';
-          const btn = document.createElement('button'); btn.className='btn subtopic-btn'; btn.textContent = '• '+st.name; btn.dataset.sid = st.id; btn.dataset.tid = topic.id; if(store.data.settings.selectedSubtopicId===st.id) btn.classList.add('active');
+          const btn = document.createElement('button'); btn.className='btn subtopic-btn'; btn.textContent = '• '+st.name; btn.dataset.sid = st.id; btn.dataset.tid = topic.id; if(data.settings.selectedSubtopicId===st.id) btn.classList.add('active');
           const edit = document.createElement('button'); edit.className='btn small ghost'; edit.textContent='Sửa';
           const del = document.createElement('button'); del.className='btn small danger'; del.textContent='Xóa';
           row.append(btn, edit, del);
           subs.appendChild(row);
           btn.addEventListener('click', ()=> selectSubtopic(topic.id, st.id));
-          edit.addEventListener('click', ()=> showInputModal('Đổi tên Subtopic', (newName) => { if(!newName) return; st.name=newName; store.save(); renderAll(); }, st.name));
-          del.addEventListener('click', ()=> showConfirmModal('Xác nhận xóa', `Bạn có chắc muốn xóa Subtopic "${st.name}"? Mọi dữ liệu liên quan sẽ bị mất.`, (ok) => { if(!ok) return; topic.subtopics = topic.subtopics.filter(x=>x.id!==st.id); const set=store.data.settings; if(set.selectedSubtopicId===st.id){ set.selectedSubtopicId=''; set.selectedTopicId=''; ensureValidSelection(); } store.save(); renderAll(); }));
+          edit.addEventListener('click', ()=> showInputModal('Đổi tên Subtopic', (newName) => { if(!newName) return; st.name=newName; save(); renderAll(); }, st.name));
+          del.addEventListener('click', ()=> showConfirmModal('Xác nhận xóa', `Bạn có chắc muốn xóa Subtopic "${st.name}"? Mọi dữ liệu liên quan sẽ bị mất.`, (ok) => { if(!ok) return; topic.subtopics = topic.subtopics.filter(x=>x.id!==st.id); const set=data.settings; if(set.selectedSubtopicId===st.id){ set.selectedSubtopicId=''; set.selectedTopicId=''; ensureValidSelection(); } save(); renderAll(); }));
         });
-        chev.addEventListener('click', ()=>{ if(isCollapsed){ delete collapsedMap[topic.id]; } else { collapsedMap[topic.id] = true; } store.data.settings.collapsedTopics = collapsedMap; store.save(); renderTopics(); });
-        bAdd.addEventListener('click', ()=> showInputModal('Tên Subtopic mới?', (name) => { if(!name) return; topic.subtopics.push({ id: uid('s'), name, tasks: [], generalNotes: [], summaries: [], chatHistory: [], stats:{ totalMinutes:0, sessionsCompleted:0, tasksCompleted: 0 }, sessions: [], timerState: { state: 'idle', remaining: 0, segmentTotal: 0, cycleIndex: 0 } }); store.save(); renderTopics(); }));
-        bEdit.addEventListener('click', ()=> showInputModal('Đổi tên Topic', (newName) => { if(!newName) return; topic.name=newName; store.save(); renderTopics(); }, topic.name));
-        bDel.addEventListener('click', ()=> showConfirmModal('Xác nhận xóa', `Bạn có chắc muốn xóa Topic "${topic.name}"? Mọi subtopic và dữ liệu liên quan sẽ bị mất.`, (ok) => { if(!ok) return; store.data.topics = store.data.topics.filter(t=>t.id!==topic.id); delete collapsedMap[topic.id]; if(store.data.settings.selectedTopicId===topic.id){ store.data.settings.selectedTopicId=''; store.data.settings.selectedSubtopicId=''; ensureValidSelection(); } store.save(); renderAll(); }));
+        chev.addEventListener('click', ()=>{ if(isCollapsed){ delete collapsedMap[topic.id]; } else { collapsedMap[topic.id] = true; } data.settings.collapsedTopics = collapsedMap; save(); renderTopics(); });
+        bAdd.addEventListener('click', ()=> showInputModal('Tên Subtopic mới?', (name) => { if(!name) return; topic.subtopics.push({ id: uid('s'), name, tasks: [], generalNotes: [], summaries: [], chatHistory: [], stats:{ totalMinutes:0, sessionsCompleted:0, tasksCompleted: 0 }, sessions: [], timerState: { state: 'idle', remaining: 0, segmentTotal: 0, cycleIndex: 0 } }); save(); renderTopics(); }));
+        bEdit.addEventListener('click', ()=> showInputModal('Đổi tên Topic', (newName) => { if(!newName) return; topic.name=newName; save(); renderTopics(); }, topic.name));
+        bDel.addEventListener('click', ()=> showConfirmModal('Xác nhận xóa', `Bạn có chắc muốn xóa Topic "${topic.name}"? Mọi subtopic và dữ liệu liên quan sẽ bị mất.`, (ok) => { if(!ok) return; data.topics = data.topics.filter(t=>t.id!==topic.id); delete collapsedMap[topic.id]; if(data.settings.selectedTopicId===topic.id){ data.settings.selectedTopicId=''; data.settings.selectedSubtopicId=''; ensureValidSelection(); } save(); renderAll(); }));
         box.append(header, subs);
         wrap.appendChild(box);
       });
@@ -1040,8 +945,8 @@
         mainEl.classList.add('reloading');
 
         setTimeout(() => {
-            store.data.settings.selectedTopicId = topicId;
-            store.data.settings.selectedSubtopicId = subId;
+            data.settings.selectedTopicId = topicId;
+            data.settings.selectedSubtopicId = subId;
 
             const newSubtopic = getCurrentSubtopic();
 
@@ -1054,14 +959,14 @@
                 timer.reset();
             }
 
-            store.save();
+            save();
             timer.updateUI();
             renderAll();
             switchView('timer'); // Quay về màn hình timer sau khi chọn
             mainEl.classList.remove('reloading');
         }, 200);
     }
-    function getCurrentSubtopic(){ const tid=store.data.settings.selectedTopicId, sid=store.data.settings.selectedSubtopicId; if(!tid||!sid) return null; const t=store.data.topics.find(x=>x.id===tid); if(!t) return null; return t.subtopics.find(x=>x.id===sid) || null; }
+    function getCurrentSubtopic(){ const tid=data.settings.selectedTopicId, sid=data.settings.selectedSubtopicId; if(!tid||!sid) return null; const t=data.topics.find(x=>x.id===tid); if(!t) return null; return t.subtopics.find(x=>x.id===sid) || null; }
     function renderContextBadge(){ const s=getCurrentSubtopic(); const name = s ? s.name : '(chưa chọn)'; $('#selectedContext').textContent = s? `Subtopic: ${s.name}`:'Chưa chọn Subtopic'; $('#currentSubtopicName').textContent = name; $('#currentSubtopicNameChat').textContent = name; }
 
     // =============================
@@ -1098,7 +1003,7 @@
         if (text) {
             if (!s.tasks) s.tasks = [];
             s.tasks.push({ id: uid('task'), text, isCompleted: false, createdAt: todayISO() });
-            store.save();
+            save();
             renderSubtopicTasks();
             input.value = '';
         }
@@ -1112,7 +1017,7 @@
         if (task) {
             task.isCompleted = true;
             s.stats.tasksCompleted = (s.stats.tasksCompleted || 0) + 1;
-            store.save();
+            save();
 
             listItemElement.classList.add('removing');
             setTimeout(() => {
@@ -1127,17 +1032,17 @@
       state:'idle', prevState:null, interval:null, endAt:null,
       remaining:0, segmentTotal:0, cyclesTarget:4, cycleIndex:0, mode:'A',
       setPreset(p, {silent=false}={}){
-        const st = store.data.settings;
+        const st = data.settings;
         this.mode = p;
         this.cyclesTarget = (p==='A' ? st.cyclesA : st.cyclesB);
         st.preset = p;
-        store.save();
+        save();
         if (this.state === 'idle') {
             this.reset();
         }
       },
-      currentDurations(){ const d=store.data.settings.durations; return this.mode==='A'? {work:d.A_work, short:d.A_short, long:d.A_long} : {work:d.B_work, short:d.B_short, long:d.B_long}; },
-      currentConfig(){ const s=store.data.settings; return this.mode==='A'? {cycles:s.cyclesA, interval:s.longBreakIntervalA} : {cycles:s.cyclesB, interval:s.longBreakIntervalB}; },
+      currentDurations(){ const d=data.settings.durations; return this.mode==='A'? {work:d.A_work, short:d.A_short, long:d.A_long} : {work:d.B_work, short:d.B_short, long:d.B_long}; },
+      currentConfig(){ const s=data.settings; return this.mode==='A'? {cycles:s.cyclesA, interval:s.longBreakIntervalA} : {cycles:s.cyclesB, interval:s.longBreakIntervalB}; },
       updateUI() {
           const badge = $('#stateBadge');
           const progressCircle = $('.timer-circle-progress');
@@ -1210,7 +1115,7 @@
           const currentSubtopic = getCurrentSubtopic();
           if (currentSubtopic) {
               currentSubtopic.timerState = { state: 'idle', remaining: 0, segmentTotal: 0, cycleIndex: 0 };
-              store.save();
+              save();
           }
       },
       segmentFinished(skipped=false){
@@ -1228,7 +1133,7 @@
                 s.sessions.unshift(entry);
                 s.stats.sessionsCompleted = (s.stats.sessionsCompleted || 0) + 1;
                 s.stats.totalMinutes = (s.stats.totalMinutes || 0) + work;
-                store.save();
+                save();
                 openNoteModal(entry.id);
                 renderStatsHistory();
             }
@@ -1238,15 +1143,15 @@
           const {interval} = this.currentConfig();
           const shouldLong = (this.cycleIndex % interval === 0) && (this.cyclesTarget >= interval);
           if(this.cycleIndex >= this.cyclesTarget){
-            if(shouldLong){ this.beginBreak(); if(!store.data.settings.autoStartNext) this.pause(); return; }
+            if(shouldLong){ this.beginBreak(); if(!data.settings.autoStartNext) this.pause(); return; }
             this.state='idle'; this.remaining=0; this.segmentTotal=0; this.updateUI(); toast('🎉 Hoàn thành chương trình preset!'); return;
           }
-          this.beginBreak(); if(!store.data.settings.autoStartNext){ this.pause(); } return;
+          this.beginBreak(); if(!data.settings.autoStartNext){ this.pause(); } return;
         }
         if(lastState==='break' || lastState==='long_break'){
           if(this.cycleIndex >= this.cyclesTarget){ this.state='idle'; this.remaining=0; this.segmentTotal=0; this.updateUI(); toast('🎯 Kết thúc chương trình'); return; }
           this.cycleIndex += 1;
-          this.beginWork(); if(!store.data.settings.autoStartNext){ this.pause(); } return;
+          this.beginWork(); if(!data.settings.autoStartNext){ this.pause(); } return;
         }
         if(lastState==='paused'){ this.updateUI(); }
       }
@@ -1320,7 +1225,7 @@
         if (!content) { toast("Nội dung ghi chú không được để trống."); return; }
         if (!s.generalNotes) s.generalNotes = [];
         s.generalNotes.unshift({ id: uid('note'), content, createdAt: todayISO() });
-        store.save(); renderGeneralNotes(); textInput.value = ''; toast("Đã thêm ghi chú.");
+        save(); renderGeneralNotes(); textInput.value = ''; toast("Đã thêm ghi chú.");
     }
 
     function deleteGeneralNote(noteId) {
@@ -1329,7 +1234,7 @@
             const s = getCurrentSubtopic();
             if (!s || !s.generalNotes) return;
             s.generalNotes = s.generalNotes.filter(note => note.id !== noteId);
-            store.save(); renderGeneralNotes(); toast("Đã xóa ghi chú.");
+            save(); renderGeneralNotes(); toast("Đã xóa ghi chú.");
         });
     }
 
@@ -1349,7 +1254,7 @@
             const result = await callGeminiAPI(prompt);
             if (!s.summaries) s.summaries = [];
             s.summaries.unshift({ id: uid('sum'), content: result, createdAt: todayISO() });
-            store.save();
+            save();
             $('#summaryInput').value = '';
             renderSummaries();
         } catch (e) {
@@ -1365,7 +1270,7 @@
             const s = getCurrentSubtopic();
             if (!s || !s.summaries) return;
             s.summaries = s.summaries.filter(x => x.id !== id);
-            store.save();
+            save();
             renderSummaries();
             toast('Đã xóa tóm tắt.');
         });
@@ -1408,7 +1313,7 @@
     // Settings & Customization
     // =============================
     function openSettings(){
-        const s = store.data.settings;
+        const s = data.settings;
         $('#set_apiKey').value = s.apiKey || '';
         const d=s.durations;
         $('#set_A_work').value=d.A_work; $('#set_A_short').value=d.A_short; $('#set_A_long').value=d.A_long;
@@ -1429,17 +1334,17 @@
 
     function closeSettings(){ $('#modalSettings').classList.remove('show'); }
     function setDefaults(){
-        store.data.settings.durations={A_work:25,A_short:5,A_long:15,B_work:50,B_short:10,B_long:30};
-        store.data.settings.cyclesA=4;
-        store.data.settings.longBreakIntervalA=4;
-        store.data.settings.cyclesB=4;
-        store.data.settings.longBreakIntervalB=4;
-        store.data.settings.preset='A';
-        store.data.settings.volume=0.8;
-        store.data.settings.soundTheme='beep';
-        store.save(); openSettings(); toast('Đã khôi phục mặc định'); }
+        data.settings.durations={A_work:25,A_short:5,A_long:15,B_work:50,B_short:10,B_long:30};
+        data.settings.cyclesA=4;
+        data.settings.longBreakIntervalA=4;
+        data.settings.cyclesB=4;
+        data.settings.longBreakIntervalB=4;
+        data.settings.preset='A';
+        data.settings.volume=0.8;
+        data.settings.soundTheme='beep';
+        save(); openSettings(); toast('Đã khôi phục mặc định'); }
     function saveSettings(){
-        const s = store.data.settings;
+        const s = data.settings;
         s.apiKey = $('#set_apiKey').value.trim();
         const d=s.durations;
         d.A_work=clampInt($('#set_A_work').value,1,999); d.A_short=clampInt($('#set_A_short').value,1,999); d.A_long=clampInt($('#set_A_long').value,1,999);
@@ -1464,7 +1369,7 @@
             ytPlayer.setVolume(s.youtubeVolume);
         }
 
-        store.save();
+        save();
         applyTheme();
         applyPanelOpacity();
         updatePresetButtonsText();
@@ -1511,7 +1416,7 @@
         }));
     }
     function applyCustomBg() {
-        const ref = store.data.settings.customBg;
+        const ref = data.settings.customBg;
         if (!ref) { document.body.style.setProperty('--bg-image', ''); return; }
         if (ref.startsWith('data:') || ref.startsWith('http') || ref.startsWith('blob:')) {
             document.body.style.setProperty('--bg-image', `url(${ref})`);
@@ -1521,23 +1426,23 @@
             });
         }
     }
-    function applyPanelOpacity() { document.documentElement.style.setProperty('--panel-opacity', store.data.settings.panelOpacity); }
+    function applyPanelOpacity() { document.documentElement.style.setProperty('--panel-opacity', data.settings.panelOpacity); }
 
     // =============================
     // Dashboard
     // =============================
-    function renderDashboard(){
-        const data = store.data.topics.flatMap(t => t.subtopics.map(s => ({ topic: t.name, subtopic: s.name, m: s.stats.totalMinutes || 0, c: s.stats.sessionsCompleted || 0, t: s.stats.tasksCompleted || 0 })));
-        const totalM = data.reduce((a, b) => a + b.m, 0);
-        const totalC = data.reduce((a, b) => a + b.c, 0);
-        const totalT = data.reduce((a, b) => a + b.t, 0);
+      function renderDashboard(){
+          const stats = data.topics.flatMap(t => t.subtopics.map(s => ({ topic: t.name, subtopic: s.name, m: s.stats.totalMinutes || 0, c: s.stats.sessionsCompleted || 0, t: s.stats.tasksCompleted || 0 })));
+          const totalM = stats.reduce((a, b) => a + b.m, 0);
+          const totalC = stats.reduce((a, b) => a + b.c, 0);
+          const totalT = stats.reduce((a, b) => a + b.t, 0);
 
         let tableHTML = `<p class="tiny"><strong>Tổng thời gian:</strong> ${formatDaysHoursMinutes(totalM)} | <strong>Tổng sessions:</strong> ${totalC} | <strong>Tổng tasks:</strong> ${totalT}</p>
         <table class="dashboard-table">
             <thead><tr><th>Topic</th><th>Subtopic</th><th>Thời gian</th><th>Sessions</th><th>Tasks</th></tr></thead>
             <tbody>`;
 
-        data.forEach(item => {
+          stats.forEach(item => {
             tableHTML += `<tr><td>${escapeHTML(item.topic)}</td><td>${escapeHTML(item.subtopic)}</td><td>${formatDaysHoursMinutes(item.m)}</td><td>${item.c}</td><td>${item.t}</td></tr>`;
         });
 
@@ -1567,7 +1472,7 @@
         const response = await callGeminiAPI(query);
         if (response) {
             subtopic.chatHistory.push({ role: 'model', text: response });
-            store.save();
+            save();
             renderChat();
         }
 
@@ -1626,7 +1531,7 @@
         showConfirmModal('Xác nhận xóa', 'Bạn có chắc muốn xóa toàn bộ lịch sử chat của subtopic này?', (ok) => {
             if (ok) {
                 s.chatHistory = [];
-                store.save();
+                save();
                 renderChat();
                 toast("Đã xóa lịch sử chat.");
             }
@@ -1668,12 +1573,12 @@
 
     function updateYouTubePlayer() {
         if (!ytPlayer || !ytPlayer.loadVideoById) return;
-        const videoId = extractYouTubeID(store.data.settings.youtubeUrl);
+        const videoId = extractYouTubeID(data.settings.youtubeUrl);
 
         if (!videoId) {
-            if (store.data.settings.useYtThumbnailAsBg) {
-                store.data.settings.customBg = '';
-                store.save();
+            if (data.settings.useYtThumbnailAsBg) {
+                data.settings.customBg = '';
+                save();
                 applyCustomBg();
             }
             if (ytPlayer && ytPlayer.stopVideo) {
@@ -1682,25 +1587,25 @@
             return;
         }
 
-        if (store.data.settings.useYtThumbnailAsBg) {
+        if (data.settings.useYtThumbnailAsBg) {
             const thumbUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
             const img = new Image();
             img.onload = () => {
-                store.data.settings.customBg = thumbUrl;
-                store.save();
+                data.settings.customBg = thumbUrl;
+                save();
                 applyCustomBg();
             };
             img.onerror = () => {
                 const fallbackUrl = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
-                store.data.settings.customBg = fallbackUrl;
-                store.save();
+                data.settings.customBg = fallbackUrl;
+                save();
                 applyCustomBg();
             };
             img.src = thumbUrl;
         }
 
         ytPlayer.loadVideoById(videoId);
-        ytPlayer.setVolume(store.data.settings.youtubeVolume);
+        ytPlayer.setVolume(data.settings.youtubeVolume);
     }
 
     function toggleYtSound() {
@@ -1717,9 +1622,19 @@
     // Bindings
     // =============================
     function bindEvents(){
-      $('#btnAddTopic').addEventListener('click', () => showInputModal('Tên Topic mới?', (name) => { if (!name) return; store.data.topics.push({ id: uid('t'), name, subtopics: [] }); store.save(); renderTopics(); }));
-      $('#btnExport').addEventListener('click', ()=> store.export());
-      $('#importFile').addEventListener('change', (e)=>{ const f=e.target.files[0]; if(f) store.import(f); e.target.value=null; });
+      $('#btnAddTopic').addEventListener('click', () => showInputModal('Tên Topic mới?', (name) => { if (!name) return; data.topics.push({ id: uid('t'), name, subtopics: [] }); save(); renderTopics(); }));
+      $('#btnExport').addEventListener('click', ()=> exportData());
+        $('#importFile').addEventListener('change', (e)=>{
+          const f = e.target.files[0];
+          if (f) {
+            importData(f).then(() => {
+              ensureValidSelection();
+              toast('Đã nhập dữ liệu thành công!');
+              renderAll();
+            }).catch(err => toast('Nhập thất bại: ' + err.message));
+          }
+          e.target.value = null;
+        });
       $('#btnSettings').addEventListener('click', openSettings);
       
       $('#btnHelpCreateTopic').addEventListener('click', () => {
@@ -1737,7 +1652,7 @@
       $('#btnDefaults').addEventListener('click', setDefaults);
       $('#btnTestSound').addEventListener('click', ()=>{ ensureAudio(); playSound('work_end'); });
 
-      $('#btnSaveNote').addEventListener('click', ()=>{ const s=getCurrentSubtopic(); if(!s) return; const id=pendingNoteSessionId; const sess=s.sessions.find(x=>x.id===id); if(sess){ sess.note=$('#noteText').value.trim(); store.save(); renderStatsHistory(); toast('Đã lưu ghi chú'); } closeNoteModal(); });
+      $('#btnSaveNote').addEventListener('click', ()=>{ const s=getCurrentSubtopic(); if(!s) return; const id=pendingNoteSessionId; const sess=s.sessions.find(x=>x.id===id); if(sess){ sess.note=$('#noteText').value.trim(); save(); renderStatsHistory(); toast('Đã lưu ghi chú'); } closeNoteModal(); });
       $('#btnSkipNote').addEventListener('click', ()=> closeNoteModal());
       $('#btnAddGeneralNote').addEventListener('click', addGeneralNote);
       $('#btnSummarize').addEventListener('click', summarizeNotes);
@@ -1798,20 +1713,20 @@
       $('#btnSkip').addEventListener('click', ()=> timer.skip());
       $('#btnReset').addEventListener('click', ()=> timer.reset());
 
-      $('#uploadBg').addEventListener('change', (e) => { handleFileUpload(e.target.files[0], (id) => { store.data.settings.customBg = id; store.save(); applyCustomBg(); toast("Đã cập nhật hình nền."); }); e.target.value = null; });
+      $('#uploadBg').addEventListener('change', (e) => { handleFileUpload(e.target.files[0], (id) => { data.settings.customBg = id; save(); applyCustomBg(); toast("Đã cập nhật hình nền."); }); e.target.value = null; });
       $('#btnClearBg').addEventListener('click', () => {
-          store.data.settings.customBg = '';
-          store.data.settings.useYtThumbnailAsBg = false;
-          store.save();
+          data.settings.customBg = '';
+          data.settings.useYtThumbnailAsBg = false;
+          save();
           applyCustomBg();
           toast("Đã xóa hình nền tùy chỉnh.");
           if ($('#modalSettings').classList.contains('show')) {
               openSettings();
           }
       });
-      $('#uploadSoundWork').addEventListener('change', (e) => { handleFileUpload(e.target.files[0], (id) => { store.data.settings.customSounds.work_end = id; store.save(); toast("Đã lưu âm báo hết WORK."); }); e.target.value = null; });
-      $('#uploadSoundBreak').addEventListener('change', (e) => { handleFileUpload(e.target.files[0], (id) => { store.data.settings.customSounds.break_end = id; store.save(); toast("Đã lưu âm báo hết BREAK."); }); e.target.value = null; });
-      $('#uploadSoundLong').addEventListener('change', (e) => { handleFileUpload(e.target.files[0], (id) => { store.data.settings.customSounds.long_end = id; store.save(); toast("Đã lưu âm báo hết LONG BREAK."); }); e.target.value = null; });
+      $('#uploadSoundWork').addEventListener('change', (e) => { handleFileUpload(e.target.files[0], (id) => { data.settings.customSounds.work_end = id; save(); toast("Đã lưu âm báo hết WORK."); }); e.target.value = null; });
+      $('#uploadSoundBreak').addEventListener('change', (e) => { handleFileUpload(e.target.files[0], (id) => { data.settings.customSounds.break_end = id; save(); toast("Đã lưu âm báo hết BREAK."); }); e.target.value = null; });
+      $('#uploadSoundLong').addEventListener('change', (e) => { handleFileUpload(e.target.files[0], (id) => { data.settings.customSounds.long_end = id; save(); toast("Đã lưu âm báo hết LONG BREAK."); }); e.target.value = null; });
 
       $('#btnFullscreen').addEventListener('click', toggleFullScreen);
       document.addEventListener('fullscreenchange', updateFullscreenButton);
@@ -1836,7 +1751,7 @@
     }
 
     function updatePresetButtonsText() {
-        const settings = store.data.settings;
+        const settings = data.settings;
         const cyclesA = settings.cyclesA;
         const cyclesB = settings.cyclesB;
         const workA = settings.durations.A_work;
@@ -1853,7 +1768,7 @@
 
     function renderAll(){
         updatePresetButtonsText();
-        const currentPreset = store.data.settings.preset;
+        const currentPreset = data.settings.preset;
         $$('.presets button').forEach(button => {
           const isSelected = button.dataset.preset === currentPreset;
           button.classList.toggle('acc', isSelected);
@@ -1863,7 +1778,7 @@
 
         updateMainViewVisibility();
 
-        timer.setPreset(store.data.settings.preset, {silent:true});
+        timer.setPreset(data.settings.preset, {silent:true});
         renderTopics();
         renderContextBadge();
         renderStatsHistory();
@@ -1874,7 +1789,7 @@
         applyPanelOpacity();
         renderSubtopicTasks();
         updateFullscreenButton();
-        switchView(store.data.settings.currentView);
+        switchView(data.settings.currentView);
     }
 
     // =============================
@@ -1904,7 +1819,7 @@
     }
 
     // Boot
-    store.load(); bindEvents(); renderAll(); applyTheme();
+      load(); ensureValidSelection(); bindEvents(); renderAll(); applyTheme();
     </script>
 </body>
 </html>

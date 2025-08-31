@@ -17,12 +17,10 @@ const context = {
 };
 vm.createContext(context);
 
-// Extract the relevant part of pomodoro.html containing defaultData, migrateData and store
-const html = fs.readFileSync('pomodoro.html', 'utf8');
-const start = html.indexOf('const LS_KEY');
-const end = html.indexOf('function showInputModal');
-const snippet = html.slice(start, end);
-vm.runInContext(snippet, context);
+// Load storage module code (strip ES module exports)
+let code = fs.readFileSync('storage.js', 'utf8');
+code = code.replace(/export\s+{[^}]+};?/g, '');
+vm.runInContext(code, context);
 
 // Simulate old data (version 10)
 const oldData = {
@@ -33,8 +31,7 @@ const oldData = {
 localStorage.setItem('pomodoro_data_v11', JSON.stringify(oldData));
 
 // Load and migrate
-const store = vm.runInContext('store', context);
-const result = store.load();
+const result = context.load();
 
 console.log('Migrated version:', result.version);
 console.log('Preset after migrate:', result.settings.preset);
