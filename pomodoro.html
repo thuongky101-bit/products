@@ -790,7 +790,7 @@
                 request.onsuccess = () => {
                     localStorage.setItem('lastBackupDate', today);
                     console.log('Daily backup successful.');
-                    this.cleanupOldBackups(14);
+                    this.cleanupOldBackups(2);
                 };
                 request.onerror = (event) => {
                     console.error('Backup failed:', event.target.error);
@@ -2119,3 +2119,4 @@
     </script>
 </body>
 </html>
+
