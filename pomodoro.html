@@ -571,28 +571,21 @@
               <button class="tab-btn" data-tab="settings-integrations">Tích hợp</button>
           </nav>
           <div class="settings-content">
-              <div id="settings-timer" class="tab-content active" style="display: flex; flex-direction: column; gap: 20px;">
+              <div id="settings-timer" class="tab-content active" style="display:flex; flex-direction:column; gap:20px;">
                   <div>
-                      <h4>Thời lượng</h4>
-                      <div class="row"><strong>Kiểu A (25/5) — Long break 15</strong></div>
-                      <div class="row">
-                          <label>WORK (phút)<input type="number" id="set_A_work" min="1" /></label>
-                          <label>BREAK (phút)<input type="number" id="set_A_short" min="1" /></label>
-                          <label>LONG BREAK (phút)<input type="number" id="set_A_long" min="1" /></label>
+                      <h4>Thời lượng Pomodoro</h4>
+                      <div class="row" id="timerPresetSelector" style="margin-bottom:16px;">
+                          <button class="btn acc" data-preset-target="A">Cài đặt Kiểu A (25/5)</button>
+                          <button class="btn ghost" data-preset-target="B">Cài đặt Kiểu B (50/10)</button>
                       </div>
                       <div class="row">
-                          <label>Chu kỳ Pomodoro<input type="number" id="set_A_cycles" min="1" /></label>
-                          <label>Chu kỳ nghỉ dài<input type="number" id="set_A_interval" min="2" /></label>
-                      </div>
-                      <div class="row" style="margin-top:8px"><strong>Kiểu B (50/10) — Long break 30</strong></div>
-                      <div class="row">
-                          <label>WORK (phút)<input type="number" id="set_B_work" min="1" /></label>
-                          <label>BREAK (phút)<input type="number" id="set_B_short" min="1" /></label>
-                          <label>LONG BREAK (phút)<input type="number" id="set_B_long" min="1" /></label>
+                          <label>WORK (phút)<input type="number" id="set_work" min="1" /></label>
+                          <label>BREAK (phút)<input type="number" id="set_short" min="1" /></label>
+                          <label>LONG BREAK (phút)<input type="number" id="set_long" min="1" /></label>
                       </div>
                       <div class="row">
-                          <label>Chu kỳ Pomodoro<input type="number" id="set_B_cycles" min="1" /></label>
-                          <label>Chu kỳ nghỉ dài<input type="number" id="set_B_interval" min="2" /></label>
+                          <label>Chu kỳ Pomodoro<input type="number" id="set_cycles" min="1" /></label>
+                          <label>Chu kỳ nghỉ dài<input type="number" id="set_interval" min="2" /></label>
                       </div>
                   </div>
               </div>
@@ -952,6 +945,7 @@
         }]
     };
     let data;
+    let editingPreset = 'A';
 
     // =============================
     // Gemini API Integration
@@ -1526,26 +1520,46 @@
         });
     }
 
-    // =============================
-    // Settings & Customization
-    // =============================
-    function openSettings(){
-        const s = data.settings;
-        $('#set_apiKey').value = s.apiKey || '';
-        const d=s.durations;
-        $('#set_A_work').value=d.A_work; $('#set_A_short').value=d.A_short; $('#set_A_long').value=d.A_long;
-        $('#set_B_work').value=d.B_work; $('#set_B_short').value=d.B_short; $('#set_B_long').value=d.B_long;
-        $('#set_A_cycles').value = s.cyclesA;
-        $('#set_A_interval').value = s.longBreakIntervalA;
-        $('#set_B_cycles').value = s.cyclesB;
-        $('#set_B_interval').value = s.longBreakIntervalB;
-        $('#set_volume').value=s.volume ?? 0.8;
-        $('#set_theme').value=s.soundTheme || 'beep';
-        $('#set_theme_color').value = s.theme || 'default';
-        $('#set_youtubeUrl').value = s.youtubeUrl || '';
-        $('#ytSoundVolume').value = s.youtubeVolume || 80;
-        $('#set_ytThumbAsBg').checked = !!s.useYtThumbnailAsBg;
-        $('#set_panelOpacity').value = s.panelOpacity || 0.85;
+      // =============================
+      // Settings & Customization
+      // =============================
+      function loadEditingPresetFields(){
+          const s = data.settings;
+          const d = s.durations;
+          if(editingPreset === 'A'){
+              $('#set_work').value = d.A_work;
+              $('#set_short').value = d.A_short;
+              $('#set_long').value = d.A_long;
+              $('#set_cycles').value = s.cyclesA;
+              $('#set_interval').value = s.longBreakIntervalA;
+          } else {
+              $('#set_work').value = d.B_work;
+              $('#set_short').value = d.B_short;
+              $('#set_long').value = d.B_long;
+              $('#set_cycles').value = s.cyclesB;
+              $('#set_interval').value = s.longBreakIntervalB;
+          }
+      }
+      function highlightPresetSelector(){
+          $$('#timerPresetSelector button').forEach(btn=>{
+              const isActive = btn.dataset.presetTarget === editingPreset;
+              btn.classList.toggle('acc', isActive);
+              btn.classList.toggle('ghost', !isActive);
+          });
+      }
+      function openSettings(){
+          const s = data.settings;
+          editingPreset = s.preset;
+          $('#set_apiKey').value = s.apiKey || '';
+          loadEditingPresetFields();
+          highlightPresetSelector();
+          $('#set_volume').value=s.volume ?? 0.8;
+          $('#set_theme').value=s.soundTheme || 'beep';
+          $('#set_theme_color').value = s.theme || 'default';
+          $('#set_youtubeUrl').value = s.youtubeUrl || '';
+          $('#ytSoundVolume').value = s.youtubeVolume || 80;
+          $('#set_ytThumbAsBg').checked = !!s.useYtThumbnailAsBg;
+          $('#set_panelOpacity').value = s.panelOpacity || 0.85;
         const backupListEl = $('#backupList');
         if (backupListEl) {
             storageManager.getBackupList().then(backups => {
@@ -1576,20 +1590,27 @@
         data.settings.volume=0.8;
         data.settings.soundTheme='beep';
         storageManager.save(data); openSettings(); toast('Đã khôi phục mặc định'); }
-    function saveSettings(){
-        const s = data.settings;
-        s.apiKey = $('#set_apiKey').value.trim();
-        const d=s.durations;
-        d.A_work=clampInt($('#set_A_work').value,1,999); d.A_short=clampInt($('#set_A_short').value,1,999); d.A_long=clampInt($('#set_A_long').value,1,999);
-        d.B_work=clampInt($('#set_B_work').value,1,999); d.B_short=clampInt($('#set_B_short').value,1,999); d.B_long=clampInt($('#set_B_long').value,1,999);
-        s.cyclesA = clampInt($('#set_A_cycles').value,1,12);
-        s.longBreakIntervalA = clampInt($('#set_A_interval').value,2,12);
-        s.cyclesB = clampInt($('#set_B_cycles').value,1,12);
-        s.longBreakIntervalB = clampInt($('#set_B_interval').value,2,12);
-        s.volume = clampFloat($('#set_volume').value,0,1,0.8);
-        s.soundTheme = $('#set_theme').value==='chime' ? 'chime':'beep';
-        s.theme = $('#set_theme_color').value;
-        s.panelOpacity = parseFloat($('#set_panelOpacity').value) || 0.85;
+      function saveSettings(){
+          const s = data.settings;
+          s.apiKey = $('#set_apiKey').value.trim();
+          const d = s.durations;
+          if(editingPreset === 'A'){
+              d.A_work = clampInt($('#set_work').value,1,999);
+              d.A_short = clampInt($('#set_short').value,1,999);
+              d.A_long = clampInt($('#set_long').value,1,999);
+              s.cyclesA = clampInt($('#set_cycles').value,1,12);
+              s.longBreakIntervalA = clampInt($('#set_interval').value,2,12);
+          } else {
+              d.B_work = clampInt($('#set_work').value,1,999);
+              d.B_short = clampInt($('#set_short').value,1,999);
+              d.B_long = clampInt($('#set_long').value,1,999);
+              s.cyclesB = clampInt($('#set_cycles').value,1,12);
+              s.longBreakIntervalB = clampInt($('#set_interval').value,2,12);
+          }
+          s.volume = clampFloat($('#set_volume').value,0,1,0.8);
+          s.soundTheme = $('#set_theme').value==='chime' ? 'chime':'beep';
+          s.theme = $('#set_theme_color').value;
+          s.panelOpacity = parseFloat($('#set_panelOpacity').value) || 0.85;
 
         const newYtUrl = $('#set_youtubeUrl').value.trim();
         s.useYtThumbnailAsBg = $('#set_ytThumbAsBg').checked;
@@ -1927,36 +1948,43 @@
       
       $$('.nav-btn[data-view]').forEach(btn => btn.addEventListener('click', () => switchView(btn.dataset.view)));
       
-      $$('.tab-btn').forEach(btn => {
-          btn.addEventListener('click', () => {
-              const tabId = btn.dataset.tab;
-              const parent = btn.closest('.aux-panel, .modal-card');
-              if (!parent) return;
-              parent.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
-              btn.classList.add('active');
-              parent.querySelectorAll('.tab-content').forEach(c => {
-                  c.classList.remove('active');
-                  c.style.display = 'none';
-              });
-              const activeContent = parent.querySelector(`#${tabId}`);
-              if(activeContent) {
-                  activeContent.classList.add('active');
-                  activeContent.style.display = 'block';
-                  // Nếu là modal settings, cần display: flex cho các tab
-                  if(parent.closest('#modalSettings')) {
-                      activeContent.style.display = 'flex';
-                  }
-              }
-          });
-      });
-
-      $$('.presets button').forEach(button => {
-        button.addEventListener('click', (e) => {
-          const newPreset = e.target.dataset.preset;
-          timer.setPreset(newPreset);
-          renderAll();
+        $$('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabId = btn.dataset.tab;
+                const parent = btn.closest('.aux-panel, .modal-card');
+                if (!parent) return;
+                parent.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+                btn.classList.add('active');
+                parent.querySelectorAll('.tab-content').forEach(c => {
+                    c.classList.remove('active');
+                    c.style.display = 'none';
+                });
+                const activeContent = parent.querySelector(`#${tabId}`);
+                if(activeContent) {
+                    activeContent.classList.add('active');
+                    activeContent.style.display = 'block';
+                    // Nếu là modal settings, cần display: flex cho các tab
+                    if(parent.closest('#modalSettings')) {
+                        activeContent.style.display = 'flex';
+                    }
+                }
+            });
         });
-      });
+        $$('#timerPresetSelector button').forEach(btn => {
+          btn.addEventListener('click', () => {
+            editingPreset = btn.dataset.presetTarget;
+            highlightPresetSelector();
+            loadEditingPresetFields();
+          });
+        });
+
+        $$('.presets button').forEach(button => {
+          button.addEventListener('click', (e) => {
+            const newPreset = e.target.dataset.preset;
+            timer.setPreset(newPreset);
+            renderAll();
+          });
+        });
 
       on($('#btnStart'), 'click', ()=> timer.start());
       on($('#btnPause'), 'click', ()=> timer.pause());
