@@ -387,6 +387,15 @@
       color: var(--sub);
     }
     /* === END: YÊU CẦU CẬP NHẬT 2 === */
+
+    #modalSettings select {
+      background: rgba(15,18,34,0.8) !important;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    #modalSettings select:focus {
+      background: rgba(23,26,46,0.9) !important;
+      border-color: var(--acc);
+    }
     </style>
 </head>
 <body>
@@ -660,9 +669,10 @@
                           </label>
                       </div>
                       <div class="row" style="margin-top: 8px;">
-                          <button id="btnToggleYtSound" class="btn small" style="flex: 0 1 auto;">▶️</button>
-                          <input type="range" id="ytSoundVolume" min="0" max="100" step="1" value="80" style="flex: 1;">
+                          <button id="btnToggleYtSound" class="btn small" style="flex:0 1 auto;">▶️</button>
+                          <input type="range" id="ytSoundVolume" min="0" max="100" step="1" value="80" style="flex:1;">
                       </div>
+                      <div class="tiny" style="text-align:center; margin-top:4px;">Âm lượng</div>
                   </div>
                   <div>
                       <h4>🛡️ Phục hồi dữ liệu</h4>
