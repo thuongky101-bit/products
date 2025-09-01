@@ -710,7 +710,7 @@
     <div class="modal-card" style="width: min(800px, 95vw);">
         <div style="display: flex; justify-content: space-between; align-items: center;">
             <h3 id="dashboardTitle">📊 Dashboard Tổng quan</h3>
-            <button class="btn ghost small" onclick="$('#modalDashboard').classList.remove('show')">Đóng</button>
+            <button class="btn ghost small" id="btnCloseDashboard">Đóng</button>
         </div>
         <p class="tiny">Tổng hợp thời gian và số phiên đã hoàn thành trên tất cả các chủ đề.</p>
         <div id="dashboardContent" style="max-height: 60vh; overflow-y: auto;"></div>
@@ -1885,6 +1885,10 @@
       on($('#btnDashboard'), 'click', () => {
           renderDashboard(); // Tạo nội dung mới nhất
           $('#modalDashboard').classList.add('show'); // Hiển thị modal
+      });
+
+      on($('#btnCloseDashboard'), 'click', () => {
+          $('#modalDashboard').classList.remove('show');
       });
 
       on($('#btnCloseSettings'), 'click', closeSettings);
