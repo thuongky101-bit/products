@@ -1768,17 +1768,14 @@
     // YouTube Player
     // =============================
     let ytPlayer;
-    function onYouTubeIframeAPIReady() {
+    window.onYouTubeIframeAPIReady = function() {
         ytPlayer = new YT.Player('youtube-player-container', {
             height: '0',
             width: '0',
-            playerVars: { 'autoplay': 0, 'controls': 0, 'loop': 1 },
-            events: {
-                'onReady': onPlayerReady,
-                'onStateChange': onPlayerStateChange
-            }
+            playerVars: { autoplay: 0, controls: 0, loop: 1 },
+            events: { onReady: onPlayerReady, onStateChange: onPlayerStateChange }
         });
-    }
+    };
 
     function onPlayerReady(event) {
         updateYouTubePlayer();
