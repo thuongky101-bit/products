@@ -1559,12 +1559,12 @@
           const shouldLong = (this.cycleIndex % interval === 0) && (this.cyclesTarget >= interval);
           if(this.cycleIndex >= this.cyclesTarget){
             if(shouldLong){ this.beginBreak(); if(!data.settings.autoStartNext) this.pause(); return; }
-            this.state='idle'; this.remaining=0; this.segmentTotal=0; this.cycleIndex=0; this.updateUI(); const cs=getCurrentSubtopic(); if(cs){ cs.timerState={ state:'idle', prevState:null, remaining:0, segmentTotal:0, cycleIndex:0 }; storageManager.save(data); } toast('🎉 Hoàn thành chương trình preset!'); return;
+            this.state='idle'; this.prevState=null; this.remaining=0; this.segmentTotal=0; this.cycleIndex=0; this.updateUI(); const cs=getCurrentSubtopic(); if(cs){ cs.timerState={ state:'idle', prevState:this.prevState, remaining:0, segmentTotal:0, cycleIndex:0 }; storageManager.save(data); } toast('🎉 Hoàn thành chương trình preset!'); return;
           }
           this.beginBreak(); if(!data.settings.autoStartNext){ this.pause(); } return;
         }
         if(lastState==='break' || lastState==='long_break'){
-          if(this.cycleIndex >= this.cyclesTarget){ this.state='idle'; this.remaining=0; this.segmentTotal=0; this.cycleIndex=0; this.updateUI(); const cs=getCurrentSubtopic(); if(cs){ cs.timerState={ state:'idle', prevState:null, remaining:0, segmentTotal:0, cycleIndex:0 }; storageManager.save(data); } toast('🎯 Kết thúc chương trình'); return; }
+          if(this.cycleIndex >= this.cyclesTarget){ this.state='idle'; this.prevState=null; this.remaining=0; this.segmentTotal=0; this.cycleIndex=0; this.updateUI(); const cs=getCurrentSubtopic(); if(cs){ cs.timerState={ state:'idle', prevState:this.prevState, remaining:0, segmentTotal:0, cycleIndex:0 }; storageManager.save(data); } toast('🎯 Kết thúc chương trình'); return; }
           this.cycleIndex += 1;
           this.beginWork(); if(!data.settings.autoStartNext){ this.pause(); } return;
         }
