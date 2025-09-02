@@ -1147,22 +1147,30 @@
     }
 
     // =============================
-    // Storage
-    // =============================
-
-      function ensureValidSelection(){
-        const set = data.settings;
-        if (!data.topics || data.topics.length === 0) { set.selectedTopicId = ''; set.selectedSubtopicId = ''; storageManager.save(data); return; }
-        const t = data.topics.find(x=>x.id===set.selectedTopicId);
-        const s = t?.subtopics.find(x=>x.id===set.selectedSubtopicId);
-        if(!t || !s){
-          const t0 = data.topics[0];
-          const s0 = t0?.subtopics?.[0];
-          set.selectedTopicId = t0?.id || '';
-          set.selectedSubtopicId = s0?.id || '';
-          storageManager.save(data);
+      // Storage
+      // =============================
+      async function saveData() {
+        try {
+          await storageManager.save(data);
+        } catch (err) {
+          console.error('Failed to save data:', err);
+          toast(`Lỗi lưu dữ liệu: ${err.message}`);
         }
       }
+
+        async function ensureValidSelection(){
+          const set = data.settings;
+          if (!data.topics || data.topics.length === 0) { set.selectedTopicId = ''; set.selectedSubtopicId = ''; await saveData(); return; }
+          const t = data.topics.find(x=>x.id===set.selectedTopicId);
+          const s = t?.subtopics.find(x=>x.id===set.selectedSubtopicId);
+          if(!t || !s){
+            const t0 = data.topics[0];
+            const s0 = t0?.subtopics?.[0];
+            set.selectedTopicId = t0?.id || '';
+            set.selectedSubtopicId = s0?.id || '';
+            await saveData();
+          }
+        }
 
     // =============================
     // Generic Modals & View Switching
@@ -1189,14 +1197,14 @@
         function cleanup() { $('#modalGeneric').classList.remove('show'); $('#btnGenericOk').onclick = null; $('#btnGenericCancel').onclick = null; }
     }
 
-    function switchView(viewId) {
+    async function switchView(viewId) {
         $$('.view').forEach(v => v.classList.remove('active'));
         $(`#view-${viewId}`).classList.add('active');
         $$('.nav-btn').forEach(b => b.classList.remove('active'));
         const navBtn = $(`.nav-btn[data-view="${viewId}"]`);
         if (navBtn) navBtn.classList.add('active');
         data.settings.currentView = viewId;
-        storageManager.save(data);
+        await saveData();
         if (viewId === 'stats') {
             renderDashboard();
         }
@@ -1347,7 +1355,7 @@
 
         mainEl.classList.add('reloading');
 
-        setTimeout(() => {
+        setTimeout(async () => {
             data.settings.selectedTopicId = topicId;
             data.settings.selectedSubtopicId = subId;
 
@@ -1363,7 +1371,7 @@
                 timer.reset();
             }
 
-            storageManager.save(data);
+            await saveData();
             timer.updateUI();
             renderAll();
             switchView('timer'); // Quay về màn hình timer sau khi chọn
@@ -1410,7 +1418,7 @@
         });
     }
 
-    function addSubtopicTask() {
+    async function addSubtopicTask() {
         const s = getCurrentSubtopic();
         if (!s) { toast("Vui lòng chọn subtopic trước."); return; }
         const input = $('#newSubtopicTaskInput');
@@ -1418,21 +1426,21 @@
         if (text) {
             if (!s.tasks) s.tasks = [];
             s.tasks.push({ id: uid('task'), text, isCompleted: false, createdAt: todayISO() });
-            storageManager.save(data);
+            await saveData();
             renderSubtopicTasks();
             input.value = '';
         }
         input.focus();
     }
 
-    function toggleSubtopicTask(taskId, listItemElement) {
+    async function toggleSubtopicTask(taskId, listItemElement) {
         const s = getCurrentSubtopic();
         if (!s || !s.tasks) return;
         const task = s.tasks.find(t => t.id === taskId);
         if (task) {
             task.isCompleted = true;
             s.stats.tasksCompleted = (s.stats.tasksCompleted || 0) + 1;
-            storageManager.save(data);
+            await saveData();
 
             listItemElement.classList.add('removing');
             setTimeout(() => {
@@ -1446,12 +1454,12 @@
     const timer = {
       state:'idle', prevState:null, interval:null, endAt:null,
       remaining:0, segmentTotal:0, cyclesTarget:4, cycleIndex:0, mode:'A',
-      setPreset(p, {silent=false}={}){
+      async setPreset(p, {silent=false}={}){
         const st = data.settings;
         this.mode = p;
         this.cyclesTarget = (p==='A' ? st.cyclesA : st.cyclesB);
         st.preset = p;
-        storageManager.save(data);
+        await saveData();
         if (this.state === 'idle') {
             this.reset();
         }
@@ -1510,7 +1518,7 @@
 
           $('#cycleInfo').textContent = `Chu kỳ: ${this.cycleIndex} / ${this.cyclesTarget}`;
       },
-      persistTimerState(){
+      async persistTimerState(){
         const s = getCurrentSubtopic();
         if(s){
           s.timerState = {
@@ -1520,35 +1528,35 @@
             segmentTotal: this.segmentTotal,
             cycleIndex: this.cycleIndex
           };
-          storageManager.save(data);
+          await saveData();
         }
       },
-      start(){ if(!getCurrentSubtopic()){ toast('Hãy chọn một Subtopic trước khi bắt đầu'); return; } ensureAudio(); if(this.state==='idle'){ this.cycleIndex = this.cycleIndex || 0; this.beginWork(); } else if(this.state==='paused'){ this.resume(); } this.persistTimerState(); },
+      async start(){ if(!getCurrentSubtopic()){ toast('Hãy chọn một Subtopic trước khi bắt đầu'); return; } ensureAudio(); if(this.state==='idle'){ this.cycleIndex = this.cycleIndex || 0; this.beginWork(); } else if(this.state==='paused'){ this.resume(); } await this.persistTimerState(); },
       beginWork(){ const {work}=this.currentDurations(); this.state='work'; if(this.cycleIndex===0) this.cycleIndex=1; this.remaining=work*60; this.segmentTotal=this.remaining; this.tickStart(); },
       beginBreak(){ const {short,long}=this.currentDurations(); const {interval}=this.currentConfig(); const isLong=(this.cycleIndex % interval===0) && (this.cyclesTarget>=interval); if(isLong){ this.state='long_break'; this.remaining=long*60; } else { this.state='break'; this.remaining=short*60; } this.segmentTotal=this.remaining; this.tickStart(); },
       tickStart(){
         clearInterval(this.interval);
         this.endAt = Date.now() + this.remaining*1000;
         this.updateUI();
-        this.interval=setInterval(()=>{
+        this.interval=setInterval(async ()=>{
           const now=Date.now();
           const newRemaining = Math.max(0, Math.ceil((this.endAt - now)/1000));
           if(newRemaining !== this.remaining){
             this.remaining = newRemaining;
             this.updateUI();
-            this.persistTimerState();
+            await this.persistTimerState();
           }
           if(this.remaining<=0){
             clearInterval(this.interval);
             this.interval=null;
-            this.segmentFinished();
+            await this.segmentFinished();
           }
         }, 250);
       },
-      pause(){ if(this.interval){ clearInterval(this.interval); this.interval=null; this.prevState=this.state; this.state='paused'; this.updateUI(); this.persistTimerState(); } },
-      resume(){ if(this.state==='paused'){ this.state = this.prevState || 'work'; this.endAt = Date.now() + this.remaining*1000; this.tickStart(); this.persistTimerState(); } },
-      skip(){ if(this.state==='idle') return; if(this.state==='paused' && this.prevState){ this.state = this.prevState; } clearInterval(this.interval); this.interval=null; this.segmentFinished(true); this.persistTimerState(); },
-      reset() {
+      async pause(){ if(this.interval){ clearInterval(this.interval); this.interval=null; this.prevState=this.state; this.state='paused'; this.updateUI(); await this.persistTimerState(); } },
+      async resume(){ if(this.state==='paused'){ this.state = this.prevState || 'work'; this.endAt = Date.now() + this.remaining*1000; this.tickStart(); await this.persistTimerState(); } },
+      async skip(){ if(this.state==='idle') return; if(this.state==='paused' && this.prevState){ this.state = this.prevState; } clearInterval(this.interval); this.interval=null; await this.segmentFinished(true); await this.persistTimerState(); },
+      async reset() {
           clearInterval(this.interval);
           this.interval = null;
           this.state = 'idle';
@@ -1557,9 +1565,9 @@
           this.segmentTotal = 0;
           this.cycleIndex = 0;
           this.updateUI();
-          this.persistTimerState();
+          await this.persistTimerState();
       },
-      segmentFinished(skipped=false){
+      async segmentFinished(skipped=false){
         const lastState = this.state;
         $('.timer-circle-container').classList.add('finished');
         if(lastState==='work' && !skipped) playSound('work_end');
@@ -1574,7 +1582,7 @@
                 s.sessions.unshift(entry);
                 s.stats.sessionsCompleted = (s.stats.sessionsCompleted || 0) + 1;
                 s.stats.totalMinutes = (s.stats.totalMinutes || 0) + work;
-                storageManager.save(data);
+                await saveData();
                 openNoteModal(entry.id);
                 renderStatsHistory();
             }
@@ -1585,14 +1593,14 @@
           const shouldLong = (this.cycleIndex % interval === 0) && (this.cyclesTarget >= interval);
           if(this.cycleIndex >= this.cyclesTarget){
             if(shouldLong){ this.beginBreak(); if(!data.settings.autoStartNext) this.pause(); return; }
-            this.state='idle'; this.prevState=null; this.remaining=0; this.segmentTotal=0; this.cycleIndex=0; this.updateUI(); const cs=getCurrentSubtopic(); if(cs){ cs.timerState={ state:'idle', prevState:this.prevState, remaining:0, segmentTotal:0, cycleIndex:0 }; storageManager.save(data); } toast('🎉 Hoàn thành chương trình preset!'); return;
+            this.state='idle'; this.prevState=null; this.remaining=0; this.segmentTotal=0; this.cycleIndex=0; this.updateUI(); const cs=getCurrentSubtopic(); if(cs){ cs.timerState={ state:'idle', prevState:this.prevState, remaining:0, segmentTotal:0, cycleIndex:0 }; await saveData(); } toast('🎉 Hoàn thành chương trình preset!'); return;
           }
-          this.beginBreak(); if(!data.settings.autoStartNext){ this.pause(); } return;
+          this.beginBreak(); if(!data.settings.autoStartNext){ await this.pause(); } return;
         }
         if(lastState==='break' || lastState==='long_break'){
-          if(this.cycleIndex >= this.cyclesTarget){ this.state='idle'; this.prevState=null; this.remaining=0; this.segmentTotal=0; this.cycleIndex=0; this.updateUI(); const cs=getCurrentSubtopic(); if(cs){ cs.timerState={ state:'idle', prevState:this.prevState, remaining:0, segmentTotal:0, cycleIndex:0 }; storageManager.save(data); } toast('🎯 Kết thúc chương trình'); return; }
+          if(this.cycleIndex >= this.cyclesTarget){ this.state='idle'; this.prevState=null; this.remaining=0; this.segmentTotal=0; this.cycleIndex=0; this.updateUI(); const cs=getCurrentSubtopic(); if(cs){ cs.timerState={ state:'idle', prevState:this.prevState, remaining:0, segmentTotal:0, cycleIndex:0 }; await saveData(); } toast('🎯 Kết thúc chương trình'); return; }
           this.cycleIndex += 1;
-          this.beginWork(); if(!data.settings.autoStartNext){ this.pause(); } return;
+          this.beginWork(); if(!data.settings.autoStartNext){ await this.pause(); } return;
         }
         if(lastState==='paused'){ this.updateUI(); }
       }
@@ -1856,7 +1864,7 @@
     }
 
     function closeSettings(){ $('#modalSettings').classList.remove('show'); }
-    function setDefaults(){
+    async function setDefaults(){
         data.settings.durations={A_work:25,A_short:5,A_long:15,B_work:50,B_short:10,B_long:30};
         data.settings.cyclesA=4;
         data.settings.longBreakIntervalA=4;
@@ -1865,8 +1873,8 @@
         data.settings.preset='A';
         data.settings.volume=0.8;
         data.settings.soundTheme='beep';
-        storageManager.save(data); openSettings(); toast('Đã khôi phục mặc định'); }
-      function saveSettings(){
+        await saveData(); openSettings(); toast('Đã khôi phục mặc định'); }
+      async function saveSettings(){
           const s = data.settings;
           s.apiKey = $('#set_apiKey').value.trim();
           const d = s.durations;
@@ -1909,7 +1917,7 @@
         }
         // --- KẾT THÚC PHẦN CẢI TIẾN (v2) ---
 
-        storageManager.save(data);
+        await saveData();
         applyTheme();
         applyPanelOpacity();
         updatePresetButtonsText();
@@ -2013,7 +2021,7 @@
         const response = await callGeminiAPI(query);
         if (response) {
             subtopic.chatHistory.push({ role: 'model', text: response });
-            storageManager.save(data);
+            await saveData();
             renderChat();
         }
 
@@ -2070,10 +2078,10 @@
     function clearChat() {
         const s = getCurrentSubtopic();
         if (!s) { toast("Vui lòng chọn subtopic."); return; }
-        showConfirmModal('Xác nhận xóa', 'Bạn có chắc muốn xóa toàn bộ lịch sử chat của subtopic này?', (ok) => {
+        showConfirmModal('Xác nhận xóa', 'Bạn có chắc muốn xóa toàn bộ lịch sử chat của subtopic này?', async (ok) => {
             if (ok) {
                 s.chatHistory = [];
-                storageManager.save(data);
+                await saveData();
                 renderChat();
                 toast("Đã xóa lịch sử chat.");
             }
@@ -2112,14 +2120,14 @@
         }
     }
 
-    function updateYouTubePlayer() {
+    async function updateYouTubePlayer() {
         if (!ytPlayer || !ytPlayer.cueVideoById) return;
         const videoId = extractYouTubeID(data.settings.youtubeUrl);
 
         if (!videoId) {
             if (data.settings.useYtThumbnailAsBg) {
                 data.settings.customBg = '';
-                storageManager.save(data);
+                await saveData();
                 applyCustomBg();
             }
             if (ytPlayer && ytPlayer.stopVideo) {
@@ -2131,15 +2139,15 @@
         if (data.settings.useYtThumbnailAsBg) {
             const thumbUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
             const img = new Image();
-            img.onload = () => {
+            img.onload = async () => {
                 data.settings.customBg = thumbUrl;
-                storageManager.save(data);
+                await saveData();
                 applyCustomBg();
             };
-            img.onerror = () => {
+            img.onerror = async () => {
                 const fallbackUrl = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
                 data.settings.customBg = fallbackUrl;
-                storageManager.save(data);
+                await saveData();
                 applyCustomBg();
             };
             img.src = thumbUrl;
@@ -2178,14 +2186,14 @@
     // Bindings
     // =============================
     function bindEvents(){
-      on($('#btnAddTopic'), 'click', () => showInputModal('Tên Topic mới?', (name) => { if (!name) return; data.topics.push({ id: uid('t'), name, subtopics: [] }); storageManager.save(data); renderTopics(); }));
+      on($('#btnAddTopic'), 'click', () => showInputModal('Tên Topic mới?', async (name) => { if (!name) return; data.topics.push({ id: uid('t'), name, subtopics: [] }); await saveData(); renderTopics(); }));
       on($('#btnExport'), 'click', ()=> storageManager.exportData(data));
         on($('#importFile'), 'change', (e)=>{
           const f = e.target.files[0];
           if (f) {
-            storageManager.importData(f).then((d) => {
+            storageManager.importData(f).then(async (d) => {
               data = d;
-              ensureValidSelection();
+              await ensureValidSelection();
               toast('Đã nhập dữ liệu thành công!');
               renderAll();
             }).catch(err => toast('Nhập thất bại: ' + err.message));
@@ -2229,7 +2237,7 @@
       on($('#btnDefaults'), 'click', setDefaults);
       on($('#btnTestSound'), 'click', ()=>{ ensureAudio(); playSound('work_end'); });
 
-      on($('#btnSaveNote'), 'click', ()=>{ const s=getCurrentSubtopic(); if(!s) return; const id=pendingNoteSessionId; const sess=s.sessions.find(x=>x.id===id); if(sess){ sess.note=$('#noteText').value.trim(); storageManager.save(data); renderStatsHistory(); toast('Đã lưu ghi chú'); } closeNoteModal(); });
+      on($('#btnSaveNote'), 'click', async ()=>{ const s=getCurrentSubtopic(); if(!s) return; const id=pendingNoteSessionId; const sess=s.sessions.find(x=>x.id===id); if(sess){ sess.note=$('#noteText').value.trim(); await saveData(); renderStatsHistory(); toast('Đã lưu ghi chú'); } closeNoteModal(); });
       on($('#btnSkipNote'), 'click', ()=> closeNoteModal());
       on($('#btnAddGeneralNote'), 'click', addGeneralNote);
       on($('#btnSummarize'), 'click', summarizeNotes);
@@ -2297,20 +2305,20 @@
       on($('#btnSkip'), 'click', ()=> timer.skip());
       on($('#btnReset'), 'click', ()=> timer.reset());
 
-      on($('#uploadBg'), 'change', (e) => { handleFileUpload(e.target.files[0], (id) => { data.settings.customBg = id; storageManager.save(data); applyCustomBg(); toast("Đã cập nhật hình nền."); }); e.target.value = null; });
-      on($('#btnClearBg'), 'click', () => {
+      on($('#uploadBg'), 'change', (e) => { handleFileUpload(e.target.files[0], async (id) => { data.settings.customBg = id; await saveData(); applyCustomBg(); toast("Đã cập nhật hình nền."); }); e.target.value = null; });
+      on($('#btnClearBg'), 'click', async () => {
           data.settings.customBg = '';
           data.settings.useYtThumbnailAsBg = false;
-          storageManager.save(data);
+          await saveData();
           applyCustomBg();
           toast("Đã xóa hình nền tùy chỉnh.");
           if ($('#modalSettings').classList.contains('show')) {
               openSettings();
           }
       });
-      on($('#uploadSoundWork'), 'change', (e) => { handleFileUpload(e.target.files[0], (id) => { data.settings.customSounds.work_end = id; storageManager.save(data); toast("Đã lưu âm báo hết WORK."); }); e.target.value = null; });
-      on($('#uploadSoundBreak'), 'change', (e) => { handleFileUpload(e.target.files[0], (id) => { data.settings.customSounds.break_end = id; storageManager.save(data); toast("Đã lưu âm báo hết BREAK."); }); e.target.value = null; });
-      on($('#uploadSoundLong'), 'change', (e) => { handleFileUpload(e.target.files[0], (id) => { data.settings.customSounds.long_end = id; storageManager.save(data); toast("Đã lưu âm báo hết LONG BREAK."); }); e.target.value = null; });
+      on($('#uploadSoundWork'), 'change', (e) => { handleFileUpload(e.target.files[0], async (id) => { data.settings.customSounds.work_end = id; await saveData(); toast("Đã lưu âm báo hết WORK."); }); e.target.value = null; });
+      on($('#uploadSoundBreak'), 'change', (e) => { handleFileUpload(e.target.files[0], async (id) => { data.settings.customSounds.break_end = id; await saveData(); toast("Đã lưu âm báo hết BREAK."); }); e.target.value = null; });
+      on($('#uploadSoundLong'), 'change', (e) => { handleFileUpload(e.target.files[0], async (id) => { data.settings.customSounds.long_end = id; await saveData(); toast("Đã lưu âm báo hết LONG BREAK."); }); e.target.value = null; });
 
       on($('#btnFullscreen'), 'click', toggleFullScreen);
       document.addEventListener('fullscreenchange', updateFullscreenButton);
