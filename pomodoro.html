@@ -759,9 +759,8 @@
     // STORAGE MANAGER - Quản lý Dữ liệu và Sao lưu
     // =============================
     const storageManager = {
-        DB_NAME: 'PomodoroDB',
+        DB_NAME: 'PomodoroAppDB',
         DB_VERSION: 1,
-        BACKUP_STORE_NAME: 'backups',
         db: null,
         async initDB() {
             return new Promise((resolve, reject) => {
@@ -769,8 +768,20 @@
                 const request = indexedDB.open(this.DB_NAME, this.DB_VERSION);
                 request.onupgradeneeded = (event) => {
                     const db = event.target.result;
-                    if (!db.objectStoreNames.contains(this.BACKUP_STORE_NAME)) {
-                        db.createObjectStore(this.BACKUP_STORE_NAME, { keyPath: 'date' });
+                    // Create core stores
+                    if (!db.objectStoreNames.contains('settings')) {
+                        db.createObjectStore('settings');
+                    }
+                    if (!db.objectStoreNames.contains('topics')) {
+                        db.createObjectStore('topics', { keyPath: 'id' });
+                    }
+                    if (!db.objectStoreNames.contains('subtopics')) {
+                        const subtopicsStore = db.createObjectStore('subtopics', { keyPath: 'id' });
+                        subtopicsStore.createIndex('by_topic', 'topicId');
+                    }
+                    // Optional backups store
+                    if (!db.objectStoreNames.contains('backups')) {
+                        db.createObjectStore('backups', { keyPath: 'date' });
                     }
                 };
                 request.onsuccess = (event) => {
@@ -810,8 +821,8 @@
             if (today !== lastBackupDate) {
                 console.log(`Creating backup for ${today}...`);
                 const backupData = { date: today, data: JSON.parse(JSON.stringify(data)) };
-                const transaction = this.db.transaction([this.BACKUP_STORE_NAME], 'readwrite');
-                const store = transaction.objectStore(this.BACKUP_STORE_NAME);
+                const transaction = this.db.transaction(['backups'], 'readwrite');
+                const store = transaction.objectStore('backups');
                 const request = store.put(backupData);
                 request.onsuccess = () => {
                     localStorage.setItem('lastBackupDate', today);
@@ -825,8 +836,8 @@
         },
         async cleanupOldBackups(daysToKeep) {
             await this.initDB();
-            const transaction = this.db.transaction([this.BACKUP_STORE_NAME], 'readwrite');
-            const store = transaction.objectStore(this.BACKUP_STORE_NAME);
+            const transaction = this.db.transaction(['backups'], 'readwrite');
+            const store = transaction.objectStore('backups');
             const request = store.getAllKeys();
             request.onsuccess = () => {
                 const allKeys = request.result.sort().reverse();
@@ -842,8 +853,8 @@
         async getBackupList() {
             await this.initDB();
             return new Promise((resolve, reject) => {
-                const transaction = this.db.transaction([this.BACKUP_STORE_NAME], 'readonly');
-                const store = transaction.objectStore(this.BACKUP_STORE_NAME);
+                const transaction = this.db.transaction(['backups'], 'readonly');
+                const store = transaction.objectStore('backups');
                 const request = store.getAll();
                 request.onsuccess = () => resolve(request.result.sort((a, b) => b.date.localeCompare(a.date)));
                 request.onerror = (event) => reject(event.target.error);
@@ -852,8 +863,8 @@
         async restoreBackup(date) {
             await this.initDB();
             return new Promise((resolve, reject) => {
-                const transaction = this.db.transaction([this.BACKUP_STORE_NAME], 'readonly');
-                const store = transaction.objectStore(this.BACKUP_STORE_NAME);
+                const transaction = this.db.transaction(['backups'], 'readonly');
+                const store = transaction.objectStore('backups');
                 const request = store.get(date);
                 request.onsuccess = () => {
                     if (request.result && request.result.data) {
