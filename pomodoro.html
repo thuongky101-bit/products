@@ -2341,15 +2341,39 @@
     async function initializeApp() {
       try {
         await storageManager.initDB();
-        data = window.data = storageManager.load(defaults);
+        const [settings, topics, subtopics] = await Promise.all([
+          storageManager.getSettings(),
+          storageManager.getAll('topics'),
+          storageManager.getAll('subtopics')
+        ]);
+
+        let merged;
+        if (!settings || topics.length === 0 || subtopics.length === 0) {
+          const defaultData = JSON.parse(JSON.stringify(defaults));
+          await storageManager.updateSettings(defaultData.settings);
+          for (const t of defaultData.topics) {
+            const { subtopics: subs, ...topicData } = t;
+            await storageManager.add('topics', topicData);
+            for (const sub of subs) {
+              await storageManager.add('subtopics', { ...sub, topicId: t.id });
+            }
+          }
+          merged = defaultData;
+        } else {
+          const map = {};
+          for (const t of topics) map[t.id] = { ...t, subtopics: [] };
+          for (const s of subtopics) map[s.topicId]?.subtopics.push(s);
+          merged = { version: defaults.version, settings, topics: Object.values(map) };
+        }
+
+        data = window.data = merged;
         ensureValidSelection();
         renderAll();
+        bindEvents();
+        applyTheme();
       } catch (err) {
         console.error('Initialization error:', err);
         toast(`Lỗi khởi tạo: ${err.message}`);
-      } finally {
-        bindEvents();
-        applyTheme();
       }
     }
     initializeApp();
