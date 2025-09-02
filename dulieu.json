@@ -1,5 +1,5 @@
 {
-  "version": 9,
+  "version": 11,
   "settings": {
     "apiKey": "AIzaSyCL6ygD9LCrKzB4mQzMVQ_o8nd4jRH0-W8",
     "currentView": "timer",
@@ -36,13 +36,7 @@
     "youtubeUrl": "https://www.youtube.com/watch?v=SpQ8-xiDYWI&list=RDSpQ8-xiDYWI&start_radio=1",
     "youtubeVolume": 12,
     "useYtThumbnailAsBg": true,
-    "panelOpacity": 0.1,
-    "isChatCollapsed": true,
-    "longBreakInterval": 4,
-    "isNotesCollapsed": true,
-    "isMethodsCollapsed": true,
-    "isHistoryCollapsed": false,
-    "isSocraticCollapsed": true
+    "panelOpacity": 0.1
   },
   "topics": [
     {
