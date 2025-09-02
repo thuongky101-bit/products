@@ -1886,9 +1886,14 @@
     function toggleYtSound() {
         if (!ytPlayer || !ytPlayer.getPlayerState) return;
         const playerState = ytPlayer.getPlayerState();
-        if (playerState === YT.PlayerState.PLAYING) {
+        // Treat both playing and buffering as active playback states
+        if (
+            playerState === YT.PlayerState.PLAYING ||
+            playerState === YT.PlayerState.BUFFERING
+        ) {
             ytPlayer.pauseVideo();
         } else {
+            // For paused, ended, cued, or unstarted states, attempt to play
             ytPlayer.playVideo();
         }
     }
