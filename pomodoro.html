@@ -1435,7 +1435,7 @@
           const progressCircle = $('.timer-circle-progress');
           const container = $('.timer-circle-container');
           
-          $('#btnStart').classList.toggle('hidden', this.state !== 'idle' && this.state !== 'paused');
+          $('#btnStart').classList.toggle('hidden', this.state !== 'idle');
           $('#btnPause').classList.toggle('hidden', !['work', 'break', 'long_break'].includes(this.state));
           $('#btnResume').classList.toggle('hidden', this.state !== 'paused');
 
