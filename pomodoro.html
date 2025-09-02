@@ -1633,13 +1633,22 @@
         }
     }
 
-    function deleteGeneralNote(noteId) {
-        showConfirmModal('Xác nhận xóa', 'Bạn có chắc muốn xóa ghi chú này?', (ok) => {
+    async function deleteGeneralNote(noteId) {
+        showConfirmModal('Xác nhận xóa', 'Bạn có chắc muốn xóa ghi chú này?', async (ok) => {
             if (!ok) return;
             const s = getCurrentSubtopic();
             if (!s || !s.generalNotes) return;
+            const original = [...s.generalNotes];
             s.generalNotes = s.generalNotes.filter(note => note.id !== noteId);
-            storageManager.save(data); renderGeneralNotes(); toast("Đã xóa ghi chú.");
+            try {
+                await storageManager.update('subtopics', s);
+                renderGeneralNotes();
+                toast("Đã xóa ghi chú.");
+            } catch (err) {
+                console.error('Failed to delete note:', err);
+                s.generalNotes = original;
+                toast("Không thể lưu thay đổi.");
+            }
         });
     }
 
@@ -1659,9 +1668,15 @@
             const result = await callGeminiAPI(prompt);
             if (!s.summaries) s.summaries = [];
             s.summaries.unshift({ id: uid('sum'), content: result, createdAt: todayISO() });
-            storageManager.save(data);
-            $('#summaryInput').value = '';
-            renderSummaries();
+            try {
+                await storageManager.update('subtopics', s);
+                $('#summaryInput').value = '';
+                renderSummaries();
+            } catch (err) {
+                console.error('Failed to save summary:', err);
+                s.summaries.shift();
+                toast('Không thể lưu tóm tắt.');
+            }
         } catch (e) {
             console.error(e);
             toast('Tóm tắt thất bại.');
@@ -1669,15 +1684,22 @@
         btn.disabled = false;
     }
 
-    function deleteSummary(id) {
-        showConfirmModal('Xác nhận xóa', 'Bạn có chắc muốn xóa tóm tắt này?', (ok) => {
+    async function deleteSummary(id) {
+        showConfirmModal('Xác nhận xóa', 'Bạn có chắc muốn xóa tóm tắt này?', async (ok) => {
             if (!ok) return;
             const s = getCurrentSubtopic();
             if (!s || !s.summaries) return;
+            const original = [...s.summaries];
             s.summaries = s.summaries.filter(x => x.id !== id);
-            storageManager.save(data);
-            renderSummaries();
-            toast('Đã xóa tóm tắt.');
+            try {
+                await storageManager.update('subtopics', s);
+                renderSummaries();
+                toast('Đã xóa tóm tắt.');
+            } catch (err) {
+                console.error('Failed to delete summary:', err);
+                s.summaries = original;
+                toast('Không thể lưu thay đổi.');
+            }
         });
     }
 
