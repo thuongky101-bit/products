@@ -86,28 +86,6 @@
             }
           ],
           "chatHistory": [],
-          "learningMethods": [
-            {
-              "id": "m_1755938797280_vu9v2dz",
-              "text": "Phương pháp Pomodoro",
-              "completed": false
-            },
-            {
-              "id": "m_1755938797280_l6pw2y5",
-              "text": "Kỹ thuật Feynman",
-              "completed": false
-            },
-            {
-              "id": "m_1755938797280_hhvzqdw",
-              "text": "Lặp lại ngắt quãng (Spaced Repetition)",
-              "completed": false
-            },
-            {
-              "id": "m_1755938797280_t09juzl",
-              "text": "Học chủ động (Active Recall)",
-              "completed": false
-            }
-          ],
           "stats": {
             "totalMinutes": 100,
             "sessionsCompleted": 4,
@@ -151,8 +129,10 @@
             "state": "paused",
             "remaining": 2996,
             "segmentTotal": 3000,
-            "cycleIndex": 1
-          }
+            "cycleIndex": 1,
+            "prevState": null
+          },
+          "summaries": []
         }
       ]
     },
@@ -365,23 +345,6 @@
           ],
           "generalNotes": [],
           "chatHistory": [],
-          "learningMethods": [
-            {
-              "id": "m_1756286515527_h9sxpt6",
-              "text": "Kỹ thuật Feynman",
-              "completed": false
-            },
-            {
-              "id": "m_1756286515527_1x2ak7m",
-              "text": "Lặp lại ngắt quãng (Spaced Repetition)",
-              "completed": false
-            },
-            {
-              "id": "m_1756286515527_b8h6a2m",
-              "text": "Học chủ động (Active Recall)",
-              "completed": false
-            }
-          ],
           "stats": {
             "totalMinutes": 1310,
             "sessionsCompleted": 28,
@@ -617,8 +580,10 @@
             "state": "idle",
             "remaining": 0,
             "segmentTotal": 0,
-            "cycleIndex": 0
-          }
+            "cycleIndex": 0,
+            "prevState": null
+          },
+          "summaries": []
         }
       ]
     }
