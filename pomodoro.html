@@ -1,4 +1,3 @@
-<Pomodoro html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8" />
@@ -8,7 +7,7 @@
     <style>
     /*
     =============================================
-    POMODORO STUDY APP — PHIÊN BẢN GIAO DIỆN TẬP TRUNG (v11.1)
+    POMODORO STUDY APP — PHIÊN BẢN GIAO DIỆN TẬP TRUNG (v11.2)
     =============================================
     */
 
@@ -45,7 +44,6 @@
     
     .app-nav {
         width: 60px;
-        /* Dùng màu gốc là rgba(15, 18, 34, ...) và áp dụng biến --panel-opacity */
         background: rgba(15, 18, 34, var(--panel-opacity));
         backdrop-filter: blur(10px);
         border-right: 1px solid rgba(255,255,255,.08);
@@ -154,21 +152,67 @@
     .btn.small::before { border-radius: 9px; }
     .btn > svg { width: 16px; height: 16px; stroke-width: 2.5px; }
 
+    /* === START: CẬP NHẬT GIAO DIỆN QUẢN LÝ CHỦ ĐỀ === */
     #view-topics { grid-template-columns: 1fr; }
-    .topic-item{background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:8px; margin-bottom:8px}
-    .topic-header{display:flex; align-items:center; gap:8px}
-    .topic-actions, .sub-row > .btn.small { opacity: 0.4; transition: opacity .2s ease; }
-    .topic-item:hover .topic-actions, .sub-row:hover > .btn.small { opacity: 1; }
-    .topic-title{flex:1; font-weight:600}
-    .topic-actions{display:flex; gap:6px}
-    .chev{width:28px; height:28px; border-radius:8px; display:inline-flex; align-items:center; justify-content:center}
-    .chev .ico{display:inline-block; transition: transform .18s ease}
-    .chev[aria-expanded="false"] .ico{transform: rotate(-90deg)}
-    .subtopics{margin-top:8px; display:flex; flex-direction:column; gap:6px}
-    .subtopics.hidden{display:none}
-    .sub-row{display:flex; gap:6px; align-items:center}
+    .topic-item { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:8px; margin-bottom:8px; }
+    .topic-header, .sub-row { display:flex; align-items:center; gap:8px; position: relative; /* Cần cho menu */ }
+    .topic-title { flex:1; font-weight:600; }
+    .chev { width:28px; height:28px; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; flex-shrink: 0; }
+    .chev .ico { display:inline-block; transition: transform .18s ease; }
+    .chev[aria-expanded="false"] .ico { transform: rotate(-90deg); }
+    .subtopics { margin-top:8px; display:flex; flex-direction:column; gap:6px; }
+    .subtopics.hidden { display:none; }
     
-    /* === START: YÊU CẦU CẬP NHẬT 1 === */
+    /* Ẩn các nút hành động mặc định */
+    .topic-actions, .sub-row .actions {
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity .2s ease, visibility .2s ease;
+        display: flex;
+        gap: 6px;
+        align-items: center;
+    }
+    /* Hiện các nút hành động khi di chuột vào item cha */
+    .topic-item:hover .topic-actions, .sub-row:hover .actions {
+        opacity: 1;
+        visibility: visible;
+    }
+    /* Nút "thêm tùy chọn" (...) */
+    .actions-menu-btn {
+        padding: 0;
+        width: 28px;
+        height: 28px;
+        font-size: 1.2em;
+        line-height: 1;
+    }
+    /* Khung chứa menu */
+    .actions-menu {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background: var(--muted);
+        border: 1px solid rgba(255,255,255,.1);
+        border-radius: 8px;
+        padding: 6px;
+        box-shadow: var(--shadow);
+        z-index: 10;
+        min-width: 150px;
+        display: none; /* Ẩn mặc định, hiện bằng JS */
+        flex-direction: column;
+        gap: 4px;
+    }
+    .actions-menu.show { display: flex; }
+    /* Các mục trong menu */
+    .menu-item {
+        background: transparent; border: none; color: var(--text);
+        padding: 8px 10px; border-radius: 6px; text-align: left;
+        width: 100%; cursor: pointer; transition: background .2s ease;
+        display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500;
+    }
+    .menu-item:hover { background: var(--acc); color: white; }
+    .menu-item.danger:hover { background: var(--danger); }
+    /* === END: CẬP NHẬT GIAO DIỆN QUẢN LÝ CHỦ ĐỀ === */
+
     .subtopic-btn{
         flex:1; 
         text-align:left;
@@ -179,13 +223,12 @@
     }
     .subtopic-btn.active {
         outline: 2px solid var(--acc);
-        background: transparent; /* Thay đổi thành nền trong suốt */
+        background: transparent;
     }
     .subtopic-btn.active:hover {
         background: rgba(255, 255, 255, 0.05);
     }
-    /* === END: YÊU CẦU CẬP NHẬT 1 === */
-
+    
     .panel{border-radius:var(--radius); padding:24px; box-shadow:var(--shadow)}
 
     .timer-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
@@ -221,9 +264,8 @@
     .modal.show{display:flex}
     .modal-card{
         width:min(720px, 94vw);
-        /* Dùng màu gốc là rgba(18, 22, 50, ...) và áp dụng biến --panel-opacity */
         background: rgba(18, 22, 50, var(--panel-opacity));
-        backdrop-filter: blur(10px); /* Thêm hiệu ứng mờ nền cho đẹp hơn */
+        backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
         border:1px solid rgba(255,255,255,.1);
         border-radius:16px;
@@ -330,63 +372,28 @@
       .app-content { padding: 12px; }
     }
 
-    /* === CẬP NHẬT 1: Cải thiện Trải nghiệm Người dùng Mới === */
-    #view-timer.no-subtopic-selected > .panel-bg:not(:first-child) {
-        display: none;
-    }
-    #view-timer.no-subtopic-selected .timer-header > .presets {
-        display: none;
-    }
-    #view-timer.no-subtopic-selected .timer {
-        display: none;
-    }
+    #view-timer.no-subtopic-selected > .panel-bg:not(:first-child) { display: none; }
+    #view-timer.no-subtopic-selected .timer-header > .presets { display: none; }
+    #view-timer.no-subtopic-selected .timer { display: none; }
 
-    /* === CẬP NHẬT 2: Tinh chỉnh Giao diện Header === */
-    header.app-header .actions #btnFullscreen {
-        background: transparent;
-        border: none;
-        box-shadow: none;
-    }
-    header.app-header .actions #btnFullscreen:hover {
-        background: var(--muted);
-        filter: none;
-    }
-    header.app-header .actions #btnFullscreen:hover::before {
-        opacity: 0;
-    }
+    header.app-header .actions #btnFullscreen { background: transparent; border: none; box-shadow: none; }
+    header.app-header .actions #btnFullscreen:hover { background: var(--muted); filter: none; }
+    header.app-header .actions #btnFullscreen:hover::before { opacity: 0; }
 
-    /* ÁP DỤNG NỀN TRONG SUỐT CHO TẤT CẢ CÁC Ô NHẬP LIỆU */
     input[type="text"], input[type="password"], input[type="number"], select, textarea {
-        background: rgba(255, 255, 255, 0.04) !important; /* Dùng !important để ghi đè mọi style cũ */
+        background: rgba(255, 255, 255, 0.04) !important;
         color: var(--text);
         border: 1px solid rgba(255, 255, 255, 0.1);
         transition: background .2s ease, border-color .2s ease;
     }
-    /* HIỆU ỨNG KHI FOCUS */
     input[type="text"]:focus, input[type="password"]:focus, input[type="number"]:focus, select:focus, textarea:focus {
         background: rgba(255, 255, 255, 0.06) !important;
         border-color: var(--acc);
     }
     
-    /* === START: YÊU CẦU CẬP NHẬT 2 === */
-    /* === Cải thiện độ tương phản cho Placeholder === */
-    ::placeholder {
-      /* Dùng biến màu --sub (màu chữ phụ) thay vì màu mặc định của trình duyệt */
-      color: var(--sub);
-      /* Đảm bảo độ mờ của placeholder là 100% (chỉ màu sắc quyết định) */
-      opacity: 1;
-    }
-
-    /* Dành cho các trình duyệt cũ hơn */
-    ::-ms-input-placeholder {
-      color: var(--sub);
-    }
-
-    /* Dành cho Firefox phiên bản cũ hơn */
-    :-ms-input-placeholder {
-      color: var(--sub);
-    }
-    /* === END: YÊU CẦU CẬP NHẬT 2 === */
+    ::placeholder { color: var(--sub); opacity: 1; }
+    ::-ms-input-placeholder { color: var(--sub); }
+    :-ms-input-placeholder { color: var(--sub); }
 
     #modalSettings select {
       background: rgba(15,18,34,0.8) !important;
@@ -396,8 +403,7 @@
       background: rgba(23,26,46,0.9) !important;
       border-color: var(--acc);
     }
-
-    /* === START: THÊM THEME MÀU TRÀ SỮA === */
+    
     body.theme-milktea {
       --bg: #f5efdd;
       --panel: #e8d5c0;
@@ -414,7 +420,6 @@
       color: var(--sub);
       opacity: 0.8;
     }
-    /* === END: THÊM THEME MÀU TRÀ SỮA === */
     </style>
 </head>
 <body>
@@ -1102,43 +1107,131 @@
     // =============================
     // Sidebar: Topics & Subtopics
     // =============================
+    function closeAllMenus() {
+        $$('.actions-menu.show').forEach(menu => menu.classList.remove('show'));
+    }
+
+    // === START: HÀM renderTopics ĐÃ ĐƯỢC CẬP NHẬT ===
     function renderTopics(){
       const wrap = $('#topicsList');
       if (!wrap) return;
       wrap.innerHTML='';
       const collapsedMap = data.settings.collapsedTopics || {};
       data.topics.forEach(topic => {
-        const box = document.createElement('div'); box.className='topic-item';
-        const header = document.createElement('div'); header.className='topic-header';
+        const box = document.createElement('div');
+        box.className='topic-item';
+        const header = document.createElement('div');
+        header.className='topic-header';
+        
         const isCollapsed = !!collapsedMap[topic.id];
-        const chev = document.createElement('button'); chev.className='btn small ghost chev'; chev.setAttribute('title','Mở/đóng subtopics'); chev.setAttribute('aria-expanded', String(!isCollapsed)); chev.innerHTML = '<span class="ico">▼</span>';
-        const title = document.createElement('div'); title.className='topic-title'; title.textContent = topic.name;
-        const act = document.createElement('div'); act.className='topic-actions';
-        const bAdd = document.createElement('button'); bAdd.className='btn small'; bAdd.textContent='＋ Sub';
-        const bEdit = document.createElement('button'); bEdit.className='btn small ghost'; bEdit.textContent='Sửa';
-        const bDel = document.createElement('button'); bDel.className='btn small danger'; bDel.textContent='Xóa';
-        act.append(bAdd,bEdit,bDel);
-        header.append(chev,title,act);
-        const subs = document.createElement('div'); subs.className='subtopics' + (isCollapsed? ' hidden':'');
+        const chev = document.createElement('button');
+        chev.className='btn small ghost chev';
+        chev.setAttribute('title','Mở/đóng subtopics');
+        chev.setAttribute('aria-expanded', String(!isCollapsed));
+        chev.innerHTML = '<span class="ico">▼</span>';
+        
+        const title = document.createElement('div');
+        title.className='topic-title';
+        title.textContent = topic.name;
+        
+        // --- Khu vực nút hành động cho Topic ---
+        const act = document.createElement('div');
+        act.className='topic-actions';
+
+        const bAdd = document.createElement('button');
+        bAdd.className='btn small';
+        bAdd.innerHTML = '＋ Sub';
+        bAdd.title = 'Thêm Subtopic';
+
+        const menuContainer = document.createElement('div');
+        menuContainer.style.position = 'relative';
+
+        const bMore = document.createElement('button');
+        bMore.className = 'btn small ghost actions-menu-btn';
+        bMore.innerHTML = '...';
+        bMore.title = 'Thêm tùy chọn';
+
+        const menu = document.createElement('div');
+        menu.className = 'actions-menu';
+
+        const bEdit = document.createElement('button');
+        bEdit.className = 'menu-item';
+        bEdit.innerHTML = 'Sửa tên Topic';
+        
+        const bDel = document.createElement('button');
+        bDel.className = 'menu-item danger';
+        bDel.innerHTML = 'Xóa Topic';
+        
+        menu.append(bEdit, bDel);
+        menuContainer.append(bMore, menu);
+        act.append(bAdd, menuContainer);
+        // --- Kết thúc khu vực nút hành động cho Topic ---
+
+        header.append(chev, title, act);
+        
+        const subs = document.createElement('div');
+        subs.className='subtopics' + (isCollapsed? ' hidden':'');
+        
         topic.subtopics.forEach(st => {
-          const row = document.createElement('div'); row.className='sub-row';
-          const btn = document.createElement('button'); btn.className='btn subtopic-btn'; btn.textContent = '• '+st.name; btn.dataset.sid = st.id; btn.dataset.tid = topic.id; if(data.settings.selectedSubtopicId===st.id) btn.classList.add('active');
-          const edit = document.createElement('button'); edit.className='btn small ghost'; edit.textContent='Sửa';
-          const del = document.createElement('button'); del.className='btn small danger'; del.textContent='Xóa';
-          row.append(btn, edit, del);
+          const row = document.createElement('div');
+          row.className='sub-row';
+          const btn = document.createElement('button');
+          btn.className='btn subtopic-btn';
+          btn.textContent = '• '+st.name;
+          btn.dataset.sid = st.id;
+          btn.dataset.tid = topic.id;
+          if(data.settings.selectedSubtopicId===st.id) btn.classList.add('active');
+
+          // --- Khu vực nút hành động cho Subtopic ---
+          const subActions = document.createElement('div');
+          subActions.className = 'actions';
+          
+          const subMenuContainer = document.createElement('div');
+          subMenuContainer.style.position = 'relative';
+
+          const subBMore = document.createElement('button');
+          subBMore.className = 'btn small ghost actions-menu-btn';
+          subBMore.innerHTML = '...';
+          subBMore.title = 'Thêm tùy chọn';
+
+          const subMenu = document.createElement('div');
+          subMenu.className = 'actions-menu';
+
+          const subBEdit = document.createElement('button');
+          subBEdit.className = 'menu-item';
+          subBEdit.innerHTML = 'Sửa tên Subtopic';
+
+          const subBDel = document.createElement('button');
+          subBDel.className = 'menu-item danger';
+          subBDel.innerHTML = 'Xóa Subtopic';
+
+          subMenu.append(subBEdit, subBDel);
+          subMenuContainer.append(subBMore, subMenu);
+          subActions.append(subMenuContainer);
+          // --- Kết thúc khu vực nút hành động cho Subtopic ---
+
+          row.append(btn, subActions);
           subs.appendChild(row);
+
+          // Event Listeners for Subtopic actions
           btn.addEventListener('click', ()=> selectSubtopic(topic.id, st.id));
-          edit.addEventListener('click', ()=> showInputModal('Đổi tên Subtopic', (newName) => { if(!newName) return; st.name=newName; storageManager.save(data); renderAll(); }, st.name));
-          del.addEventListener('click', ()=> showConfirmModal('Xác nhận xóa', `Bạn có chắc muốn xóa Subtopic "${st.name}"? Mọi dữ liệu liên quan sẽ bị mất.`, (ok) => { if(!ok) return; topic.subtopics = topic.subtopics.filter(x=>x.id!==st.id); const set=data.settings; if(set.selectedSubtopicId===st.id){ set.selectedSubtopicId=''; set.selectedTopicId=''; ensureValidSelection(); } storageManager.save(data); renderAll(); }));
+          subBMore.addEventListener('click', (e) => { e.stopPropagation(); closeAllMenus(); subMenu.classList.toggle('show'); });
+          subBEdit.addEventListener('click', ()=> showInputModal('Đổi tên Subtopic', (newName) => { if(!newName) return; st.name=newName; storageManager.save(data); renderAll(); }, st.name));
+          subBDel.addEventListener('click', ()=> showConfirmModal('Xác nhận xóa', `Bạn có chắc muốn xóa Subtopic "${st.name}"? Mọi dữ liệu liên quan sẽ bị mất.`, (ok) => { if(!ok) return; topic.subtopics = topic.subtopics.filter(x=>x.id!==st.id); const set=data.settings; if(set.selectedSubtopicId===st.id){ set.selectedSubtopicId=''; set.selectedTopicId=''; ensureValidSelection(); } storageManager.save(data); renderAll(); }));
         });
+
+        // Event Listeners for Topic actions
         chev.addEventListener('click', ()=>{ if(isCollapsed){ delete collapsedMap[topic.id]; } else { collapsedMap[topic.id] = true; } data.settings.collapsedTopics = collapsedMap; storageManager.save(data); renderTopics(); });
+        bMore.addEventListener('click', (e) => { e.stopPropagation(); closeAllMenus(); menu.classList.toggle('show'); });
         bAdd.addEventListener('click', ()=> showInputModal('Tên Subtopic mới?', (name) => { if(!name) return; topic.subtopics.push({ id: uid('s'), name, tasks: [], generalNotes: [], summaries: [], chatHistory: [], stats:{ totalMinutes:0, sessionsCompleted:0, tasksCompleted: 0 }, sessions: [], timerState: { state: 'idle', remaining: 0, segmentTotal: 0, cycleIndex: 0 } }); storageManager.save(data); renderTopics(); }));
         bEdit.addEventListener('click', ()=> showInputModal('Đổi tên Topic', (newName) => { if(!newName) return; topic.name=newName; storageManager.save(data); renderTopics(); }, topic.name));
         bDel.addEventListener('click', ()=> showConfirmModal('Xác nhận xóa', `Bạn có chắc muốn xóa Topic "${topic.name}"? Mọi subtopic và dữ liệu liên quan sẽ bị mất.`, (ok) => { if(!ok) return; data.topics = data.topics.filter(t=>t.id!==topic.id); delete collapsedMap[topic.id]; if(data.settings.selectedTopicId===topic.id){ data.settings.selectedTopicId=''; data.settings.selectedSubtopicId=''; ensureValidSelection(); } storageManager.save(data); renderAll(); }));
+
         box.append(header, subs);
         wrap.appendChild(box);
       });
     }
+    // === END: HÀM renderTopics ĐÃ ĐƯỢC CẬP NHẬT ===
 
     function selectSubtopic(topicId, subId) {
         const mainEl = $('.app-content');
@@ -1886,14 +1979,12 @@
     function toggleYtSound() {
         if (!ytPlayer || !ytPlayer.getPlayerState) return;
         const playerState = ytPlayer.getPlayerState();
-        // Treat both playing and buffering as active playback states
         if (
             playerState === YT.PlayerState.PLAYING ||
             playerState === YT.PlayerState.BUFFERING
         ) {
             ytPlayer.pauseVideo();
         } else {
-            // For paused, ended, cued, or unstarted states, attempt to play
             ytPlayer.playVideo();
         }
     }
@@ -1920,15 +2011,17 @@
           const backupListEl = $('#backupList');
           const selectedDate = backupListEl ? backupListEl.value : '';
           if (!selectedDate) { toast('Vui lòng chọn một bản sao lưu.'); return; }
-          if (confirm(`Bạn có chắc muốn phục hồi dữ liệu từ ngày ${selectedDate}? Dữ liệu hiện tại sẽ bị ghi đè.`)) {
-              storageManager.restoreBackup(selectedDate).then((d) => {
-                  data = d;
-                  toast('Phục hồi dữ liệu thành công! Tải lại trang...');
-                  setTimeout(() => window.location.reload(), 1500);
-              }).catch(err => {
-                  toast(`Lỗi: ${err.message}`);
-              });
-          }
+          showConfirmModal('Xác nhận phục hồi', `Bạn có chắc muốn phục hồi dữ liệu từ ngày ${new Date(selectedDate).toLocaleDateString()}? Dữ liệu hiện tại sẽ bị ghi đè.`, (ok) => {
+              if (ok) {
+                  storageManager.restoreBackup(selectedDate).then((d) => {
+                      data = d;
+                      toast('Phục hồi dữ liệu thành công! Tải lại trang...');
+                      setTimeout(() => window.location.reload(), 1500);
+                  }).catch(err => {
+                      toast(`Lỗi: ${err.message}`);
+                  });
+              }
+          });
       });
       on($('#btnSettings'), 'click', openSettings);
       
@@ -1938,8 +2031,8 @@
       });
 
       on($('#btnDashboard'), 'click', () => {
-          renderDashboard(); // Tạo nội dung mới nhất
-          $('#modalDashboard').classList.add('show'); // Hiển thị modal
+          renderDashboard();
+          $('#modalDashboard').classList.add('show');
       });
 
       on($('#btnCloseDashboard'), 'click', () => {
@@ -1990,7 +2083,6 @@
                 if(activeContent) {
                     activeContent.classList.add('active');
                     activeContent.style.display = 'block';
-                    // Nếu là modal settings, cần display: flex cho các tab
                     if(parent.closest('#modalSettings')) {
                         activeContent.style.display = 'flex';
                     }
@@ -2039,6 +2131,13 @@
 
       window.addEventListener('keydown', (e)=>{ const tag=(e.target.tagName||'').toLowerCase(); const isTyping=['input','textarea','select'].includes(tag); if(e.code==='Space' && !isTyping){ e.preventDefault(); if(timer.state==='idle'||timer.state==='paused') timer.start(); else timer.pause(); } if(e.key==='n'||e.key==='N'){ if(!isTyping){ e.preventDefault(); timer.skip(); } } if(e.key==='Escape'){ $$('.modal').forEach(m => m.classList.remove('show')); } });
       $$('.modal').forEach(m=> m.addEventListener('click', (ev)=>{ if(ev.target===m) m.classList.remove('show'); }));
+      
+      // Global click listener to close menus
+      window.addEventListener('click', (e) => {
+        if (!e.target.closest('.actions-menu-btn')) {
+            closeAllMenus();
+        }
+      });
     }
 
     function updateMainViewVisibility() {
@@ -2046,12 +2145,10 @@
         const timerView = $('#view-timer');
         const welcomePanel = $('#welcomePanel');
 
-        // Hiển thị/ẩn panel chào mừng
         if (welcomePanel) {
             welcomePanel.classList.toggle('hidden', hasSubtopic);
         }
 
-        // Thêm/xóa class để CSS có thể ẩn các phần không cần thiết
         if (timerView) {
             if (hasSubtopic) {
                 timerView.classList.remove('no-subtopic-selected');
@@ -2146,4 +2243,3 @@
     </script>
 </body>
 </html>
-
