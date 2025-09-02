@@ -1454,6 +1454,8 @@
     const timer = {
       state:'idle', prevState:null, tickHandle:null, endAt:null,
       remaining:0, segmentTotal:0, cyclesTarget:4, cycleIndex:0, mode:'A',
+      persistInterval: 60*1000,
+      lastPersist: 0,
       async setPreset(p, {silent=false}={}){
         const st = data.settings;
         this.mode = p;
@@ -1518,17 +1520,35 @@
 
           $('#cycleInfo').textContent = `Chu kỳ: ${this.cycleIndex} / ${this.cyclesTarget}`;
       },
-      async persistTimerState(){
+      async persistTimerState(force=false){
         const s = getCurrentSubtopic();
-        if(s){
-          s.timerState = {
-            state: this.state,
-            prevState: this.prevState,
-            remaining: this.remaining,
-            segmentTotal: this.segmentTotal,
-            cycleIndex: this.cycleIndex
-          };
-          await saveData();
+        if(!s) return;
+
+        const state = {
+          state: this.state,
+          prevState: this.prevState,
+          remaining: this.remaining,
+          segmentTotal: this.segmentTotal,
+          cycleIndex: this.cycleIndex
+        };
+
+        s.timerState = state;
+
+        // Lightweight persistence for crash recovery
+        try {
+          localStorage.setItem('timerState_' + s.id, JSON.stringify(state));
+        } catch(err) {
+          console.warn('Timer state cache failed', err);
+        }
+
+        const now = Date.now();
+        if (force || now - this.lastPersist >= this.persistInterval) {
+          try {
+            await storageManager.update('subtopics', s);
+            this.lastPersist = now;
+          } catch(err) {
+            console.error('Failed to persist timer state', err);
+          }
         }
       },
       async start(){ if(!getCurrentSubtopic()){ toast('Hãy chọn một Subtopic trước khi bắt đầu'); return; } ensureAudio(); if(this.state==='idle'){ this.cycleIndex = this.cycleIndex || 0; this.beginWork(); } else if(this.state==='paused'){ this.resume(); } await this.persistTimerState(); },
@@ -1544,7 +1564,7 @@
           if(newRemaining !== this.remaining){
             this.remaining = newRemaining;
             this.updateUI();
-            await this.persistTimerState();
+            await this.persistTimerState(newRemaining===0);
           }
           if(this.remaining<=0){
             this.stopTick();
@@ -1568,7 +1588,7 @@
       },
       async pause(){ if(this.tickHandle){ this.stopTick(); this.prevState=this.state; this.state='paused'; this.updateUI(); await this.persistTimerState(); } },
       async resume(){ if(this.state==='paused'){ this.state = this.prevState || 'work'; this.endAt = Date.now() + this.remaining*1000; this.tickStart(); await this.persistTimerState(); } },
-      async skip(){ if(this.state==='idle') return; if(this.state==='paused' && this.prevState){ this.state = this.prevState; } this.stopTick(); await this.segmentFinished(true); await this.persistTimerState(); },
+      async skip(){ if(this.state==='idle') return; if(this.state==='paused' && this.prevState){ this.state = this.prevState; } this.stopTick(); await this.segmentFinished(true); await this.persistTimerState(true); },
       async reset() {
           this.stopTick();
           this.state = 'idle';
@@ -1577,7 +1597,7 @@
           this.segmentTotal = 0;
           this.cycleIndex = 0;
           this.updateUI();
-          await this.persistTimerState();
+          await this.persistTimerState(true);
       },
       async segmentFinished(skipped=false){
         const lastState = this.state;
@@ -2344,7 +2364,7 @@
             closeAllMenus();
         }
       });
-      window.addEventListener('beforeunload', () => timer.persistTimerState());
+      window.addEventListener('beforeunload', () => timer.persistTimerState(true));
     }
 
     function updateMainViewVisibility() {

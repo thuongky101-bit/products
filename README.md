@@ -16,3 +16,11 @@ fetch('storage.json')
 
 Tránh nhúng trực tiếp bằng thẻ `<script src="storage.json"></script>`.
 
+## Timer state persistence
+
+The timer no longer writes the entire `data` object on every tick.
+`persistTimerState` caches updates and only syncs with IndexedDB once per
+minute or when a segment finishes. For immediate safety, only the current
+timer values are stored in `localStorage`, avoiding heavy writes. Future
+changes to timer logic should respect this throttling strategy.
+
