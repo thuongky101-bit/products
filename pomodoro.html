@@ -1037,7 +1037,7 @@
                 chatHistory: [],
                 stats: { totalMinutes: 0, sessionsCompleted: 0, tasksCompleted: 0 },
                 sessions: [],
-                timerState: { state: 'idle', remaining: 0, segmentTotal: 0, cycleIndex: 0 }
+                timerState: { state: 'idle', prevState: null, remaining: 0, segmentTotal: 0, cycleIndex: 0 }
             }]
         }]
     };
@@ -1295,7 +1295,7 @@
         // Event Listeners for Topic actions
         chev.addEventListener('click', async ()=>{ if(isCollapsed){ delete collapsedMap[topic.id]; } else { collapsedMap[topic.id] = true; } data.settings.collapsedTopics = collapsedMap; await storageManager.updateSettings(data.settings); renderTopics(); });
         bMore.addEventListener('click', (e) => { e.stopPropagation(); closeAllMenus(); menu.classList.toggle('show'); });
-        bAdd.addEventListener('click', ()=> showInputModal('Tên Subtopic mới?', async (name) => { if(!name) return; const newSub = { id: uid('s'), topicId: topic.id, name, tasks: [], generalNotes: [], summaries: [], chatHistory: [], stats:{ totalMinutes:0, sessionsCompleted:0, tasksCompleted: 0 }, sessions: [], timerState: { state: 'idle', remaining: 0, segmentTotal: 0, cycleIndex: 0 } }; topic.subtopics.push(newSub); await storageManager.add('subtopics', newSub); renderTopics(); }));
+        bAdd.addEventListener('click', ()=> showInputModal('Tên Subtopic mới?', async (name) => { if(!name) return; const newSub = { id: uid('s'), topicId: topic.id, name, tasks: [], generalNotes: [], summaries: [], chatHistory: [], stats:{ totalMinutes:0, sessionsCompleted:0, tasksCompleted: 0 }, sessions: [], timerState: { state: 'idle', prevState: null, remaining: 0, segmentTotal: 0, cycleIndex: 0 } }; topic.subtopics.push(newSub); await storageManager.add('subtopics', newSub); renderTopics(); }));
         bEdit.addEventListener('click', ()=> showInputModal('Đổi tên Topic', async (newName) => { if(!newName) return; topic.name=newName; await storageManager.update('topics', topic); renderTopics(); }, topic.name));
         bDel.addEventListener('click', ()=> showConfirmModal('Xác nhận xóa', `Bạn có chắc muốn xóa Topic "${topic.name}"? Mọi subtopic và dữ liệu liên quan sẽ bị mất.`, async (ok) => { if(!ok) return; data.topics = data.topics.filter(t=>t.id!==topic.id); delete collapsedMap[topic.id]; if(data.settings.selectedTopicId===topic.id){ data.settings.selectedTopicId=''; data.settings.selectedSubtopicId=''; ensureValidSelection(); } await storageManager.delete('topics', topic.id); for(const sub of topic.subtopics){ await storageManager.delete('subtopics', sub.id); } renderAll(); }));
 
@@ -1312,6 +1312,7 @@
         if (oldSubtopic && timer.state !== 'idle') {
             oldSubtopic.timerState = {
                 state: timer.state,
+                prevState: timer.prevState,
                 remaining: timer.remaining,
                 segmentTotal: timer.segmentTotal,
                 cycleIndex: timer.cycleIndex
@@ -1328,6 +1329,7 @@
 
             if (newSubtopic.timerState) {
                 timer.state = newSubtopic.timerState.state;
+                timer.prevState = newSubtopic.timerState.prevState || null;
                 timer.remaining = newSubtopic.timerState.remaining;
                 timer.segmentTotal = newSubtopic.timerState.segmentTotal;
                 timer.cycleIndex = newSubtopic.timerState.cycleIndex;
@@ -1482,13 +1484,44 @@
 
           $('#cycleInfo').textContent = `Chu kỳ: ${this.cycleIndex} / ${this.cyclesTarget}`;
       },
-      start(){ if(!getCurrentSubtopic()){ toast('Hãy chọn một Subtopic trước khi bắt đầu'); return; } ensureAudio(); if(this.state==='idle'){ this.cycleIndex = this.cycleIndex || 0; this.beginWork(); } else if(this.state==='paused'){ this.resume(); } },
+      persistTimerState(){
+        const s = getCurrentSubtopic();
+        if(s){
+          s.timerState = {
+            state: this.state,
+            prevState: this.prevState,
+            remaining: this.remaining,
+            segmentTotal: this.segmentTotal,
+            cycleIndex: this.cycleIndex
+          };
+          storageManager.save(data);
+        }
+      },
+      start(){ if(!getCurrentSubtopic()){ toast('Hãy chọn một Subtopic trước khi bắt đầu'); return; } ensureAudio(); if(this.state==='idle'){ this.cycleIndex = this.cycleIndex || 0; this.beginWork(); } else if(this.state==='paused'){ this.resume(); } this.persistTimerState(); },
       beginWork(){ const {work}=this.currentDurations(); this.state='work'; if(this.cycleIndex===0) this.cycleIndex=1; this.remaining=work*60; this.segmentTotal=this.remaining; this.tickStart(); },
       beginBreak(){ const {short,long}=this.currentDurations(); const {interval}=this.currentConfig(); const isLong=(this.cycleIndex % interval===0) && (this.cyclesTarget>=interval); if(isLong){ this.state='long_break'; this.remaining=long*60; } else { this.state='break'; this.remaining=short*60; } this.segmentTotal=this.remaining; this.tickStart(); },
-      tickStart(){ clearInterval(this.interval); this.endAt = Date.now() + this.remaining*1000; this.updateUI(); this.interval=setInterval(()=>{ const now=Date.now(); this.remaining = Math.max(0, Math.ceil((this.endAt - now)/1000)); this.updateUI(); if(this.remaining<=0){ clearInterval(this.interval); this.interval=null; this.segmentFinished(); } }, 250); },
-      pause(){ if(this.interval){ clearInterval(this.interval); this.interval=null; this.prevState=this.state; this.state='paused'; this.updateUI(); } },
-      resume(){ if(this.state==='paused'){ this.state = this.prevState || 'work'; this.endAt = Date.now() + this.remaining*1000; this.tickStart(); } },
-      skip(){ if(this.state==='idle') return; if(this.state==='paused' && this.prevState){ this.state = this.prevState; } clearInterval(this.interval); this.interval=null; this.segmentFinished(true); },
+      tickStart(){
+        clearInterval(this.interval);
+        this.endAt = Date.now() + this.remaining*1000;
+        this.updateUI();
+        this.interval=setInterval(()=>{
+          const now=Date.now();
+          const newRemaining = Math.max(0, Math.ceil((this.endAt - now)/1000));
+          if(newRemaining !== this.remaining){
+            this.remaining = newRemaining;
+            this.updateUI();
+            this.persistTimerState();
+          }
+          if(this.remaining<=0){
+            clearInterval(this.interval);
+            this.interval=null;
+            this.segmentFinished();
+          }
+        }, 250);
+      },
+      pause(){ if(this.interval){ clearInterval(this.interval); this.interval=null; this.prevState=this.state; this.state='paused'; this.updateUI(); this.persistTimerState(); } },
+      resume(){ if(this.state==='paused'){ this.state = this.prevState || 'work'; this.endAt = Date.now() + this.remaining*1000; this.tickStart(); this.persistTimerState(); } },
+      skip(){ if(this.state==='idle') return; if(this.state==='paused' && this.prevState){ this.state = this.prevState; } clearInterval(this.interval); this.interval=null; this.segmentFinished(true); this.persistTimerState(); },
       reset() {
           clearInterval(this.interval);
           this.interval = null;
@@ -1498,12 +1531,7 @@
           this.segmentTotal = 0;
           this.cycleIndex = 0;
           this.updateUI();
-
-          const currentSubtopic = getCurrentSubtopic();
-          if (currentSubtopic) {
-              currentSubtopic.timerState = { state: 'idle', remaining: 0, segmentTotal: 0, cycleIndex: 0 };
-              storageManager.save(data);
-          }
+          this.persistTimerState();
       },
       segmentFinished(skipped=false){
         const lastState = this.state;
@@ -1531,12 +1559,12 @@
           const shouldLong = (this.cycleIndex % interval === 0) && (this.cyclesTarget >= interval);
           if(this.cycleIndex >= this.cyclesTarget){
             if(shouldLong){ this.beginBreak(); if(!data.settings.autoStartNext) this.pause(); return; }
-            this.state='idle'; this.remaining=0; this.segmentTotal=0; this.cycleIndex=0; this.updateUI(); const cs=getCurrentSubtopic(); if(cs){ cs.timerState={ state:'idle', remaining:0, segmentTotal:0, cycleIndex:0 }; storageManager.save(data); } toast('🎉 Hoàn thành chương trình preset!'); return;
+            this.state='idle'; this.remaining=0; this.segmentTotal=0; this.cycleIndex=0; this.updateUI(); const cs=getCurrentSubtopic(); if(cs){ cs.timerState={ state:'idle', prevState:null, remaining:0, segmentTotal:0, cycleIndex:0 }; storageManager.save(data); } toast('🎉 Hoàn thành chương trình preset!'); return;
           }
           this.beginBreak(); if(!data.settings.autoStartNext){ this.pause(); } return;
         }
         if(lastState==='break' || lastState==='long_break'){
-          if(this.cycleIndex >= this.cyclesTarget){ this.state='idle'; this.remaining=0; this.segmentTotal=0; this.cycleIndex=0; this.updateUI(); const cs=getCurrentSubtopic(); if(cs){ cs.timerState={ state:'idle', remaining:0, segmentTotal:0, cycleIndex:0 }; storageManager.save(data); } toast('🎯 Kết thúc chương trình'); return; }
+          if(this.cycleIndex >= this.cyclesTarget){ this.state='idle'; this.remaining=0; this.segmentTotal=0; this.cycleIndex=0; this.updateUI(); const cs=getCurrentSubtopic(); if(cs){ cs.timerState={ state:'idle', prevState:null, remaining:0, segmentTotal:0, cycleIndex:0 }; storageManager.save(data); } toast('🎯 Kết thúc chương trình'); return; }
           this.cycleIndex += 1;
           this.beginWork(); if(!data.settings.autoStartNext){ this.pause(); } return;
         }
@@ -2270,6 +2298,7 @@
             closeAllMenus();
         }
       });
+      window.addEventListener('beforeunload', () => timer.persistTimerState());
     }
 
     function updateMainViewVisibility() {
