@@ -847,6 +847,32 @@
                 request.onerror = () => reject(request.error);
             });
         },
+        async save(data) {
+            await this.initDB();
+            return new Promise((resolve, reject) => {
+                const tx = this.db.transaction(['settings', 'topics', 'subtopics'], 'readwrite');
+                const settingsStore = tx.objectStore('settings');
+                const topicsStore = tx.objectStore('topics');
+                const subtopicsStore = tx.objectStore('subtopics');
+
+                // 1. Persist settings
+                settingsStore.put(data.settings, 'main_settings');
+
+                // 2. Clear old topics/subtopics
+                topicsStore.clear();
+                subtopicsStore.clear();
+
+                // 3. Store topics and subtopics
+                data.topics.forEach(topic => {
+                    const { subtopics, ...topicData } = topic;
+                    topicsStore.put(topicData);
+                    (subtopics || []).forEach(sub => subtopicsStore.put(sub));
+                });
+
+                tx.oncomplete = () => resolve();
+                tx.onerror = e => reject(e.target.error);
+            });
+        },
         async autoBackup(data) {
             await this.initDB();
             const today = new Date().toISOString().slice(0, 10);
