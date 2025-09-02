@@ -1568,15 +1568,25 @@
         });
     }
 
-    function addGeneralNote() {
+    async function addGeneralNote() {
         const s = getCurrentSubtopic();
         if (!s) { toast("Vui lòng chọn một subtopic trước."); return; }
         const textInput = $('#newGeneralNoteText');
         const content = textInput.value.trim();
         if (!content) { toast("Nội dung ghi chú không được để trống."); return; }
         if (!s.generalNotes) s.generalNotes = [];
-        s.generalNotes.unshift({ id: uid('note'), content, createdAt: todayISO() });
-        storageManager.save(data); renderGeneralNotes(); textInput.value = ''; toast("Đã thêm ghi chú.");
+        const note = { id: uid('note'), content, createdAt: todayISO() };
+        s.generalNotes.unshift(note);
+        try {
+            await storageManager.update('subtopics', s);
+            renderGeneralNotes();
+            textInput.value = '';
+            toast("Đã thêm ghi chú.");
+        } catch (err) {
+            console.error('Failed to add note:', err);
+            s.generalNotes.shift();
+            toast("Không thể lưu ghi chú.");
+        }
     }
 
     function deleteGeneralNote(noteId) {
