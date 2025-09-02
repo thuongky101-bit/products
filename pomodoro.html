@@ -1985,6 +1985,18 @@
         ) {
             ytPlayer.pauseVideo();
         } else {
+            if (
+                playerState === YT.PlayerState.ENDED ||
+                playerState === YT.PlayerState.UNSTARTED ||
+                playerState === YT.PlayerState.CUED
+            ) {
+                const videoId = extractYouTubeID(data.settings.youtubeUrl);
+                if (videoId) {
+                    ytPlayer.loadVideoById(videoId);
+                } else {
+                    ytPlayer.seekTo(0);
+                }
+            }
             ytPlayer.playVideo();
         }
     }
