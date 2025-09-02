@@ -784,25 +784,60 @@
                 };
             });
         },
-        load(defaults) {
-            const stored = localStorage.getItem('pomodoroData_v11');
-            let data = {};
-            if (stored) {
-                data = JSON.parse(stored);
-                data.settings = { ...defaults.settings, ...data.settings };
+          load(defaults) {
+              const stored = localStorage.getItem('pomodoroData_v11');
+              let data = {};
+              if (stored) {
+                  data = JSON.parse(stored);
+                  data.settings = { ...defaults.settings, ...data.settings };
+              } else {
+                  data = JSON.parse(JSON.stringify(defaults));
+              }
+              return data;
+          },
+        getSettings() {
+            const stored = localStorage.getItem('pomodoro_settings');
+            return stored ? JSON.parse(stored) : null;
+        },
+        saveSettings(settings) {
+            localStorage.setItem('pomodoro_settings', JSON.stringify(settings));
+        },
+        getTopics() {
+            const stored = localStorage.getItem('pomodoro_topics');
+            return stored ? JSON.parse(stored) : [];
+        },
+        saveTopic(topic) {
+            const topics = this.getTopics();
+            const idx = topics.findIndex(t => t.id === topic.id);
+            if (idx >= 0) {
+                topics[idx] = { id: topic.id, name: topic.name };
             } else {
-                data = JSON.parse(JSON.stringify(defaults));
+                topics.push({ id: topic.id, name: topic.name });
             }
-            return data;
+            localStorage.setItem('pomodoro_topics', JSON.stringify(topics));
         },
-        async save(data) {
-            try {
-                localStorage.setItem('pomodoroData_v11', JSON.stringify(data));
-                await this.autoBackup(data);
-            } catch (e) {
-                console.error('Error saving to localStorage', e);
+        getSubtopics(topicId) {
+            const stored = localStorage.getItem(`pomodoro_subtopics_${topicId}`);
+            return stored ? JSON.parse(stored) : [];
+        },
+        saveSubtopic(topicId, subtopic) {
+            const subs = this.getSubtopics(topicId);
+            const idx = subs.findIndex(s => s.id === subtopic.id);
+            if (idx >= 0) {
+                subs[idx] = subtopic;
+            } else {
+                subs.push(subtopic);
             }
+            localStorage.setItem(`pomodoro_subtopics_${topicId}`, JSON.stringify(subs));
         },
+          async save(data) {
+              try {
+                  localStorage.setItem('pomodoroData_v11', JSON.stringify(data));
+                  await this.autoBackup(data);
+              } catch (e) {
+                  console.error('Error saving to localStorage', e);
+              }
+          },
         async autoBackup(data) {
             await this.initDB();
             const today = new Date().toISOString().slice(0, 10);
@@ -2284,18 +2319,46 @@
 
 
     // Boot
-    try {
-      data = storageManager.load(defaults);
-      storageManager.initDB();
-      ensureValidSelection();
-      renderAll();
-    } catch (err) {
-      console.error('Initialization error:', err);
-      toast(`Lỗi khởi tạo: ${err.message}`);
-    } finally {
-      bindEvents();
+    async function initializeApp() {
+      try {
+        await storageManager.initDB();
+        let settings = await storageManager.getSettings();
+        let topics = await storageManager.getTopics();
+        if (!settings) {
+          settings = defaults.settings;
+          await storageManager.saveSettings(settings);
+        }
+        if (!topics || topics.length === 0) {
+          topics = [];
+          for (const t of defaults.topics) {
+            await storageManager.saveTopic({ id: t.id, name: t.name });
+            const subtopics = [];
+            for (const s of t.subtopics || []) {
+              await storageManager.saveSubtopic(t.id, s);
+              subtopics.push(s);
+            }
+            topics.push({ id: t.id, name: t.name, subtopics });
+          }
+        } else {
+          const loaded = [];
+          for (const t of topics) {
+            const subs = await storageManager.getSubtopics(t.id);
+            loaded.push({ ...t, subtopics: subs });
+          }
+          topics = loaded;
+        }
+        data = { version: defaults.version, settings, topics };
+        window.data = data;
+        ensureValidSelection();
+        renderAll();
+        bindEvents();
+        applyTheme();
+      } catch (err) {
+        console.error('Initialization error:', err);
+        toast(`Lỗi khởi tạo: ${err.message}`);
+      }
     }
-    applyTheme();
+    initializeApp();
     </script>
 </body>
 </html>
