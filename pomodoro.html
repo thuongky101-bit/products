@@ -2339,7 +2339,12 @@ async function initializeApp() {
         data = JSON.parse(JSON.stringify(defaults));
     } finally {
         // Dù thành công hay thất bại, luôn render giao diện và gán sự kiện
-        renderAll();
+        try {
+            renderAll();
+        } catch (err) {
+            console.error('Render error:', err);
+            toast(`Lỗi hiển thị: ${err.message}`);
+        }
         bindEvents();
         applyTheme();
     }
