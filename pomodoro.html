@@ -761,6 +761,7 @@
     const storageManager = {
         DB_NAME: 'PomodoroDB',
         DB_VERSION: 1,
+        MAIN_STORE: 'data',
         BACKUP_STORE_NAME: 'backups',
         db: null,
         async initDB() {
@@ -769,6 +770,9 @@
                 const request = indexedDB.open(this.DB_NAME, this.DB_VERSION);
                 request.onupgradeneeded = (event) => {
                     const db = event.target.result;
+                    if (!db.objectStoreNames.contains(this.MAIN_STORE)) {
+                        db.createObjectStore(this.MAIN_STORE, { keyPath: 'key' });
+                    }
                     if (!db.objectStoreNames.contains(this.BACKUP_STORE_NAME)) {
                         db.createObjectStore(this.BACKUP_STORE_NAME, { keyPath: 'date' });
                     }
@@ -784,24 +788,48 @@
                 };
             });
         },
-        load(defaults) {
-            const stored = localStorage.getItem('pomodoroData_v11');
-            let data = {};
-            if (stored) {
-                data = JSON.parse(stored);
-                data.settings = { ...defaults.settings, ...data.settings };
-            } else {
-                data = JSON.parse(JSON.stringify(defaults));
-            }
-            return data;
+        async load(defaults) {
+            await this.initDB();
+            return new Promise((resolve, reject) => {
+                const transaction = this.db.transaction([this.MAIN_STORE], 'readonly');
+                const store = transaction.objectStore(this.MAIN_STORE);
+                const request = store.get('main');
+                request.onsuccess = () => {
+                    let data;
+                    if (request.result && request.result.value) {
+                        data = request.result.value;
+                        data.settings = { ...defaults.settings, ...data.settings };
+                    } else {
+                        const old = localStorage.getItem('pomodoroData_v11');
+                        if (old) {
+                            data = JSON.parse(old);
+                            data.settings = { ...defaults.settings, ...data.settings };
+                            this.save(data); // migrate
+                            localStorage.removeItem('pomodoroData_v11');
+                        } else {
+                            data = JSON.parse(JSON.stringify(defaults));
+                        }
+                    }
+                    resolve(data);
+                };
+                request.onerror = () => reject(request.error);
+            });
         },
         async save(data) {
-            try {
-                localStorage.setItem('pomodoroData_v11', JSON.stringify(data));
-                await this.autoBackup(data);
-            } catch (e) {
-                console.error('Error saving to localStorage', e);
-            }
+            await this.initDB();
+            return new Promise((resolve, reject) => {
+                const transaction = this.db.transaction([this.MAIN_STORE], 'readwrite');
+                const store = transaction.objectStore(this.MAIN_STORE);
+                const request = store.put({ key: 'main', value: data });
+                request.onsuccess = async () => {
+                    await this.autoBackup(data);
+                    resolve();
+                };
+                request.onerror = (event) => {
+                    console.error('Error saving to IndexedDB', event);
+                    reject(event.target.error);
+                };
+            });
         },
         async autoBackup(data) {
             await this.initDB();
@@ -857,8 +885,7 @@
                 const request = store.get(date);
                 request.onsuccess = () => {
                     if (request.result && request.result.data) {
-                        localStorage.setItem('pomodoroData_v11', JSON.stringify(request.result.data));
-                        resolve(request.result.data);
+                        this.save(request.result.data).then(() => resolve(request.result.data));
                     } else {
                         reject(new Error('Không tìm thấy bản sao lưu.'));
                     }
@@ -882,7 +909,7 @@
             if (!obj.version || !obj.settings || !Array.isArray(obj.topics)) {
                 throw new Error('Tệp không đúng định dạng');
             }
-            localStorage.setItem('pomodoroData_v11', JSON.stringify(obj));
+            await this.save(obj);
             return obj;
         }
     };
@@ -2292,8 +2319,8 @@
 
     // Boot
     try {
-      data = storageManager.load(defaults);
-      storageManager.initDB();
+      await storageManager.initDB();
+      data = await storageManager.load(defaults);
       ensureValidSelection();
       renderAll();
     } catch (err) {
