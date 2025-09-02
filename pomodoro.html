@@ -1847,7 +1847,7 @@
     }
 
     function updateYouTubePlayer() {
-        if (!ytPlayer || !ytPlayer.cueVideoById) return;
+        if (!ytPlayer || typeof ytPlayer.cueVideoById !== 'function') return;
         const videoId = extractYouTubeID(data.settings.youtubeUrl);
 
         if (!videoId) {
@@ -1879,7 +1879,7 @@
             img.src = thumbUrl;
         }
 
-        ytPlayer.cueVideoById(videoId);
+        ytPlayer.cueVideoById({ videoId });
         ytPlayer.setVolume(data.settings.youtubeVolume);
     }
 
