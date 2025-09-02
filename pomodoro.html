@@ -1037,7 +1037,7 @@
                 chatHistory: [],
                 stats: { totalMinutes: 0, sessionsCompleted: 0, tasksCompleted: 0 },
                 sessions: [],
-                timerState: { state: 'idle', remaining: 0, segmentTotal: 0, cycleIndex: 0 }
+                timerState: { state: 'idle', remaining: 0, segmentTotal: 0, cycleIndex: 0, prevState: null }
             }]
         }]
     };
@@ -1295,7 +1295,7 @@
         // Event Listeners for Topic actions
         chev.addEventListener('click', async ()=>{ if(isCollapsed){ delete collapsedMap[topic.id]; } else { collapsedMap[topic.id] = true; } data.settings.collapsedTopics = collapsedMap; await storageManager.updateSettings(data.settings); renderTopics(); });
         bMore.addEventListener('click', (e) => { e.stopPropagation(); closeAllMenus(); menu.classList.toggle('show'); });
-        bAdd.addEventListener('click', ()=> showInputModal('Tên Subtopic mới?', async (name) => { if(!name) return; const newSub = { id: uid('s'), topicId: topic.id, name, tasks: [], generalNotes: [], summaries: [], chatHistory: [], stats:{ totalMinutes:0, sessionsCompleted:0, tasksCompleted: 0 }, sessions: [], timerState: { state: 'idle', remaining: 0, segmentTotal: 0, cycleIndex: 0 } }; topic.subtopics.push(newSub); await storageManager.add('subtopics', newSub); renderTopics(); }));
+        bAdd.addEventListener('click', ()=> showInputModal('Tên Subtopic mới?', async (name) => { if(!name) return; const newSub = { id: uid('s'), topicId: topic.id, name, tasks: [], generalNotes: [], summaries: [], chatHistory: [], stats:{ totalMinutes:0, sessionsCompleted:0, tasksCompleted: 0 }, sessions: [], timerState: { state: 'idle', remaining: 0, segmentTotal: 0, cycleIndex: 0, prevState: null } }; topic.subtopics.push(newSub); await storageManager.add('subtopics', newSub); renderTopics(); }));
         bEdit.addEventListener('click', ()=> showInputModal('Đổi tên Topic', async (newName) => { if(!newName) return; topic.name=newName; await storageManager.update('topics', topic); renderTopics(); }, topic.name));
         bDel.addEventListener('click', ()=> showConfirmModal('Xác nhận xóa', `Bạn có chắc muốn xóa Topic "${topic.name}"? Mọi subtopic và dữ liệu liên quan sẽ bị mất.`, async (ok) => { if(!ok) return; data.topics = data.topics.filter(t=>t.id!==topic.id); delete collapsedMap[topic.id]; if(data.settings.selectedTopicId===topic.id){ data.settings.selectedTopicId=''; data.settings.selectedSubtopicId=''; ensureValidSelection(); } await storageManager.delete('topics', topic.id); for(const sub of topic.subtopics){ await storageManager.delete('subtopics', sub.id); } renderAll(); }));
 
@@ -1314,7 +1314,8 @@
                 state: timer.state,
                 remaining: timer.remaining,
                 segmentTotal: timer.segmentTotal,
-                cycleIndex: timer.cycleIndex
+                cycleIndex: timer.cycleIndex,
+                prevState: timer.prevState
             };
         }
 
@@ -1331,6 +1332,7 @@
                 timer.remaining = newSubtopic.timerState.remaining;
                 timer.segmentTotal = newSubtopic.timerState.segmentTotal;
                 timer.cycleIndex = newSubtopic.timerState.cycleIndex;
+                timer.prevState = newSubtopic.timerState.prevState || null;
             } else {
                 timer.reset();
             }
@@ -1501,7 +1503,7 @@
 
           const currentSubtopic = getCurrentSubtopic();
           if (currentSubtopic) {
-              currentSubtopic.timerState = { state: 'idle', remaining: 0, segmentTotal: 0, cycleIndex: 0 };
+              currentSubtopic.timerState = { state: 'idle', remaining: 0, segmentTotal: 0, cycleIndex: 0, prevState: null };
               storageManager.save(data);
           }
       },
@@ -1531,12 +1533,12 @@
           const shouldLong = (this.cycleIndex % interval === 0) && (this.cyclesTarget >= interval);
           if(this.cycleIndex >= this.cyclesTarget){
             if(shouldLong){ this.beginBreak(); if(!data.settings.autoStartNext) this.pause(); return; }
-            this.state='idle'; this.remaining=0; this.segmentTotal=0; this.cycleIndex=0; this.updateUI(); const cs=getCurrentSubtopic(); if(cs){ cs.timerState={ state:'idle', remaining:0, segmentTotal:0, cycleIndex:0 }; storageManager.save(data); } toast('🎉 Hoàn thành chương trình preset!'); return;
+            this.state='idle'; this.prevState=null; this.remaining=0; this.segmentTotal=0; this.cycleIndex=0; this.updateUI(); const cs=getCurrentSubtopic(); if(cs){ cs.timerState={ state:'idle', remaining:0, segmentTotal:0, cycleIndex:0, prevState:null }; storageManager.save(data); } toast('🎉 Hoàn thành chương trình preset!'); return;
           }
           this.beginBreak(); if(!data.settings.autoStartNext){ this.pause(); } return;
         }
         if(lastState==='break' || lastState==='long_break'){
-          if(this.cycleIndex >= this.cyclesTarget){ this.state='idle'; this.remaining=0; this.segmentTotal=0; this.cycleIndex=0; this.updateUI(); const cs=getCurrentSubtopic(); if(cs){ cs.timerState={ state:'idle', remaining:0, segmentTotal:0, cycleIndex:0 }; storageManager.save(data); } toast('🎯 Kết thúc chương trình'); return; }
+          if(this.cycleIndex >= this.cyclesTarget){ this.state='idle'; this.prevState=null; this.remaining=0; this.segmentTotal=0; this.cycleIndex=0; this.updateUI(); const cs=getCurrentSubtopic(); if(cs){ cs.timerState={ state:'idle', remaining:0, segmentTotal:0, cycleIndex:0, prevState:null }; storageManager.save(data); } toast('🎯 Kết thúc chương trình'); return; }
           this.cycleIndex += 1;
           this.beginWork(); if(!data.settings.autoStartNext){ this.pause(); } return;
         }
