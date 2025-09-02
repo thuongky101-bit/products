@@ -779,7 +779,6 @@
                         const subtopicsStore = db.createObjectStore('subtopics', { keyPath: 'id' });
                         subtopicsStore.createIndex('by_topic', 'topicId');
                     }
-                    // Optional backups store
                     if (!db.objectStoreNames.contains('backups')) {
                         db.createObjectStore('backups', { keyPath: 'date' });
                     }
@@ -795,24 +794,58 @@
                 };
             });
         },
-        load(defaults) {
-            const stored = localStorage.getItem('pomodoroData_v11');
-            let data = {};
-            if (stored) {
-                data = JSON.parse(stored);
-                data.settings = { ...defaults.settings, ...data.settings };
-            } else {
-                data = JSON.parse(JSON.stringify(defaults));
-            }
-            return data;
+        async _getStore(storeName, mode = 'readonly') {
+            await this.initDB();
+            const tx = this.db.transaction([storeName], mode);
+            return tx.objectStore(storeName);
         },
-        async save(data) {
-            try {
-                localStorage.setItem('pomodoroData_v11', JSON.stringify(data));
-                await this.autoBackup(data);
-            } catch (e) {
-                console.error('Error saving to localStorage', e);
-            }
+        async getSettings() {
+            const store = await this._getStore('settings');
+            return new Promise((resolve, reject) => {
+                const request = store.get('main_settings');
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        },
+        async updateSettings(settingsObject) {
+            const store = await this._getStore('settings', 'readwrite');
+            return new Promise((resolve, reject) => {
+                const request = store.put(settingsObject, 'main_settings');
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        },
+        async getAll(storeName) {
+            const store = await this._getStore(storeName);
+            return new Promise((resolve, reject) => {
+                const request = store.getAll();
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        },
+        async update(storeName, object) {
+            const store = await this._getStore(storeName, 'readwrite');
+            return new Promise((resolve, reject) => {
+                const request = store.put(object);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        },
+        async add(storeName, object) {
+            const store = await this._getStore(storeName, 'readwrite');
+            return new Promise((resolve, reject) => {
+                const request = store.add(object);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        },
+        async delete(storeName, key) {
+            const store = await this._getStore(storeName, 'readwrite');
+            return new Promise((resolve, reject) => {
+                const request = store.delete(key);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
         },
         async autoBackup(data) {
             await this.initDB();
