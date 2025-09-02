@@ -760,8 +760,7 @@
     // =============================
     const storageManager = {
         DB_NAME: 'PomodoroDB',
-        DB_VERSION: 2,
-        MAIN_STORE: 'data',
+        DB_VERSION: 1,
         BACKUP_STORE_NAME: 'backups',
         db: null,
         async initDB() {
@@ -770,9 +769,6 @@
                 const request = indexedDB.open(this.DB_NAME, this.DB_VERSION);
                 request.onupgradeneeded = (event) => {
                     const db = event.target.result;
-                    if (!db.objectStoreNames.contains(this.MAIN_STORE)) {
-                        db.createObjectStore(this.MAIN_STORE, { keyPath: 'key' });
-                    }
                     if (!db.objectStoreNames.contains(this.BACKUP_STORE_NAME)) {
                         db.createObjectStore(this.BACKUP_STORE_NAME, { keyPath: 'date' });
                     }
@@ -788,57 +784,24 @@
                 };
             });
         },
-        // HÀM MỚI - Đã sửa lỗi bất đồng bộ
-async load(defaults) {
-    await this.initDB();
-    return new Promise((resolve, reject) => {
-        const transaction = this.db.transaction([this.MAIN_STORE], 'readonly');
-        const store = transaction.objectStore(this.MAIN_STORE);
-        const request = store.get('main');
-
-        request.onsuccess = async () => { // Thêm "async" ở đây
-            try {
-                let data;
-                if (request.result && request.result.value) {
-                    data = request.result.value;
-                    data.settings = mergeDeep(defaults.settings, data.settings);
-                    validateSettings(data.settings, defaults.settings);
-                } else {
-                    const old = localStorage.getItem('pomodoroData_v11');
-                    if (old) {
-                        console.log("Di chuyển dữ liệu từ LocalStorage sang IndexedDB...");
-                        data = JSON.parse(old);
-                        data.settings = mergeDeep(defaults.settings, data.settings);
-                        validateSettings(data.settings, defaults.settings);
-                        await this.save(data); // Thêm "await" để đợi di chuyển xong
-                        localStorage.removeItem('pomodoroData_v11');
-                        console.log("Di chuyển hoàn tất.");
-                    } else {
-                        data = JSON.parse(JSON.stringify(defaults));
-                    }
-                }
-                resolve(data);
-            } catch (err) {
-                reject(err);
+        load(defaults) {
+            const stored = localStorage.getItem('pomodoroData_v11');
+            let data = {};
+            if (stored) {
+                data = JSON.parse(stored);
+                data.settings = { ...defaults.settings, ...data.settings };
+            } else {
+                data = JSON.parse(JSON.stringify(defaults));
             }
-        };
-        request.onerror = () => reject(request.error);
-    });
-},
+            return data;
+        },
         async save(data) {
-            await this.initDB();
-            return new Promise((resolve, reject) => {
-                const transaction = this.db.transaction([this.MAIN_STORE], 'readwrite');
-                const store = transaction.objectStore(this.MAIN_STORE);
-                const request = store.put({ key: 'main', value: data });
-                request.onsuccess = async () => {
-                    await this.autoBackup(data);
-                    resolve();
-                };
-                request.onerror = (event) => {
-                    reject(event.target.error);
-                };
-            });
+            try {
+                localStorage.setItem('pomodoroData_v11', JSON.stringify(data));
+                await this.autoBackup(data);
+            } catch (e) {
+                console.error('Error saving to localStorage', e);
+            }
         },
         async autoBackup(data) {
             await this.initDB();
@@ -894,7 +857,8 @@ async load(defaults) {
                 const request = store.get(date);
                 request.onsuccess = () => {
                     if (request.result && request.result.data) {
-                        this.save(request.result.data).then(() => resolve(request.result.data));
+                        localStorage.setItem('pomodoroData_v11', JSON.stringify(request.result.data));
+                        resolve(request.result.data);
                     } else {
                         reject(new Error('Không tìm thấy bản sao lưu.'));
                     }
@@ -918,7 +882,7 @@ async load(defaults) {
             if (!obj.version || !obj.settings || !Array.isArray(obj.topics)) {
                 throw new Error('Tệp không đúng định dạng');
             }
-            await this.save(obj);
+            localStorage.setItem('pomodoroData_v11', JSON.stringify(obj));
             return obj;
         }
     };
@@ -934,50 +898,6 @@ async load(defaults) {
     const todayISO = () => new Date().toISOString();
     function toast(msg, ms=2600){ const box=$('#toasts'); const t=document.createElement('div'); t.className='toast'; t.textContent=msg; box.appendChild(t); setTimeout(()=>{t.style.opacity='0';}, ms-300); setTimeout(()=> box.removeChild(t), ms); }
     function escapeHTML(str){ return str.replace(/[&<>"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;' }[m])); }
-    function debounce(func, delay) {
-        let timeout;
-        return function(...args) {
-            clearTimeout(timeout);
-            return new Promise((resolve, reject) => {
-                timeout = setTimeout(() => {
-                    Promise.resolve(func.apply(this, args)).then(resolve).catch(reject);
-                }, delay);
-            });
-        };
-    }
-    function mergeDeep(target = {}, source = {}) {
-        const isObject = (obj) => obj && typeof obj === 'object' && !Array.isArray(obj);
-        const output = isObject(target) ? { ...target } : {};
-        if (!isObject(source)) return output;
-        for (const key of Object.keys(source)) {
-            const srcVal = source[key];
-            const tgtVal = output[key];
-            if (isObject(srcVal) && isObject(tgtVal)) {
-                output[key] = mergeDeep(tgtVal, srcVal);
-            } else {
-                output[key] = srcVal;
-            }
-        }
-        return output;
-    }
-    function validateSettings(settings, defaults) {
-        const isObject = (obj) => obj && typeof obj === 'object' && !Array.isArray(obj);
-        for (const key of Object.keys(defaults)) {
-            const defVal = defaults[key];
-            const curVal = settings[key];
-            if (isObject(defVal)) {
-                if (!isObject(curVal)) {
-                    console.warn(`Resetting missing section: settings.${key}`);
-                    settings[key] = mergeDeep({}, defVal);
-                } else {
-                    validateSettings(curVal, defVal);
-                }
-            } else if (curVal === undefined) {
-                console.warn(`Missing setting: ${key}; applying default.`);
-                settings[key] = defVal;
-            }
-        }
-    }
     function formatDaysHoursMinutes(totalMinutes) {
         if (!totalMinutes || totalMinutes < 1) return "0 phút";
         const MINS_IN_DAY = 24 * 60;
@@ -1080,17 +1000,6 @@ async load(defaults) {
     let data;
     let editingPreset = 'A';
 
-    function handleSaveError(err) {
-        console.error('Error saving data:', err);
-        toast('Lưu dữ liệu thất bại.');
-    }
-
-    const saveData = async () => {
-        await storageManager.save(data);
-    };
-
-    const debouncedSave = debounce(async () => { await saveData(); }, 500);
-
     // =============================
     // Gemini API Integration
     // =============================
@@ -1171,9 +1080,9 @@ async load(defaults) {
     // Storage
     // =============================
 
-      async function ensureValidSelection(){
+      function ensureValidSelection(){
         const set = data.settings;
-        if (!data.topics || data.topics.length === 0) { set.selectedTopicId = ''; set.selectedSubtopicId = ''; await saveData(); return; }
+        if (!data.topics || data.topics.length === 0) { set.selectedTopicId = ''; set.selectedSubtopicId = ''; storageManager.save(data); return; }
         const t = data.topics.find(x=>x.id===set.selectedTopicId);
         const s = t?.subtopics.find(x=>x.id===set.selectedSubtopicId);
         if(!t || !s){
@@ -1181,7 +1090,7 @@ async load(defaults) {
           const s0 = t0?.subtopics?.[0];
           set.selectedTopicId = t0?.id || '';
           set.selectedSubtopicId = s0?.id || '';
-          await saveData();
+          storageManager.save(data);
         }
       }
 
@@ -1210,14 +1119,14 @@ async load(defaults) {
         function cleanup() { $('#modalGeneric').classList.remove('show'); $('#btnGenericOk').onclick = null; $('#btnGenericCancel').onclick = null; }
     }
 
-    async function switchView(viewId) {
+    function switchView(viewId) {
         $$('.view').forEach(v => v.classList.remove('active'));
         $(`#view-${viewId}`).classList.add('active');
         $$('.nav-btn').forEach(b => b.classList.remove('active'));
         const navBtn = $(`.nav-btn[data-view="${viewId}"]`);
         if (navBtn) navBtn.classList.add('active');
         data.settings.currentView = viewId;
-        await saveData();
+        storageManager.save(data);
         if (viewId === 'stats') {
             renderDashboard();
         }
@@ -1335,16 +1244,16 @@ async load(defaults) {
           // Event Listeners for Subtopic actions
           btn.addEventListener('click', ()=> selectSubtopic(topic.id, st.id));
           subBMore.addEventListener('click', (e) => { e.stopPropagation(); closeAllMenus(); subMenu.classList.toggle('show'); });
-          subBEdit.addEventListener('click', ()=> showInputModal('Đổi tên Subtopic', async (newName) => { if(!newName) return; st.name=newName; await saveData(); renderAll(); }, st.name));
-          subBDel.addEventListener('click', ()=> showConfirmModal('Xác nhận xóa', `Bạn có chắc muốn xóa Subtopic "${st.name}"? Mọi dữ liệu liên quan sẽ bị mất.`, async (ok) => { if(!ok) return; topic.subtopics = topic.subtopics.filter(x=>x.id!==st.id); const set=data.settings; if(set.selectedSubtopicId===st.id){ set.selectedSubtopicId=''; set.selectedTopicId=''; await ensureValidSelection(); } await saveData(); renderAll(); }));
+          subBEdit.addEventListener('click', ()=> showInputModal('Đổi tên Subtopic', (newName) => { if(!newName) return; st.name=newName; storageManager.save(data); renderAll(); }, st.name));
+          subBDel.addEventListener('click', ()=> showConfirmModal('Xác nhận xóa', `Bạn có chắc muốn xóa Subtopic "${st.name}"? Mọi dữ liệu liên quan sẽ bị mất.`, (ok) => { if(!ok) return; topic.subtopics = topic.subtopics.filter(x=>x.id!==st.id); const set=data.settings; if(set.selectedSubtopicId===st.id){ set.selectedSubtopicId=''; set.selectedTopicId=''; ensureValidSelection(); } storageManager.save(data); renderAll(); }));
         });
 
         // Event Listeners for Topic actions
-        chev.addEventListener('click', async ()=>{ if(isCollapsed){ delete collapsedMap[topic.id]; } else { collapsedMap[topic.id] = true; } data.settings.collapsedTopics = collapsedMap; await saveData(); renderTopics(); });
+        chev.addEventListener('click', ()=>{ if(isCollapsed){ delete collapsedMap[topic.id]; } else { collapsedMap[topic.id] = true; } data.settings.collapsedTopics = collapsedMap; storageManager.save(data); renderTopics(); });
         bMore.addEventListener('click', (e) => { e.stopPropagation(); closeAllMenus(); menu.classList.toggle('show'); });
-        bAdd.addEventListener('click', ()=> showInputModal('Tên Subtopic mới?', async (name) => { if(!name) return; topic.subtopics.push({ id: uid('s'), name, tasks: [], generalNotes: [], summaries: [], chatHistory: [], stats:{ totalMinutes:0, sessionsCompleted:0, tasksCompleted: 0 }, sessions: [], timerState: { state: 'idle', remaining: 0, segmentTotal: 0, cycleIndex: 0 } }); await saveData(); renderTopics(); }));
-        bEdit.addEventListener('click', ()=> showInputModal('Đổi tên Topic', async (newName) => { if(!newName) return; topic.name=newName; await saveData(); renderTopics(); }, topic.name));
-        bDel.addEventListener('click', ()=> showConfirmModal('Xác nhận xóa', `Bạn có chắc muốn xóa Topic "${topic.name}"? Mọi subtopic và dữ liệu liên quan sẽ bị mất.`, async (ok) => { if(!ok) return; data.topics = data.topics.filter(t=>t.id!==topic.id); delete collapsedMap[topic.id]; if(data.settings.selectedTopicId===topic.id){ data.settings.selectedTopicId=''; data.settings.selectedSubtopicId=''; await ensureValidSelection(); } await saveData(); renderAll(); }));
+        bAdd.addEventListener('click', ()=> showInputModal('Tên Subtopic mới?', (name) => { if(!name) return; topic.subtopics.push({ id: uid('s'), name, tasks: [], generalNotes: [], summaries: [], chatHistory: [], stats:{ totalMinutes:0, sessionsCompleted:0, tasksCompleted: 0 }, sessions: [], timerState: { state: 'idle', remaining: 0, segmentTotal: 0, cycleIndex: 0 } }); storageManager.save(data); renderTopics(); }));
+        bEdit.addEventListener('click', ()=> showInputModal('Đổi tên Topic', (newName) => { if(!newName) return; topic.name=newName; storageManager.save(data); renderTopics(); }, topic.name));
+        bDel.addEventListener('click', ()=> showConfirmModal('Xác nhận xóa', `Bạn có chắc muốn xóa Topic "${topic.name}"? Mọi subtopic và dữ liệu liên quan sẽ bị mất.`, (ok) => { if(!ok) return; data.topics = data.topics.filter(t=>t.id!==topic.id); delete collapsedMap[topic.id]; if(data.settings.selectedTopicId===topic.id){ data.settings.selectedTopicId=''; data.settings.selectedSubtopicId=''; ensureValidSelection(); } storageManager.save(data); renderAll(); }));
 
         box.append(header, subs);
         wrap.appendChild(box);
@@ -1367,7 +1276,7 @@ async load(defaults) {
 
         mainEl.classList.add('reloading');
 
-        setTimeout(async () => {
+        setTimeout(() => {
             data.settings.selectedTopicId = topicId;
             data.settings.selectedSubtopicId = subId;
 
@@ -1379,9 +1288,10 @@ async load(defaults) {
                 timer.segmentTotal = newSubtopic.timerState.segmentTotal;
                 timer.cycleIndex = newSubtopic.timerState.cycleIndex;
             } else {
-                await timer.reset();
+                timer.reset();
             }
-            debouncedSave().catch(handleSaveError);
+
+            storageManager.save(data);
             timer.updateUI();
             renderAll();
             switchView('timer'); // Quay về màn hình timer sau khi chọn
@@ -1428,7 +1338,7 @@ async load(defaults) {
         });
     }
 
-    async function addSubtopicTask() {
+    function addSubtopicTask() {
         const s = getCurrentSubtopic();
         if (!s) { toast("Vui lòng chọn subtopic trước."); return; }
         const input = $('#newSubtopicTaskInput');
@@ -1436,7 +1346,7 @@ async load(defaults) {
         if (text) {
             if (!s.tasks) s.tasks = [];
             s.tasks.push({ id: uid('task'), text, isCompleted: false, createdAt: todayISO() });
-            await saveData();
+            storageManager.save(data);
             renderSubtopicTasks();
             input.value = '';
         }
@@ -1450,7 +1360,7 @@ async load(defaults) {
         if (task) {
             task.isCompleted = true;
             s.stats.tasksCompleted = (s.stats.tasksCompleted || 0) + 1;
-            debouncedSave().catch(handleSaveError);
+            storageManager.save(data);
 
             listItemElement.classList.add('removing');
             setTimeout(() => {
@@ -1464,14 +1374,14 @@ async load(defaults) {
     const timer = {
       state:'idle', prevState:null, interval:null, endAt:null,
       remaining:0, segmentTotal:0, cyclesTarget:4, cycleIndex:0, mode:'A',
-      async setPreset(p, {silent=false}={}){
+      setPreset(p, {silent=false}={}){
         const st = data.settings;
         this.mode = p;
         this.cyclesTarget = (p==='A' ? st.cyclesA : st.cyclesB);
         st.preset = p;
-        await saveData();
+        storageManager.save(data);
         if (this.state === 'idle') {
-            await this.reset();
+            this.reset();
         }
       },
       currentDurations(){ const d=data.settings.durations; return this.mode==='A'? {work:d.A_work, short:d.A_short, long:d.A_long} : {work:d.B_work, short:d.B_short, long:d.B_long}; },
@@ -1535,7 +1445,7 @@ async load(defaults) {
       pause(){ if(this.interval){ clearInterval(this.interval); this.interval=null; this.prevState=this.state; this.state='paused'; this.updateUI(); } },
       resume(){ if(this.state==='paused'){ this.state = this.prevState || 'work'; this.endAt = Date.now() + this.remaining*1000; this.tickStart(); } },
       skip(){ if(this.state==='idle') return; if(this.state==='paused' && this.prevState){ this.state = this.prevState; } clearInterval(this.interval); this.interval=null; this.segmentFinished(true); },
-      async reset() {
+      reset() {
           clearInterval(this.interval);
           this.interval = null;
           this.state = 'idle';
@@ -1548,10 +1458,10 @@ async load(defaults) {
           const currentSubtopic = getCurrentSubtopic();
           if (currentSubtopic) {
               currentSubtopic.timerState = { state: 'idle', remaining: 0, segmentTotal: 0, cycleIndex: 0 };
-              await saveData();
+              storageManager.save(data);
           }
       },
-      async segmentFinished(skipped=false){
+      segmentFinished(skipped=false){
         const lastState = this.state;
         $('.timer-circle-container').classList.add('finished');
         if(lastState==='work' && !skipped) playSound('work_end');
@@ -1566,7 +1476,7 @@ async load(defaults) {
                 s.sessions.unshift(entry);
                 s.stats.sessionsCompleted = (s.stats.sessionsCompleted || 0) + 1;
                 s.stats.totalMinutes = (s.stats.totalMinutes || 0) + work;
-                await saveData();
+                storageManager.save(data);
                 openNoteModal(entry.id);
                 renderStatsHistory();
             }
@@ -1666,7 +1576,7 @@ async load(defaults) {
         if (!content) { toast("Nội dung ghi chú không được để trống."); return; }
         if (!s.generalNotes) s.generalNotes = [];
         s.generalNotes.unshift({ id: uid('note'), content, createdAt: todayISO() });
-        debouncedSave().catch(handleSaveError); renderGeneralNotes(); textInput.value = ''; toast("Đã thêm ghi chú.");
+        storageManager.save(data); renderGeneralNotes(); textInput.value = ''; toast("Đã thêm ghi chú.");
     }
 
     function deleteGeneralNote(noteId) {
@@ -1675,7 +1585,7 @@ async load(defaults) {
             const s = getCurrentSubtopic();
             if (!s || !s.generalNotes) return;
             s.generalNotes = s.generalNotes.filter(note => note.id !== noteId);
-            debouncedSave().catch(handleSaveError); renderGeneralNotes(); toast("Đã xóa ghi chú.");
+            storageManager.save(data); renderGeneralNotes(); toast("Đã xóa ghi chú.");
         });
     }
 
@@ -1695,7 +1605,7 @@ async load(defaults) {
             const result = await callGeminiAPI(prompt);
             if (!s.summaries) s.summaries = [];
             s.summaries.unshift({ id: uid('sum'), content: result, createdAt: todayISO() });
-            await saveData();
+            storageManager.save(data);
             $('#summaryInput').value = '';
             renderSummaries();
         } catch (e) {
@@ -1706,12 +1616,12 @@ async load(defaults) {
     }
 
     function deleteSummary(id) {
-        showConfirmModal('Xác nhận xóa', 'Bạn có chắc muốn xóa tóm tắt này?', async (ok) => {
+        showConfirmModal('Xác nhận xóa', 'Bạn có chắc muốn xóa tóm tắt này?', (ok) => {
             if (!ok) return;
             const s = getCurrentSubtopic();
             if (!s || !s.summaries) return;
             s.summaries = s.summaries.filter(x => x.id !== id);
-            await saveData();
+            storageManager.save(data);
             renderSummaries();
             toast('Đã xóa tóm tắt.');
         });
@@ -1816,7 +1726,7 @@ async load(defaults) {
     }
 
     function closeSettings(){ $('#modalSettings').classList.remove('show'); }
-    async function setDefaults(){
+    function setDefaults(){
         data.settings.durations={A_work:25,A_short:5,A_long:15,B_work:50,B_short:10,B_long:30};
         data.settings.cyclesA=4;
         data.settings.longBreakIntervalA=4;
@@ -1825,8 +1735,8 @@ async load(defaults) {
         data.settings.preset='A';
         data.settings.volume=0.8;
         data.settings.soundTheme='beep';
-        await saveData(); openSettings(); toast('Đã khôi phục mặc định'); }
-      async function saveSettings(){
+        storageManager.save(data); openSettings(); toast('Đã khôi phục mặc định'); }
+      function saveSettings(){
           const s = data.settings;
           s.apiKey = $('#set_apiKey').value.trim();
           const d = s.durations;
@@ -1869,11 +1779,11 @@ async load(defaults) {
         }
         // --- KẾT THÚC PHẦN CẢI TIẾN (v2) ---
 
-        await saveData();
+        storageManager.save(data);
         applyTheme();
         applyPanelOpacity();
         updatePresetButtonsText();
-        await timer.setPreset(s.preset, {silent:true});
+        timer.setPreset(s.preset, {silent:true});
 
         closeSettings();
         toast('Đã lưu cài đặt');
@@ -1973,7 +1883,7 @@ async load(defaults) {
         const response = await callGeminiAPI(query);
         if (response) {
             subtopic.chatHistory.push({ role: 'model', text: response });
-            await saveData();
+            storageManager.save(data);
             renderChat();
         }
 
@@ -2030,10 +1940,10 @@ async load(defaults) {
     function clearChat() {
         const s = getCurrentSubtopic();
         if (!s) { toast("Vui lòng chọn subtopic."); return; }
-        showConfirmModal('Xác nhận xóa', 'Bạn có chắc muốn xóa toàn bộ lịch sử chat của subtopic này?', async (ok) => {
+        showConfirmModal('Xác nhận xóa', 'Bạn có chắc muốn xóa toàn bộ lịch sử chat của subtopic này?', (ok) => {
             if (ok) {
                 s.chatHistory = [];
-                await saveData();
+                storageManager.save(data);
                 renderChat();
                 toast("Đã xóa lịch sử chat.");
             }
@@ -2045,8 +1955,7 @@ async load(defaults) {
     // YouTube Player
     // =============================
     let ytPlayer;
-    // Expose callback globally for the YouTube IFrame API
-    window.onYouTubeIframeAPIReady = function onYouTubeIframeAPIReady() {
+    window.onYouTubeIframeAPIReady = function() {
         ytPlayer = new YT.Player('youtube-player-container', {
             height: '0',
             width: '0',
@@ -2073,14 +1982,14 @@ async load(defaults) {
         }
     }
 
-    async function updateYouTubePlayer() {
+    function updateYouTubePlayer() {
         if (!ytPlayer || !ytPlayer.cueVideoById) return;
         const videoId = extractYouTubeID(data.settings.youtubeUrl);
 
         if (!videoId) {
             if (data.settings.useYtThumbnailAsBg) {
                 data.settings.customBg = '';
-                await saveData();
+                storageManager.save(data);
                 applyCustomBg();
             }
             if (ytPlayer && ytPlayer.stopVideo) {
@@ -2092,15 +2001,15 @@ async load(defaults) {
         if (data.settings.useYtThumbnailAsBg) {
             const thumbUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
             const img = new Image();
-            img.onload = async () => {
+            img.onload = () => {
                 data.settings.customBg = thumbUrl;
-                await saveData();
+                storageManager.save(data);
                 applyCustomBg();
             };
-            img.onerror = async () => {
+            img.onerror = () => {
                 const fallbackUrl = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
                 data.settings.customBg = fallbackUrl;
-                await saveData();
+                storageManager.save(data);
                 applyCustomBg();
             };
             img.src = thumbUrl;
@@ -2139,14 +2048,14 @@ async load(defaults) {
     // Bindings
     // =============================
     function bindEvents(){
-      on($('#btnAddTopic'), 'click', () => showInputModal('Tên Topic mới?', async (name) => { if (!name) return; data.topics.push({ id: uid('t'), name, subtopics: [] }); await saveData(); renderTopics(); }));
+      on($('#btnAddTopic'), 'click', () => showInputModal('Tên Topic mới?', (name) => { if (!name) return; data.topics.push({ id: uid('t'), name, subtopics: [] }); storageManager.save(data); renderTopics(); }));
       on($('#btnExport'), 'click', ()=> storageManager.exportData(data));
         on($('#importFile'), 'change', (e)=>{
           const f = e.target.files[0];
           if (f) {
-            storageManager.importData(f).then(async (d) => {
+            storageManager.importData(f).then((d) => {
               data = d;
-              await ensureValidSelection();
+              ensureValidSelection();
               toast('Đã nhập dữ liệu thành công!');
               renderAll();
             }).catch(err => toast('Nhập thất bại: ' + err.message));
@@ -2190,7 +2099,7 @@ async load(defaults) {
       on($('#btnDefaults'), 'click', setDefaults);
       on($('#btnTestSound'), 'click', ()=>{ ensureAudio(); playSound('work_end'); });
 
-      on($('#btnSaveNote'), 'click', async ()=>{ const s=getCurrentSubtopic(); if(!s) return; const id=pendingNoteSessionId; const sess=s.sessions.find(x=>x.id===id); if(sess){ sess.note=$('#noteText').value.trim(); await saveData(); renderStatsHistory(); toast('Đã lưu ghi chú'); } closeNoteModal(); });
+      on($('#btnSaveNote'), 'click', ()=>{ const s=getCurrentSubtopic(); if(!s) return; const id=pendingNoteSessionId; const sess=s.sessions.find(x=>x.id===id); if(sess){ sess.note=$('#noteText').value.trim(); storageManager.save(data); renderStatsHistory(); toast('Đã lưu ghi chú'); } closeNoteModal(); });
       on($('#btnSkipNote'), 'click', ()=> closeNoteModal());
       on($('#btnAddGeneralNote'), 'click', addGeneralNote);
       on($('#btnSummarize'), 'click', summarizeNotes);
@@ -2256,22 +2165,22 @@ async load(defaults) {
       on($('#btnPause'), 'click', ()=> timer.pause());
       on($('#btnResume'), 'click', ()=> timer.resume());
       on($('#btnSkip'), 'click', ()=> timer.skip());
-      on($('#btnReset'), 'click', async ()=> { await timer.reset(); });
+      on($('#btnReset'), 'click', ()=> timer.reset());
 
-      on($('#uploadBg'), 'change', (e) => { handleFileUpload(e.target.files[0], async (id) => { data.settings.customBg = id; await saveData(); applyCustomBg(); toast("Đã cập nhật hình nền."); }); e.target.value = null; });
-      on($('#btnClearBg'), 'click', async () => {
+      on($('#uploadBg'), 'change', (e) => { handleFileUpload(e.target.files[0], (id) => { data.settings.customBg = id; storageManager.save(data); applyCustomBg(); toast("Đã cập nhật hình nền."); }); e.target.value = null; });
+      on($('#btnClearBg'), 'click', () => {
           data.settings.customBg = '';
           data.settings.useYtThumbnailAsBg = false;
-          await saveData();
+          storageManager.save(data);
           applyCustomBg();
           toast("Đã xóa hình nền tùy chỉnh.");
           if ($('#modalSettings').classList.contains('show')) {
               openSettings();
           }
       });
-      on($('#uploadSoundWork'), 'change', (e) => { handleFileUpload(e.target.files[0], async (id) => { data.settings.customSounds.work_end = id; await saveData(); toast("Đã lưu âm báo hết WORK."); }); e.target.value = null; });
-      on($('#uploadSoundBreak'), 'change', (e) => { handleFileUpload(e.target.files[0], async (id) => { data.settings.customSounds.break_end = id; await saveData(); toast("Đã lưu âm báo hết BREAK."); }); e.target.value = null; });
-      on($('#uploadSoundLong'), 'change', (e) => { handleFileUpload(e.target.files[0], async (id) => { data.settings.customSounds.long_end = id; await saveData(); toast("Đã lưu âm báo hết LONG BREAK."); }); e.target.value = null; });
+      on($('#uploadSoundWork'), 'change', (e) => { handleFileUpload(e.target.files[0], (id) => { data.settings.customSounds.work_end = id; storageManager.save(data); toast("Đã lưu âm báo hết WORK."); }); e.target.value = null; });
+      on($('#uploadSoundBreak'), 'change', (e) => { handleFileUpload(e.target.files[0], (id) => { data.settings.customSounds.break_end = id; storageManager.save(data); toast("Đã lưu âm báo hết BREAK."); }); e.target.value = null; });
+      on($('#uploadSoundLong'), 'change', (e) => { handleFileUpload(e.target.files[0], (id) => { data.settings.customSounds.long_end = id; storageManager.save(data); toast("Đã lưu âm báo hết LONG BREAK."); }); e.target.value = null; });
 
       on($('#btnFullscreen'), 'click', toggleFullScreen);
       document.addEventListener('fullscreenchange', updateFullscreenButton);
@@ -2375,32 +2284,18 @@ async load(defaults) {
 
 
     // Boot
-async function initializeApp() {
     try {
-        // storageManager.load() đã gọi initDB() bên trong nó rồi
-        data = await storageManager.load(defaults);
-        await ensureValidSelection();
+      data = storageManager.load(defaults);
+      storageManager.initDB();
+      ensureValidSelection();
+      renderAll();
     } catch (err) {
-        console.error('Initialization error:', err);
-        toast(`Lỗi khởi tạo, sử dụng dữ liệu mặc định: ${err.message}`);
-        // Nếu không tải được dữ liệu, hãy dùng dữ liệu mặc định để app không bị lỗi
-        data = JSON.parse(JSON.stringify(defaults));
+      console.error('Initialization error:', err);
+      toast(`Lỗi khởi tạo: ${err.message}`);
     } finally {
-        // Dù thành công hay thất bại, luôn render giao diện và gán sự kiện
-        try {
-            renderAll();
-        } catch (err) {
-            console.error('Render error:', err);
-            toast(`Lỗi hiển thị: ${err.message}`);
-        } finally {
-            bindEvents();
-        }
-        applyTheme();
+      bindEvents();
     }
-}
-
-// Chạy hàm khởi tạo sau khi DOM đã sẵn sàng
-document.addEventListener('DOMContentLoaded', initializeApp);
+    applyTheme();
     </script>
 </body>
 </html>
