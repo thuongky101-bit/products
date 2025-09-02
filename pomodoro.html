@@ -1997,7 +1997,8 @@ async load(defaults) {
     // YouTube Player
     // =============================
     let ytPlayer;
-    window.onYouTubeIframeAPIReady = function() {
+    // Expose callback globally for the YouTube IFrame API
+    window.onYouTubeIframeAPIReady = function onYouTubeIframeAPIReady() {
         ytPlayer = new YT.Player('youtube-player-container', {
             height: '0',
             width: '0',
@@ -2344,8 +2345,8 @@ async function initializeApp() {
     }
 }
 
-// Chạy hàm khởi tạo
-initializeApp();
+// Chạy hàm khởi tạo sau khi DOM đã sẵn sàng
+document.addEventListener('DOMContentLoaded', initializeApp);
     </script>
 </body>
 </html>
