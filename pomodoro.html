@@ -801,13 +801,15 @@ async load(defaults) {
                 let data;
                 if (request.result && request.result.value) {
                     data = request.result.value;
-                    data.settings = { ...defaults.settings, ...data.settings };
+                    data.settings = mergeDeep(defaults.settings, data.settings);
+                    validateSettings(data.settings, defaults.settings);
                 } else {
                     const old = localStorage.getItem('pomodoroData_v11');
                     if (old) {
                         console.log("Di chuyển dữ liệu từ LocalStorage sang IndexedDB...");
                         data = JSON.parse(old);
-                        data.settings = { ...defaults.settings, ...data.settings };
+                        data.settings = mergeDeep(defaults.settings, data.settings);
+                        validateSettings(data.settings, defaults.settings);
                         await this.save(data); // Thêm "await" để đợi di chuyển xong
                         localStorage.removeItem('pomodoroData_v11');
                         console.log("Di chuyển hoàn tất.");
@@ -939,6 +941,39 @@ async load(defaults) {
             clearTimeout(timeout);
             timeout = setTimeout(() => func.apply(this, args), delay);
         };
+    }
+    function mergeDeep(target = {}, source = {}) {
+        const isObject = (obj) => obj && typeof obj === 'object' && !Array.isArray(obj);
+        const output = isObject(target) ? { ...target } : {};
+        if (!isObject(source)) return output;
+        for (const key of Object.keys(source)) {
+            const srcVal = source[key];
+            const tgtVal = output[key];
+            if (isObject(srcVal) && isObject(tgtVal)) {
+                output[key] = mergeDeep(tgtVal, srcVal);
+            } else {
+                output[key] = srcVal;
+            }
+        }
+        return output;
+    }
+    function validateSettings(settings, defaults) {
+        const isObject = (obj) => obj && typeof obj === 'object' && !Array.isArray(obj);
+        for (const key of Object.keys(defaults)) {
+            const defVal = defaults[key];
+            const curVal = settings[key];
+            if (isObject(defVal)) {
+                if (!isObject(curVal)) {
+                    console.warn(`Resetting missing section: settings.${key}`);
+                    settings[key] = mergeDeep({}, defVal);
+                } else {
+                    validateSettings(curVal, defVal);
+                }
+            } else if (curVal === undefined) {
+                console.warn(`Missing setting: ${key}; applying default.`);
+                settings[key] = defVal;
+            }
+        }
     }
     function formatDaysHoursMinutes(totalMinutes) {
         if (!totalMinutes || totalMinutes < 1) return "0 phút";
