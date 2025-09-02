@@ -788,33 +788,41 @@
                 };
             });
         },
-        async load(defaults) {
-            await this.initDB();
-            return new Promise((resolve, reject) => {
-                const transaction = this.db.transaction([this.MAIN_STORE], 'readonly');
-                const store = transaction.objectStore(this.MAIN_STORE);
-                const request = store.get('main');
-                request.onsuccess = () => {
-                    let data;
-                    if (request.result && request.result.value) {
-                        data = request.result.value;
+        // HÀM MỚI - Đã sửa lỗi bất đồng bộ
+async load(defaults) {
+    await this.initDB();
+    return new Promise((resolve, reject) => {
+        const transaction = this.db.transaction([this.MAIN_STORE], 'readonly');
+        const store = transaction.objectStore(this.MAIN_STORE);
+        const request = store.get('main');
+
+        request.onsuccess = async () => { // Thêm "async" ở đây
+            try {
+                let data;
+                if (request.result && request.result.value) {
+                    data = request.result.value;
+                    data.settings = { ...defaults.settings, ...data.settings };
+                } else {
+                    const old = localStorage.getItem('pomodoroData_v11');
+                    if (old) {
+                        console.log("Di chuyển dữ liệu từ LocalStorage sang IndexedDB...");
+                        data = JSON.parse(old);
                         data.settings = { ...defaults.settings, ...data.settings };
+                        await this.save(data); // Thêm "await" để đợi di chuyển xong
+                        localStorage.removeItem('pomodoroData_v11');
+                        console.log("Di chuyển hoàn tất.");
                     } else {
-                        const old = localStorage.getItem('pomodoroData_v11');
-                        if (old) {
-                            data = JSON.parse(old);
-                            data.settings = { ...defaults.settings, ...data.settings };
-                            this.save(data); // migrate
-                            localStorage.removeItem('pomodoroData_v11');
-                        } else {
-                            data = JSON.parse(JSON.stringify(defaults));
-                        }
+                        data = JSON.parse(JSON.stringify(defaults));
                     }
-                    resolve(data);
-                };
-                request.onerror = () => reject(request.error);
-            });
-        },
+                }
+                resolve(data);
+            } catch (err) {
+                reject(err);
+            }
+        };
+        request.onerror = () => reject(request.error);
+    });
+},
         async save(data) {
             await this.initDB();
             return new Promise((resolve, reject) => {
@@ -2318,19 +2326,26 @@
 
 
     // Boot
+async function initializeApp() {
     try {
-      await storageManager.initDB();
-      data = await storageManager.load(defaults);
-      ensureValidSelection();
-      renderAll();
+        // storageManager.load() đã gọi initDB() bên trong nó rồi
+        data = await storageManager.load(defaults);
+        ensureValidSelection();
     } catch (err) {
-      console.error('Initialization error:', err);
-      toast(`Lỗi khởi tạo: ${err.message}`);
+        console.error('Initialization error:', err);
+        toast(`Lỗi khởi tạo, sử dụng dữ liệu mặc định: ${err.message}`);
+        // Nếu không tải được dữ liệu, hãy dùng dữ liệu mặc định để app không bị lỗi
+        data = JSON.parse(JSON.stringify(defaults));
     } finally {
-      bindEvents();
+        // Dù thành công hay thất bại, luôn render giao diện và gán sự kiện
+        renderAll();
+        bindEvents();
+        applyTheme();
     }
-    applyTheme();
+}
+
+// Chạy hàm khởi tạo
+initializeApp();
     </script>
 </body>
 </html>
-
