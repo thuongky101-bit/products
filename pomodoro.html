@@ -836,7 +836,6 @@ async load(defaults) {
                     resolve();
                 };
                 request.onerror = (event) => {
-                    console.error('Error saving to IndexedDB', event);
                     reject(event.target.error);
                 };
             });
@@ -1076,7 +1075,15 @@ async load(defaults) {
     };
     let data;
     let editingPreset = 'A';
-    const debouncedSave = debounce(() => storageManager.save(data), 500);
+
+    function handleSaveError(err) {
+        console.error('Error saving data:', err);
+        toast('Lưu dữ liệu thất bại.');
+    }
+
+    const saveData = () => storageManager.save(data).catch(handleSaveError);
+
+    const debouncedSave = debounce(saveData, 500);
 
     // =============================
     // Gemini API Integration
@@ -1160,7 +1167,7 @@ async load(defaults) {
 
       function ensureValidSelection(){
         const set = data.settings;
-        if (!data.topics || data.topics.length === 0) { set.selectedTopicId = ''; set.selectedSubtopicId = ''; storageManager.save(data); return; }
+        if (!data.topics || data.topics.length === 0) { set.selectedTopicId = ''; set.selectedSubtopicId = ''; saveData(); return; }
         const t = data.topics.find(x=>x.id===set.selectedTopicId);
         const s = t?.subtopics.find(x=>x.id===set.selectedSubtopicId);
         if(!t || !s){
@@ -1168,7 +1175,7 @@ async load(defaults) {
           const s0 = t0?.subtopics?.[0];
           set.selectedTopicId = t0?.id || '';
           set.selectedSubtopicId = s0?.id || '';
-          storageManager.save(data);
+          saveData();
         }
       }
 
@@ -1204,7 +1211,7 @@ async load(defaults) {
         const navBtn = $(`.nav-btn[data-view="${viewId}"]`);
         if (navBtn) navBtn.classList.add('active');
         data.settings.currentView = viewId;
-        storageManager.save(data);
+        saveData();
         if (viewId === 'stats') {
             renderDashboard();
         }
@@ -1322,16 +1329,16 @@ async load(defaults) {
           // Event Listeners for Subtopic actions
           btn.addEventListener('click', ()=> selectSubtopic(topic.id, st.id));
           subBMore.addEventListener('click', (e) => { e.stopPropagation(); closeAllMenus(); subMenu.classList.toggle('show'); });
-          subBEdit.addEventListener('click', ()=> showInputModal('Đổi tên Subtopic', (newName) => { if(!newName) return; st.name=newName; storageManager.save(data); renderAll(); }, st.name));
-          subBDel.addEventListener('click', ()=> showConfirmModal('Xác nhận xóa', `Bạn có chắc muốn xóa Subtopic "${st.name}"? Mọi dữ liệu liên quan sẽ bị mất.`, (ok) => { if(!ok) return; topic.subtopics = topic.subtopics.filter(x=>x.id!==st.id); const set=data.settings; if(set.selectedSubtopicId===st.id){ set.selectedSubtopicId=''; set.selectedTopicId=''; ensureValidSelection(); } storageManager.save(data); renderAll(); }));
+          subBEdit.addEventListener('click', ()=> showInputModal('Đổi tên Subtopic', (newName) => { if(!newName) return; st.name=newName; saveData(); renderAll(); }, st.name));
+          subBDel.addEventListener('click', ()=> showConfirmModal('Xác nhận xóa', `Bạn có chắc muốn xóa Subtopic "${st.name}"? Mọi dữ liệu liên quan sẽ bị mất.`, (ok) => { if(!ok) return; topic.subtopics = topic.subtopics.filter(x=>x.id!==st.id); const set=data.settings; if(set.selectedSubtopicId===st.id){ set.selectedSubtopicId=''; set.selectedTopicId=''; ensureValidSelection(); } saveData(); renderAll(); }));
         });
 
         // Event Listeners for Topic actions
-        chev.addEventListener('click', ()=>{ if(isCollapsed){ delete collapsedMap[topic.id]; } else { collapsedMap[topic.id] = true; } data.settings.collapsedTopics = collapsedMap; storageManager.save(data); renderTopics(); });
+        chev.addEventListener('click', ()=>{ if(isCollapsed){ delete collapsedMap[topic.id]; } else { collapsedMap[topic.id] = true; } data.settings.collapsedTopics = collapsedMap; saveData(); renderTopics(); });
         bMore.addEventListener('click', (e) => { e.stopPropagation(); closeAllMenus(); menu.classList.toggle('show'); });
-        bAdd.addEventListener('click', ()=> showInputModal('Tên Subtopic mới?', (name) => { if(!name) return; topic.subtopics.push({ id: uid('s'), name, tasks: [], generalNotes: [], summaries: [], chatHistory: [], stats:{ totalMinutes:0, sessionsCompleted:0, tasksCompleted: 0 }, sessions: [], timerState: { state: 'idle', remaining: 0, segmentTotal: 0, cycleIndex: 0 } }); storageManager.save(data); renderTopics(); }));
-        bEdit.addEventListener('click', ()=> showInputModal('Đổi tên Topic', (newName) => { if(!newName) return; topic.name=newName; storageManager.save(data); renderTopics(); }, topic.name));
-        bDel.addEventListener('click', ()=> showConfirmModal('Xác nhận xóa', `Bạn có chắc muốn xóa Topic "${topic.name}"? Mọi subtopic và dữ liệu liên quan sẽ bị mất.`, (ok) => { if(!ok) return; data.topics = data.topics.filter(t=>t.id!==topic.id); delete collapsedMap[topic.id]; if(data.settings.selectedTopicId===topic.id){ data.settings.selectedTopicId=''; data.settings.selectedSubtopicId=''; ensureValidSelection(); } storageManager.save(data); renderAll(); }));
+        bAdd.addEventListener('click', ()=> showInputModal('Tên Subtopic mới?', (name) => { if(!name) return; topic.subtopics.push({ id: uid('s'), name, tasks: [], generalNotes: [], summaries: [], chatHistory: [], stats:{ totalMinutes:0, sessionsCompleted:0, tasksCompleted: 0 }, sessions: [], timerState: { state: 'idle', remaining: 0, segmentTotal: 0, cycleIndex: 0 } }); saveData(); renderTopics(); }));
+        bEdit.addEventListener('click', ()=> showInputModal('Đổi tên Topic', (newName) => { if(!newName) return; topic.name=newName; saveData(); renderTopics(); }, topic.name));
+        bDel.addEventListener('click', ()=> showConfirmModal('Xác nhận xóa', `Bạn có chắc muốn xóa Topic "${topic.name}"? Mọi subtopic và dữ liệu liên quan sẽ bị mất.`, (ok) => { if(!ok) return; data.topics = data.topics.filter(t=>t.id!==topic.id); delete collapsedMap[topic.id]; if(data.settings.selectedTopicId===topic.id){ data.settings.selectedTopicId=''; data.settings.selectedSubtopicId=''; ensureValidSelection(); } saveData(); renderAll(); }));
 
         box.append(header, subs);
         wrap.appendChild(box);
@@ -1423,7 +1430,7 @@ async load(defaults) {
         if (text) {
             if (!s.tasks) s.tasks = [];
             s.tasks.push({ id: uid('task'), text, isCompleted: false, createdAt: todayISO() });
-            storageManager.save(data);
+            saveData();
             renderSubtopicTasks();
             input.value = '';
         }
@@ -1456,7 +1463,7 @@ async load(defaults) {
         this.mode = p;
         this.cyclesTarget = (p==='A' ? st.cyclesA : st.cyclesB);
         st.preset = p;
-        storageManager.save(data);
+        saveData();
         if (this.state === 'idle') {
             this.reset();
         }
@@ -1535,7 +1542,7 @@ async load(defaults) {
           const currentSubtopic = getCurrentSubtopic();
           if (currentSubtopic) {
               currentSubtopic.timerState = { state: 'idle', remaining: 0, segmentTotal: 0, cycleIndex: 0 };
-              storageManager.save(data);
+              saveData();
           }
       },
       segmentFinished(skipped=false){
@@ -1553,7 +1560,7 @@ async load(defaults) {
                 s.sessions.unshift(entry);
                 s.stats.sessionsCompleted = (s.stats.sessionsCompleted || 0) + 1;
                 s.stats.totalMinutes = (s.stats.totalMinutes || 0) + work;
-                storageManager.save(data);
+                saveData();
                 openNoteModal(entry.id);
                 renderStatsHistory();
             }
@@ -1682,7 +1689,7 @@ async load(defaults) {
             const result = await callGeminiAPI(prompt);
             if (!s.summaries) s.summaries = [];
             s.summaries.unshift({ id: uid('sum'), content: result, createdAt: todayISO() });
-            storageManager.save(data);
+            saveData();
             $('#summaryInput').value = '';
             renderSummaries();
         } catch (e) {
@@ -1698,7 +1705,7 @@ async load(defaults) {
             const s = getCurrentSubtopic();
             if (!s || !s.summaries) return;
             s.summaries = s.summaries.filter(x => x.id !== id);
-            storageManager.save(data);
+            saveData();
             renderSummaries();
             toast('Đã xóa tóm tắt.');
         });
@@ -1812,7 +1819,7 @@ async load(defaults) {
         data.settings.preset='A';
         data.settings.volume=0.8;
         data.settings.soundTheme='beep';
-        storageManager.save(data); openSettings(); toast('Đã khôi phục mặc định'); }
+        saveData(); openSettings(); toast('Đã khôi phục mặc định'); }
       function saveSettings(){
           const s = data.settings;
           s.apiKey = $('#set_apiKey').value.trim();
@@ -1856,7 +1863,7 @@ async load(defaults) {
         }
         // --- KẾT THÚC PHẦN CẢI TIẾN (v2) ---
 
-        storageManager.save(data);
+        saveData();
         applyTheme();
         applyPanelOpacity();
         updatePresetButtonsText();
@@ -1960,7 +1967,7 @@ async load(defaults) {
         const response = await callGeminiAPI(query);
         if (response) {
             subtopic.chatHistory.push({ role: 'model', text: response });
-            storageManager.save(data);
+            saveData();
             renderChat();
         }
 
@@ -2020,7 +2027,7 @@ async load(defaults) {
         showConfirmModal('Xác nhận xóa', 'Bạn có chắc muốn xóa toàn bộ lịch sử chat của subtopic này?', (ok) => {
             if (ok) {
                 s.chatHistory = [];
-                storageManager.save(data);
+                saveData();
                 renderChat();
                 toast("Đã xóa lịch sử chat.");
             }
@@ -2067,7 +2074,7 @@ async load(defaults) {
         if (!videoId) {
             if (data.settings.useYtThumbnailAsBg) {
                 data.settings.customBg = '';
-                storageManager.save(data);
+                saveData();
                 applyCustomBg();
             }
             if (ytPlayer && ytPlayer.stopVideo) {
@@ -2081,13 +2088,13 @@ async load(defaults) {
             const img = new Image();
             img.onload = () => {
                 data.settings.customBg = thumbUrl;
-                storageManager.save(data);
+                saveData();
                 applyCustomBg();
             };
             img.onerror = () => {
                 const fallbackUrl = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
                 data.settings.customBg = fallbackUrl;
-                storageManager.save(data);
+                saveData();
                 applyCustomBg();
             };
             img.src = thumbUrl;
@@ -2126,7 +2133,7 @@ async load(defaults) {
     // Bindings
     // =============================
     function bindEvents(){
-      on($('#btnAddTopic'), 'click', () => showInputModal('Tên Topic mới?', (name) => { if (!name) return; data.topics.push({ id: uid('t'), name, subtopics: [] }); storageManager.save(data); renderTopics(); }));
+      on($('#btnAddTopic'), 'click', () => showInputModal('Tên Topic mới?', (name) => { if (!name) return; data.topics.push({ id: uid('t'), name, subtopics: [] }); saveData(); renderTopics(); }));
       on($('#btnExport'), 'click', ()=> storageManager.exportData(data));
         on($('#importFile'), 'change', (e)=>{
           const f = e.target.files[0];
@@ -2177,7 +2184,7 @@ async load(defaults) {
       on($('#btnDefaults'), 'click', setDefaults);
       on($('#btnTestSound'), 'click', ()=>{ ensureAudio(); playSound('work_end'); });
 
-      on($('#btnSaveNote'), 'click', ()=>{ const s=getCurrentSubtopic(); if(!s) return; const id=pendingNoteSessionId; const sess=s.sessions.find(x=>x.id===id); if(sess){ sess.note=$('#noteText').value.trim(); storageManager.save(data); renderStatsHistory(); toast('Đã lưu ghi chú'); } closeNoteModal(); });
+      on($('#btnSaveNote'), 'click', ()=>{ const s=getCurrentSubtopic(); if(!s) return; const id=pendingNoteSessionId; const sess=s.sessions.find(x=>x.id===id); if(sess){ sess.note=$('#noteText').value.trim(); saveData(); renderStatsHistory(); toast('Đã lưu ghi chú'); } closeNoteModal(); });
       on($('#btnSkipNote'), 'click', ()=> closeNoteModal());
       on($('#btnAddGeneralNote'), 'click', addGeneralNote);
       on($('#btnSummarize'), 'click', summarizeNotes);
@@ -2245,20 +2252,20 @@ async load(defaults) {
       on($('#btnSkip'), 'click', ()=> timer.skip());
       on($('#btnReset'), 'click', ()=> timer.reset());
 
-      on($('#uploadBg'), 'change', (e) => { handleFileUpload(e.target.files[0], (id) => { data.settings.customBg = id; storageManager.save(data); applyCustomBg(); toast("Đã cập nhật hình nền."); }); e.target.value = null; });
+      on($('#uploadBg'), 'change', (e) => { handleFileUpload(e.target.files[0], (id) => { data.settings.customBg = id; saveData(); applyCustomBg(); toast("Đã cập nhật hình nền."); }); e.target.value = null; });
       on($('#btnClearBg'), 'click', () => {
           data.settings.customBg = '';
           data.settings.useYtThumbnailAsBg = false;
-          storageManager.save(data);
+          saveData();
           applyCustomBg();
           toast("Đã xóa hình nền tùy chỉnh.");
           if ($('#modalSettings').classList.contains('show')) {
               openSettings();
           }
       });
-      on($('#uploadSoundWork'), 'change', (e) => { handleFileUpload(e.target.files[0], (id) => { data.settings.customSounds.work_end = id; storageManager.save(data); toast("Đã lưu âm báo hết WORK."); }); e.target.value = null; });
-      on($('#uploadSoundBreak'), 'change', (e) => { handleFileUpload(e.target.files[0], (id) => { data.settings.customSounds.break_end = id; storageManager.save(data); toast("Đã lưu âm báo hết BREAK."); }); e.target.value = null; });
-      on($('#uploadSoundLong'), 'change', (e) => { handleFileUpload(e.target.files[0], (id) => { data.settings.customSounds.long_end = id; storageManager.save(data); toast("Đã lưu âm báo hết LONG BREAK."); }); e.target.value = null; });
+      on($('#uploadSoundWork'), 'change', (e) => { handleFileUpload(e.target.files[0], (id) => { data.settings.customSounds.work_end = id; saveData(); toast("Đã lưu âm báo hết WORK."); }); e.target.value = null; });
+      on($('#uploadSoundBreak'), 'change', (e) => { handleFileUpload(e.target.files[0], (id) => { data.settings.customSounds.break_end = id; saveData(); toast("Đã lưu âm báo hết BREAK."); }); e.target.value = null; });
+      on($('#uploadSoundLong'), 'change', (e) => { handleFileUpload(e.target.files[0], (id) => { data.settings.customSounds.long_end = id; saveData(); toast("Đã lưu âm báo hết LONG BREAK."); }); e.target.value = null; });
 
       on($('#btnFullscreen'), 'click', toggleFullScreen);
       document.addEventListener('fullscreenchange', updateFullscreenButton);
