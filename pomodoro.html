@@ -1315,7 +1315,7 @@
                 remaining: timer.remaining,
                 segmentTotal: timer.segmentTotal,
                 cycleIndex: timer.cycleIndex,
-                prevState: timer.prevState
+                prevState: timer.prevState || null
             };
         }
 
@@ -1489,8 +1489,8 @@
       beginBreak(){ const {short,long}=this.currentDurations(); const {interval}=this.currentConfig(); const isLong=(this.cycleIndex % interval===0) && (this.cyclesTarget>=interval); if(isLong){ this.state='long_break'; this.remaining=long*60; } else { this.state='break'; this.remaining=short*60; } this.segmentTotal=this.remaining; this.tickStart(); },
       tickStart(){ clearInterval(this.interval); this.endAt = Date.now() + this.remaining*1000; this.updateUI(); this.interval=setInterval(()=>{ const now=Date.now(); this.remaining = Math.max(0, Math.ceil((this.endAt - now)/1000)); this.updateUI(); if(this.remaining<=0){ clearInterval(this.interval); this.interval=null; this.segmentFinished(); } }, 250); },
       pause(){ if(this.interval){ clearInterval(this.interval); this.interval=null; this.prevState=this.state; this.state='paused'; this.updateUI(); } },
-      resume(){ if(this.state==='paused'){ this.state = this.prevState || 'work'; this.endAt = Date.now() + this.remaining*1000; this.tickStart(); } },
-      skip(){ if(this.state==='idle') return; if(this.state==='paused' && this.prevState){ this.state = this.prevState; } clearInterval(this.interval); this.interval=null; this.segmentFinished(true); },
+      resume(){ if(this.state==='paused'){ this.state = this.prevState || 'work'; this.prevState = null; this.endAt = Date.now() + this.remaining*1000; this.tickStart(); } },
+      skip(){ if(this.state==='idle') return; if(this.state==='paused' && this.prevState){ this.state = this.prevState; this.prevState = null; } clearInterval(this.interval); this.interval=null; this.segmentFinished(true); },
       reset() {
           clearInterval(this.interval);
           this.interval = null;
