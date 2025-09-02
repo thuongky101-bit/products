@@ -1823,8 +1823,10 @@
         ytPlayer = new YT.Player('youtube-player-container', {
             height: '0',
             width: '0',
-            playerVars: { autoplay: 0, controls: 0, loop: 1 },
-            events: { onReady: onPlayerReady, onStateChange: onPlayerStateChange }
+            playerVars: { autoplay: 0, controls: 0 },
+            events: { onReady: onPlayerReady, onStateChange: onPlayerStateChange },
+            host: 'https://www.youtube.com',
+            origin: window.location.origin
         });
     };
 
@@ -1845,7 +1847,7 @@
     }
 
     function updateYouTubePlayer() {
-        if (!ytPlayer || !ytPlayer.loadVideoById) return;
+        if (!ytPlayer || !ytPlayer.cueVideoById) return;
         const videoId = extractYouTubeID(data.settings.youtubeUrl);
 
         if (!videoId) {
@@ -1877,16 +1879,18 @@
             img.src = thumbUrl;
         }
 
-        ytPlayer.loadVideoById(videoId);
+        ytPlayer.cueVideoById(videoId);
         ytPlayer.setVolume(data.settings.youtubeVolume);
     }
 
     function toggleYtSound() {
         if (!ytPlayer || !ytPlayer.getPlayerState) return;
         const playerState = ytPlayer.getPlayerState();
-        if (playerState === YT.PlayerState.PLAYING) {
+        // Các trạng thái "đang hoạt động" bao gồm ĐANG PHÁT và ĐANG TẢI
+        if (playerState === YT.PlayerState.PLAYING || playerState === YT.PlayerState.BUFFERING) {
             ytPlayer.pauseVideo();
         } else {
+            // Các trạng thái "đang nghỉ" (dừng, kết thúc, chờ) thì cho phát
             ytPlayer.playVideo();
         }
     }
