@@ -1768,12 +1768,16 @@
         if (ytPlayer && ytPlayer.setVolume) {
             ytPlayer.setVolume(s.youtubeVolume);
         }
-        // --- BẮT ĐẦU PHẦN CẢI TIẾN: TỰ ĐỘNG PHÁT KHI LƯU ---
+        // --- BẮT ĐẦU PHẦN CẢI TIẾN: TỰ ĐỘNG PHÁT KHI LƯU (v2) ---
         const finalVideoId = extractYouTubeID(s.youtubeUrl);
-        if (finalVideoId && ytPlayer && typeof ytPlayer.playVideo === 'function') {
+        if (finalVideoId && ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
+            // 1. Chủ động YÊU CẦU TẢI video. Hàm này mạnh hơn "cueVideoById".
+            ytPlayer.loadVideoById(finalVideoId);
+
+            // 2. Sau đó, yêu cầu phát video vừa được tải.
             ytPlayer.playVideo();
         }
-        // --- KẾT THÚC PHẦN CẢI TIẾN ---
+        // --- KẾT THÚC PHẦN CẢI TIẾN (v2) ---
 
         storageManager.save(data);
         applyTheme();
