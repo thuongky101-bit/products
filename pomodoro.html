@@ -680,6 +680,7 @@
                       <div class="row">
                           <input type="text" id="set_youtubeUrl" placeholder="Dán link YouTube vào đây...">
                       </div>
+                      <div id="ytUrlFeedback" class="tiny" style="min-height: 1.2em; padding: 4px 0;"></div>
                       <div class="row" style="margin-top: 4px;">
                           <label style="flex: 0 1 auto; display: flex; align-items: center; gap: 8px; font-size: 14px;">
                               <input type="checkbox" id="set_ytThumbAsBg">
@@ -918,6 +919,33 @@
         const regExp = /^.*(?:youtu.be\/|shorts\/|live\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([A-Za-z0-9_-]{11}).*/;
         const match = url.match(regExp);
         return match ? match[1] : null;
+    }
+    function handleYoutubeUrlInput() {
+        const input = $('#set_youtubeUrl');
+        const feedbackEl = $('#ytUrlFeedback');
+        const toggleBtn = $('#btnToggleYtSound');
+        const url = input.value.trim();
+        const videoId = extractYouTubeID(url);
+
+        if (videoId) {
+            feedbackEl.textContent = "✅ Link hợp lệ. Sẵn sàng để phát.";
+            feedbackEl.style.color = 'var(--acc-2)';
+            toggleBtn.disabled = false;
+            // Cập nhật player ngay lập tức mà không cần lưu
+            if (ytPlayer && ytPlayer.cueVideoById) {
+                ytPlayer.cueVideoById(videoId);
+            }
+        } else if (url === '') {
+            feedbackEl.textContent = ""; // Xóa thông báo nếu ô trống
+            toggleBtn.disabled = true;
+            if (ytPlayer && ytPlayer.stopVideo) {
+                ytPlayer.stopVideo();
+            }
+        } else {
+            feedbackEl.textContent = "❌ Link không hợp lệ hoặc không được hỗ trợ.";
+            feedbackEl.style.color = 'var(--danger)';
+            toggleBtn.disabled = true;
+        }
     }
     function applyTheme() {
         const theme = data.settings.theme || 'default';
@@ -1670,6 +1698,11 @@
           $('#set_theme').value=s.soundTheme || 'beep';
           $('#set_theme_color').value = s.theme || 'default';
           $('#set_youtubeUrl').value = s.youtubeUrl || '';
+          const initialVideoId = extractYouTubeID(s.youtubeUrl);
+          $('#btnToggleYtSound').disabled = !initialVideoId;
+          if ($('#ytUrlFeedback')) {
+              $('#ytUrlFeedback').textContent = '';
+          }
           $('#ytSoundVolume').value = s.youtubeVolume || 80;
           $('#set_ytThumbAsBg').checked = !!s.useYtThumbnailAsBg;
           $('#set_panelOpacity').value = s.panelOpacity || 0.85;
@@ -1730,22 +1763,6 @@
         if (newYtUrl !== s.youtubeUrl) {
             s.youtubeUrl = newYtUrl;
             updateYouTubePlayer(); // Cập nhật YouTube player như cũ
-
-            // --- BẮT ĐẦU PHẦN CẢI TIẾN ---
-            // Sử dụng hàm extractYouTubeID để kiểm tra link mới
-            const videoId = extractYouTubeID(newYtUrl);
-
-            if (videoId) {
-                // Nếu có videoId, link hợp lệ
-                toast("✅ Đã tải nhạc nền YouTube thành công!");
-            } else if (newYtUrl === '') {
-                // Nếu người dùng xóa link
-                toast("ℹ️ Đã xóa nhạc nền YouTube.");
-            } else {
-                // Nếu có link nhưng không hợp lệ
-                toast("❌ Link YouTube không hợp lệ. Vui lòng kiểm tra lại.");
-            }
-            // --- KẾT THÚC PHẦN CẢI TIẾN ---
         }
         s.youtubeVolume = parseInt($('#ytSoundVolume').value, 10);
         if (ytPlayer && ytPlayer.setVolume) {
@@ -2093,7 +2110,8 @@
               ytPlayer.setVolume(vol);
           }
       });
-      
+      on($('#set_youtubeUrl'), 'input', handleYoutubeUrlInput);
+
       $$('.nav-btn[data-view]').forEach(btn => btn.addEventListener('click', () => switchView(btn.dataset.view)));
       
         $$('.tab-btn').forEach(btn => {
