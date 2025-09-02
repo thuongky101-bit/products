@@ -1452,7 +1452,7 @@
 
 
     const timer = {
-      state:'idle', prevState:null, interval:null, endAt:null,
+      state:'idle', prevState:null, tickHandle:null, endAt:null,
       remaining:0, segmentTotal:0, cyclesTarget:4, cycleIndex:0, mode:'A',
       async setPreset(p, {silent=false}={}){
         const st = data.settings;
@@ -1535,11 +1535,11 @@
       beginWork(){ const {work}=this.currentDurations(); this.state='work'; if(this.cycleIndex===0) this.cycleIndex=1; this.remaining=work*60; this.segmentTotal=this.remaining; this.tickStart(); },
       beginBreak(){ const {short,long}=this.currentDurations(); const {interval}=this.currentConfig(); const isLong=(this.cycleIndex % interval===0) && (this.cyclesTarget>=interval); if(isLong){ this.state='long_break'; this.remaining=long*60; } else { this.state='break'; this.remaining=short*60; } this.segmentTotal=this.remaining; this.tickStart(); },
       tickStart(){
-        clearInterval(this.interval);
+        this.stopTick();
         this.endAt = Date.now() + this.remaining*1000;
         this.updateUI();
-        this.interval=setInterval(async ()=>{
-          const now=Date.now();
+        const tick = async () => {
+          const now = Date.now();
           const newRemaining = Math.max(0, Math.ceil((this.endAt - now)/1000));
           if(newRemaining !== this.remaining){
             this.remaining = newRemaining;
@@ -1547,18 +1547,30 @@
             await this.persistTimerState();
           }
           if(this.remaining<=0){
-            clearInterval(this.interval);
-            this.interval=null;
+            this.stopTick();
             await this.segmentFinished();
+            return;
           }
-        }, 250);
+          if(document.hidden){
+            this.tickHandle = setTimeout(tick, 1000);
+          } else {
+            this.tickHandle = requestAnimationFrame(tick);
+          }
+        };
+        tick();
       },
-      async pause(){ if(this.interval){ clearInterval(this.interval); this.interval=null; this.prevState=this.state; this.state='paused'; this.updateUI(); await this.persistTimerState(); } },
+      stopTick(){
+        if(this.tickHandle){
+          cancelAnimationFrame(this.tickHandle);
+          clearTimeout(this.tickHandle);
+          this.tickHandle = null;
+        }
+      },
+      async pause(){ if(this.tickHandle){ this.stopTick(); this.prevState=this.state; this.state='paused'; this.updateUI(); await this.persistTimerState(); } },
       async resume(){ if(this.state==='paused'){ this.state = this.prevState || 'work'; this.endAt = Date.now() + this.remaining*1000; this.tickStart(); await this.persistTimerState(); } },
-      async skip(){ if(this.state==='idle') return; if(this.state==='paused' && this.prevState){ this.state = this.prevState; } clearInterval(this.interval); this.interval=null; await this.segmentFinished(true); await this.persistTimerState(); },
+      async skip(){ if(this.state==='idle') return; if(this.state==='paused' && this.prevState){ this.state = this.prevState; } this.stopTick(); await this.segmentFinished(true); await this.persistTimerState(); },
       async reset() {
-          clearInterval(this.interval);
-          this.interval = null;
+          this.stopTick();
           this.state = 'idle';
           this.prevState = null;
           this.remaining = 0;
