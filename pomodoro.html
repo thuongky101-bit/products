@@ -772,6 +772,9 @@
                     if (!db.objectStoreNames.contains(this.BACKUP_STORE_NAME)) {
                         db.createObjectStore(this.BACKUP_STORE_NAME, { keyPath: 'date' });
                     }
+                    if (!db.objectStoreNames.contains('settings')) {
+                        db.createObjectStore('settings', { keyPath: 'key' });
+                    }
                 };
                 request.onsuccess = (event) => {
                     this.db = event.target.result;
@@ -784,86 +787,111 @@
                 };
             });
         },
-        load(defaults) {
-            const stored = localStorage.getItem('pomodoroData_v11');
-            let data = {};
-            if (stored) {
-                data = JSON.parse(stored);
-                data.settings = { ...defaults.settings, ...data.settings };
-            } else {
-                data = JSON.parse(JSON.stringify(defaults));
-            }
-            return data;
+        async _getStore(storeName, mode = 'readonly') {
+            await this.initDB();
+            const tx = this.db.transaction([storeName], mode);
+            return tx.objectStore(storeName);
         },
-        async save(data) {
-            try {
-                localStorage.setItem('pomodoroData_v11', JSON.stringify(data));
-                await this.autoBackup(data);
-            } catch (e) {
-                console.error('Error saving to localStorage', e);
-            }
+        async getSettings() {
+            const store = await this._getStore('settings', 'readonly');
+            return new Promise((resolve, reject) => {
+                const req = store.get('main_settings');
+                req.onsuccess = () => resolve(req.result ? req.result.value : undefined);
+                req.onerror = () => reject(req.error);
+            });
+        },
+        async updateSettings(settingsObject) {
+            const store = await this._getStore('settings', 'readwrite');
+            return new Promise((resolve, reject) => {
+                const req = store.put({ key: 'main_settings', value: settingsObject });
+                req.onsuccess = () => resolve();
+                req.onerror = () => reject(req.error);
+            });
+        },
+        async getAll(storeName) {
+            const store = await this._getStore(storeName, 'readonly');
+            return new Promise((resolve, reject) => {
+                const req = store.getAll();
+                req.onsuccess = () => resolve(req.result || []);
+                req.onerror = () => reject(req.error);
+            });
+        },
+        async update(storeName, object) {
+            const store = await this._getStore(storeName, 'readwrite');
+            return new Promise((resolve, reject) => {
+                const req = store.put(object);
+                req.onsuccess = () => resolve();
+                req.onerror = () => reject(req.error);
+            });
+        },
+        async add(storeName, object) {
+            const store = await this._getStore(storeName, 'readwrite');
+            return new Promise((resolve, reject) => {
+                const req = store.add(object);
+                req.onsuccess = () => resolve();
+                req.onerror = () => reject(req.error);
+            });
+        },
+        async delete(storeName, key) {
+            const store = await this._getStore(storeName, 'readwrite');
+            return new Promise((resolve, reject) => {
+                const req = store.delete(key);
+                req.onsuccess = () => resolve();
+                req.onerror = () => reject(req.error);
+            });
         },
         async autoBackup(data) {
-            await this.initDB();
             const today = new Date().toISOString().slice(0, 10);
             const lastBackupDate = localStorage.getItem('lastBackupDate');
             if (today !== lastBackupDate) {
                 console.log(`Creating backup for ${today}...`);
+                const store = await this._getStore(this.BACKUP_STORE_NAME, 'readwrite');
                 const backupData = { date: today, data: JSON.parse(JSON.stringify(data)) };
-                const transaction = this.db.transaction([this.BACKUP_STORE_NAME], 'readwrite');
-                const store = transaction.objectStore(this.BACKUP_STORE_NAME);
-                const request = store.put(backupData);
-                request.onsuccess = () => {
-                    localStorage.setItem('lastBackupDate', today);
-                    console.log('Daily backup successful.');
-                    this.cleanupOldBackups(2);
-                };
-                request.onerror = (event) => {
-                    console.error('Backup failed:', event.target.error);
-                };
+                await new Promise((resolve, reject) => {
+                    const req = store.put(backupData);
+                    req.onsuccess = () => resolve();
+                    req.onerror = () => reject(req.error);
+                });
+                localStorage.setItem('lastBackupDate', today);
+                console.log('Daily backup successful.');
+                await this.cleanupOldBackups(2);
             }
         },
         async cleanupOldBackups(daysToKeep) {
-            await this.initDB();
-            const transaction = this.db.transaction([this.BACKUP_STORE_NAME], 'readwrite');
-            const store = transaction.objectStore(this.BACKUP_STORE_NAME);
-            const request = store.getAllKeys();
-            request.onsuccess = () => {
-                const allKeys = request.result.sort().reverse();
-                if (allKeys.length > daysToKeep) {
-                    const keysToDelete = allKeys.slice(daysToKeep);
-                    keysToDelete.forEach(key => {
-                        store.delete(key);
-                        console.log(`Deleted old backup: ${key}`);
-                    });
-                }
-            };
+            const store = await this._getStore(this.BACKUP_STORE_NAME, 'readwrite');
+            await new Promise((resolve, reject) => {
+                const req = store.getAllKeys();
+                req.onsuccess = () => {
+                    const allKeys = req.result.sort().reverse();
+                    if (allKeys.length > daysToKeep) {
+                        const keysToDelete = allKeys.slice(daysToKeep);
+                        keysToDelete.forEach(key => store.delete(key));
+                    }
+                    resolve();
+                };
+                req.onerror = () => reject(req.error);
+            });
         },
         async getBackupList() {
-            await this.initDB();
+            const store = await this._getStore(this.BACKUP_STORE_NAME, 'readonly');
             return new Promise((resolve, reject) => {
-                const transaction = this.db.transaction([this.BACKUP_STORE_NAME], 'readonly');
-                const store = transaction.objectStore(this.BACKUP_STORE_NAME);
-                const request = store.getAll();
-                request.onsuccess = () => resolve(request.result.sort((a, b) => b.date.localeCompare(a.date)));
-                request.onerror = (event) => reject(event.target.error);
+                const req = store.getAll();
+                req.onsuccess = () => resolve(req.result.sort((a, b) => b.date.localeCompare(a.date)));
+                req.onerror = () => reject(req.error);
             });
         },
         async restoreBackup(date) {
-            await this.initDB();
+            const store = await this._getStore(this.BACKUP_STORE_NAME, 'readonly');
             return new Promise((resolve, reject) => {
-                const transaction = this.db.transaction([this.BACKUP_STORE_NAME], 'readonly');
-                const store = transaction.objectStore(this.BACKUP_STORE_NAME);
-                const request = store.get(date);
-                request.onsuccess = () => {
-                    if (request.result && request.result.data) {
-                        localStorage.setItem('pomodoroData_v11', JSON.stringify(request.result.data));
-                        resolve(request.result.data);
+                const req = store.get(date);
+                req.onsuccess = () => {
+                    if (req.result && req.result.data) {
+                        resolve(req.result.data);
                     } else {
                         reject(new Error('Không tìm thấy bản sao lưu.'));
                     }
                 };
-                request.onerror = (event) => reject(event.target.error);
+                req.onerror = () => reject(req.error);
             });
         },
         exportData(data) {
