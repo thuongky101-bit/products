@@ -1089,7 +1089,7 @@ async load(defaults) {
         await storageManager.save(data);
     };
 
-    const debouncedSave = debounce(saveData, 500);
+    const debouncedSave = debounce(async () => { await saveData(); }, 500);
 
     // =============================
     // Gemini API Integration
