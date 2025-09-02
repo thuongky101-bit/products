@@ -1768,6 +1768,12 @@
         if (ytPlayer && ytPlayer.setVolume) {
             ytPlayer.setVolume(s.youtubeVolume);
         }
+        // --- BẮT ĐẦU PHẦN CẢI TIẾN: TỰ ĐỘNG PHÁT KHI LƯU ---
+        const finalVideoId = extractYouTubeID(s.youtubeUrl);
+        if (finalVideoId && ytPlayer && typeof ytPlayer.playVideo === 'function') {
+            ytPlayer.playVideo();
+        }
+        // --- KẾT THÚC PHẦN CẢI TIẾN ---
 
         storageManager.save(data);
         applyTheme();
