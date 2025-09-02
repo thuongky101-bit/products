@@ -16,3 +16,10 @@ fetch('storage.json')
 
 Tránh nhúng trực tiếp bằng thẻ `<script src="storage.json"></script>`.
 
+## Timer persistence
+
+`persistTimerState` now caches updates and writes to storage only when a
+segment ends or once per minute. For immediate persistence (e.g. when the
+page unloads), call `timer.persistTimerState({ immediate: true })` to store
+only the timer state in `localStorage` without saving the entire data object.
+

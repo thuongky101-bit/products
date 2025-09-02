@@ -1454,6 +1454,9 @@
     const timer = {
       state:'idle', prevState:null, interval:null, endAt:null,
       remaining:0, segmentTotal:0, cyclesTarget:4, cycleIndex:0, mode:'A',
+      persistInterval: 60_000, // throttle persistence to once per minute
+      _lastPersist: 0,
+      _pendingTimerState: null,
       async setPreset(p, {silent=false}={}){
         const st = data.settings;
         this.mode = p;
@@ -1518,17 +1521,44 @@
 
           $('#cycleInfo').textContent = `Chu kỳ: ${this.cycleIndex} / ${this.cyclesTarget}`;
       },
-      async persistTimerState(){
+      // Persist timer state with throttling. Updates are cached and flushed
+      // to storage only when a segment ends or after a fixed interval. For
+      // immediate persistence (e.g. page unload), pass {immediate: true} to
+      // save only the timer snapshot to localStorage.
+      async persistTimerState(opts = {}){
         const s = getCurrentSubtopic();
-        if(s){
-          s.timerState = {
-            state: this.state,
-            prevState: this.prevState,
-            remaining: this.remaining,
-            segmentTotal: this.segmentTotal,
-            cycleIndex: this.cycleIndex
-          };
+        if(!s) return;
+
+        const snapshot = {
+          state: this.state,
+          prevState: this.prevState,
+          remaining: this.remaining,
+          segmentTotal: this.segmentTotal,
+          cycleIndex: this.cycleIndex
+        };
+
+        // Cache the latest snapshot
+        this._pendingTimerState = snapshot;
+
+        const now = Date.now();
+        const shouldFlush = opts.segmentEnd ||
+                            !this._lastPersist ||
+                            (now - this._lastPersist) >= this.persistInterval;
+
+        if(opts.immediate){
+          try {
+            localStorage.setItem('pomodoroTimer', JSON.stringify(snapshot));
+          } catch (e){
+            console.error('Immediate timer persistence failed', e);
+          }
+          return;
+        }
+
+        if(shouldFlush){
+          s.timerState = snapshot;
           await saveData();
+          this._lastPersist = now;
+          this._pendingTimerState = null;
         }
       },
       async start(){ if(!getCurrentSubtopic()){ toast('Hãy chọn một Subtopic trước khi bắt đầu'); return; } ensureAudio(); if(this.state==='idle'){ this.cycleIndex = this.cycleIndex || 0; this.beginWork(); } else if(this.state==='paused'){ this.resume(); } await this.persistTimerState(); },
@@ -1555,7 +1585,7 @@
       },
       async pause(){ if(this.interval){ clearInterval(this.interval); this.interval=null; this.prevState=this.state; this.state='paused'; this.updateUI(); await this.persistTimerState(); } },
       async resume(){ if(this.state==='paused'){ this.state = this.prevState || 'work'; this.endAt = Date.now() + this.remaining*1000; this.tickStart(); await this.persistTimerState(); } },
-      async skip(){ if(this.state==='idle') return; if(this.state==='paused' && this.prevState){ this.state = this.prevState; } clearInterval(this.interval); this.interval=null; await this.segmentFinished(true); await this.persistTimerState(); },
+      async skip(){ if(this.state==='idle') return; if(this.state==='paused' && this.prevState){ this.state = this.prevState; } clearInterval(this.interval); this.interval=null; await this.segmentFinished(true); },
       async reset() {
           clearInterval(this.interval);
           this.interval = null;
@@ -1565,7 +1595,7 @@
           this.segmentTotal = 0;
           this.cycleIndex = 0;
           this.updateUI();
-          await this.persistTimerState();
+          await this.persistTimerState({segmentEnd:true});
       },
       async segmentFinished(skipped=false){
         const lastState = this.state;
@@ -1603,6 +1633,7 @@
           this.beginWork(); if(!data.settings.autoStartNext){ await this.pause(); } return;
         }
         if(lastState==='paused'){ this.updateUI(); }
+        await this.persistTimerState({segmentEnd:true});
       }
     };
 
@@ -2332,7 +2363,7 @@
             closeAllMenus();
         }
       });
-      window.addEventListener('beforeunload', () => timer.persistTimerState());
+      window.addEventListener('beforeunload', () => timer.persistTimerState({immediate:true}));
     }
 
     function updateMainViewVisibility() {
