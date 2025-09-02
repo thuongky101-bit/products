@@ -2295,18 +2295,21 @@
 
 
     // Boot
-    try {
-      data = storageManager.load(defaults);
-      storageManager.initDB();
-      ensureValidSelection();
-      renderAll();
-    } catch (err) {
-      console.error('Initialization error:', err);
-      toast(`Lỗi khởi tạo: ${err.message}`);
-    } finally {
-      bindEvents();
+    async function initializeApp() {
+      try {
+        await storageManager.initDB();
+        data = window.data = storageManager.load(defaults);
+        ensureValidSelection();
+        renderAll();
+      } catch (err) {
+        console.error('Initialization error:', err);
+        toast(`Lỗi khởi tạo: ${err.message}`);
+      } finally {
+        bindEvents();
+        applyTheme();
+      }
     }
-    applyTheme();
+    initializeApp();
     </script>
 </body>
 </html>
