@@ -1729,7 +1729,23 @@
         s.useYtThumbnailAsBg = $('#set_ytThumbAsBg').checked;
         if (newYtUrl !== s.youtubeUrl) {
             s.youtubeUrl = newYtUrl;
-            updateYouTubePlayer();
+            updateYouTubePlayer(); // Cập nhật YouTube player như cũ
+
+            // --- BẮT ĐẦU PHẦN CẢI TIẾN ---
+            // Sử dụng hàm extractYouTubeID để kiểm tra link mới
+            const videoId = extractYouTubeID(newYtUrl);
+
+            if (videoId) {
+                // Nếu có videoId, link hợp lệ
+                toast("✅ Đã tải nhạc nền YouTube thành công!");
+            } else if (newYtUrl === '') {
+                // Nếu người dùng xóa link
+                toast("ℹ️ Đã xóa nhạc nền YouTube.");
+            } else {
+                // Nếu có link nhưng không hợp lệ
+                toast("❌ Link YouTube không hợp lệ. Vui lòng kiểm tra lại.");
+            }
+            // --- KẾT THÚC PHẦN CẢI TIẾN ---
         }
         s.youtubeVolume = parseInt($('#ytSoundVolume').value, 10);
         if (ytPlayer && ytPlayer.setVolume) {
