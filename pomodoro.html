@@ -488,7 +488,7 @@
               <div id="timeDisplay" class="big-time">00:00</div>
             </div>
 
-            <div class="tiny" id="cycleInfo">Chu kỳ: 0 / 0</div>
+            <div class="tiny" id="cycleInfo"></div>
             
             <div class="controls">
               <button class="btn acc" id="btnStart" aria-label="Bắt đầu (Space)">▶️ Start</button>
@@ -754,6 +754,7 @@
 
   <script src="https://www.youtube.com/iframe_api"></script>
   <script type="module">
+    import { loadLanguage, t } from './i18n.js';
     // storageManager will manage persistence
     // =============================
     // STORAGE MANAGER - Quản lý Dữ liệu và Sao lưu
@@ -1420,7 +1421,7 @@
 
     async function addSubtopicTask() {
         const s = getCurrentSubtopic();
-        if (!s) { toast("Vui lòng chọn subtopic trước."); return; }
+        if (!s) { toast(t('timer.selectSubtopicPrompt')); return; }
         const input = $('#newSubtopicTaskInput');
         const text = input.value.trim();
         if (text) {
@@ -1518,7 +1519,7 @@
               progressCircle.style.strokeDashoffset = offset;
           }
 
-          $('#cycleInfo').textContent = `Chu kỳ: ${this.cycleIndex} / ${this.cyclesTarget}`;
+          $('#cycleInfo').textContent = t('timer.cycleInfo', { current: this.cycleIndex, target: this.cyclesTarget });
       },
       async persistTimerState(force=false){
         const s = getCurrentSubtopic();
@@ -1708,7 +1709,7 @@
 
     async function addGeneralNote() {
         const s = getCurrentSubtopic();
-        if (!s) { toast("Vui lòng chọn một subtopic trước."); return; }
+        if (!s) { toast(t('timer.selectSubtopicPrompt')); return; }
         const textInput = $('#newGeneralNoteText');
         const content = textInput.value.trim();
         if (!content) { toast("Nội dung ghi chú không được để trống."); return; }
@@ -1748,7 +1749,7 @@
 
     async function summarizeNotes() {
         const s = getCurrentSubtopic();
-        if (!s) { toast("Vui lòng chọn một subtopic trước."); return; }
+        if (!s) { toast(t('timer.selectSubtopicPrompt')); return; }
         const input = $('#summaryInput').value.trim();
         let notesText = input;
         if (!notesText) {
@@ -2041,7 +2042,7 @@
         const subtopic = getCurrentSubtopic();
 
         if (!query) return;
-        if (!subtopic) { toast("Vui lòng chọn một subtopic."); return; }
+        if (!subtopic) { toast(t('timer.selectSubtopicPrompt')); return; }
 
         input.value = '';
         btn.disabled = true;
@@ -2109,7 +2110,7 @@
 
     function clearChat() {
         const s = getCurrentSubtopic();
-        if (!s) { toast("Vui lòng chọn subtopic."); return; }
+        if (!s) { toast(t('timer.selectSubtopicPrompt')); return; }
         showConfirmModal('Xác nhận xóa', 'Bạn có chắc muốn xóa toàn bộ lịch sử chat của subtopic này?', async (ok) => {
             if (ok) {
                 s.chatHistory = [];
@@ -2493,7 +2494,7 @@
         toast(`Lỗi khởi tạo: ${err.message}`);
       }
     }
-    initializeApp();
+    loadLanguage(localStorage.getItem('lang') || 'vi').then(initializeApp);
     </script>
 </body>
 </html>
