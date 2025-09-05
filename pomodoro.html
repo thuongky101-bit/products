@@ -502,7 +502,7 @@
     input[type="text"], input[type="password"], input[type="number"], select, textarea {
         background: rgba(255,255,255,0.04) !important; /* Sửa đổi: chuyển sang nền trắng trong suốt */
         color: var(--text);
-        border: 1px solid var(--muted);
+        border: 1px solid rgba(255, 255, 255, 0.1); /* Viền trắng mờ */
         transition: background .2s ease, border-color .2s ease;
     }
     input[type="text"]:focus, input[type="password"]:focus, input[type="number"]:focus, select:focus, textarea:focus {
@@ -513,6 +513,7 @@
     [data-theme='light'] input, [data-theme='light'] select, [data-theme='light'] textarea,
     [data-theme='pastel'] input, [data-theme='pastel'] select, [data-theme='pastel'] textarea {
         background: rgba(0, 0, 0, 0.05) !important; /* Dùng nền đen mờ thay vì trắng mờ */
+        border-color: rgba(0, 0, 0, 0.1); /* Viền đen mờ trên theme sáng */
     }
 
     [data-theme='light'] input:focus, [data-theme='light'] select:focus, [data-theme='light'] textarea:focus,
@@ -687,6 +688,74 @@
     }
     /* === END: ĐỒNG BỘ GIAO DIỆN CÁC PANEL PHỤ === */
 
+    /* === START: CSS CHO TRANG PHƯƠNG PHÁP HỌC === */
+    .methods-container {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .method-item {
+        border: 1px solid rgba(255, 255, 255, 0.08); /* Viền trắng mờ */
+        border-radius: 12px;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .method-item[open] {
+        border: 2px solid var(--acc); /* Viền dày và nổi bật hơn */
+    }
+
+    .method-item summary {
+        font-size: 1.1em;
+        font-weight: 600;
+        padding: 16px;
+        cursor: pointer;
+        list-style-position: inside;
+        transition: background-color 0.2s ease;
+    }
+
+    .method-item summary:hover {
+        background-color: rgba(255, 255, 255, 0.04);
+    }
+    [data-theme='light'] .method-item summary:hover,
+    [data-theme='pastel'] .method-item summary:hover {
+        background-color: rgba(0, 0, 0, 0.03);
+    }
+
+    .method-item[open] summary {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Viền trắng mờ */
+    }
+
+    .method-content {
+        padding: 0px 16px 16px 16px;
+        line-height: 1.7;
+        animation: fadeIn .3s ease;
+    }
+    .method-content h4 {
+        margin-top: 20px;
+        margin-bottom: 8px;
+        color: var(--acc-2);
+    }
+    .method-content ol, .method-content ul {
+        padding-left: 20px;
+    }
+    .method-content li {
+        margin-bottom: 8px;
+    }
+    /* === END: CSS CHO TRANG PHƯƠNG PHÁP HỌC === */
+
+    /* === START: ĐỒNG BỘ VIỀN PHƯƠNG PHÁP HỌC CHO THEME SÁNG === */
+    [data-theme='light'] .method-item,
+    [data-theme='pastel'] .method-item {
+        border-color: rgba(0, 0, 0, 0.08); /* Viền đen mờ */
+    }
+
+    [data-theme='light'] .method-item[open] summary,
+    [data-theme='pastel'] .method-item[open] summary {
+        border-bottom-color: rgba(0, 0, 0, 0.1); /* Viền đen mờ */
+    }
+    /* === END: ĐỒNG BỘ VIỀN PHƯƠNG PHÁP HỌC CHO THEME SÁNG === */
+
     </style>
 </head>
 <body data-theme="default"> <div class="app" id="app">
@@ -702,6 +771,10 @@
         <button class="nav-btn" id="navBtnStats" data-view="stats" aria-label="Thống kê">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="m19 9-5 5-4-4-3 3"></path></svg>
             <span class="tooltip">Thống kê</span>
+        </button>
+        <button class="nav-btn" id="navBtnMethods" data-view="methods" aria-label="Phương pháp học">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.042 21.672L13.684 16.6s.408-1.947 1.25-3.25c.842-1.303 2.002-2.5 3.5-3.5s3.25-1.25 3.25-1.25l5.072 1.358c.27.072.358.42.128.628l-3.35 3.35a.499.499 0 0 1-.594.052l-2.07-1.486c-.44-.314-.82-.53-1.11-.665-.29-.135-.55-.22-.78-.245s-.45.045-.63.155c-.18.11-.3.29-.36.5-.06.21.02.48.18.78.16.3.385.68.665 1.11l1.486 2.07a.499.499 0 0 1-.052.594l-3.35 3.35c-.208.23-.556.142-.628-.128z"/><path d="M12 15l-3-3 3-3 3 3-3 3z"/><path d="M9.01 11.99l-3.005 3.004a.997.997 0 0 1-1.41-1.41l3.004-3.005-3.004-3.005a.997.997 0 0 1 1.41-1.41l3.005 3.004z"/><path d="M5.01 11.99l-3.005 3.004a.997.997 0 0 1-1.41-1.41l3.004-3.005-3.004-3.005a.997.997 0 0 1 1.41-1.41l3.005 3.004z"/></svg>
+            <span class="tooltip">Phương pháp học</span>
         </button>
         <button class="nav-btn" id="btnSettings" style="margin-top: auto;" aria-label="Cài đặt">
              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 0 2l-.15.08a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1 0-2l.15.08a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
@@ -839,6 +912,102 @@
               <div class="history" id="historyList"></div>
             </div>
         </section>
+      </div>
+      
+      <div id="view-methods" class="view">
+        <div class="panel panel-bg">
+            <h3 style="margin-top: 0;">💡 Các Phương pháp Học tập Hiệu quả</h3>
+            <p class="tiny" style="margin-top: -8px; margin-bottom: 20px;">Nhấp vào từng phương pháp để xem chi tiết.</p>
+            
+            <div class="methods-container">
+                <details class="method-item">
+                    <summary>Kỹ Thuật Feynman: Hiểu Sâu Bằng Cách Giải Thích Đơn Giản</summary>
+                    <div class="method-content">
+                        <p>Nguyên tắc cốt lõi của kỹ thuật này dựa trên một ý tưởng duy nhất: "Nếu bạn không thể giải thích một chủ đề một cách đơn giản, bạn chưa thực sự hiểu nó." Mục tiêu là biến kiến thức phức tạp thành lời giải thích đơn giản đến mức một đứa trẻ cũng có thể hiểu.</p>
+                        <h4>Quy Trình 4 Bước Tinh Gọn</h4>
+                        <ol>
+                            <li><strong>Học:</strong> Chọn một chủ đề và viết ra tất cả những gì bạn biết về nó.</li>
+                            <li><strong>Dạy:</strong> Giả vờ dạy lại chủ đề này bằng ngôn ngữ đơn giản nhất có thể. Viết hoặc nói to ra.</li>
+                            <li><strong>Tìm & Sửa Lỗi:</strong> Bất cứ khi nào bạn bị "kẹt", phải dùng thuật ngữ phức tạp, hoặc không thể giải thích trôi chảy, bạn đã tìm thấy lỗ hổng kiến thức của mình. Hãy quay lại tài liệu gốc để học lại cho đến khi lấp được lỗ hổng đó.</li>
+                            <li><strong>Đơn Giản Hóa:</strong> Sắp xếp lại lời giải thích cuối cùng, sử dụng các ví dụ hoặc phép ví von đơn giản để nó trở nên mạch lạc và dễ hiểu nhất.</li>
+                        </ol>
+                        <h4>Cốt Lõi</h4>
+                        <p>Kỹ thuật Feynman buộc bạn phải chuyển từ việc tiếp thu thụ động (đọc, nghe) sang chủ động xử lý thông tin. Quá trình "bị kẹt" khi giải thích chính là công cụ chẩn đoán mạnh mẽ nhất, nó chỉ ra chính xác điểm bạn còn yếu.</p>
+                        <p><i>Cách nhanh nhất để kiểm tra và củng cố sự hiểu biết của bạn là thử dạy lại nó cho người khác một cách đơn giản.</i></p>
+                    </div>
+                </details>
+
+                <details class="method-item">
+                    <summary>Phương Pháp Viết của Benjamin Franklin: Học Viết Bằng Cách Tái Tạo</summary>
+                    <div class="method-content">
+                        <p>Benjamin Franklin đã tự rèn luyện kỹ năng viết từ kém cỏi trở nên bậc thầy bằng một phương pháp chủ động, thay vì chỉ đọc một cách thụ động. Cốt lõi của phương pháp này là phân tích, tái tạo, và so sánh với một bài viết chất lượng cao.</p>
+                        <p>Đây là một ví dụ kinh điển của "Luyện tập có Chủ đích": tập trung vào điểm yếu, có mục tiêu rõ ràng và nhận phản hồi ngay lập tức.</p>
+                        <h4>Quy Trình 3 Bước Cốt Lõi</h4>
+                        <ol>
+                            <li><strong>Phân Tích (Deconstruct):</strong> Đọc một bài viết mẫu xuất sắc. Sau đó, chỉ ghi lại những ý chính của từng đoạn hoặc từng câu ra một tờ giấy riêng.</li>
+                            <li><strong>Tái Tạo (Reconstruct):</strong> Vài ngày sau, khi đã quên đi văn phong của bản gốc, hãy dùng những ghi chú ý chính đó để viết lại toàn bộ bài viết bằng ngôn ngữ và cách diễn đạt của chính bạn.</li>
+                            <li><strong>So Sánh & Sửa Lỗi (Compare & Correct):</strong> Đối chiếu trực tiếp bài viết của bạn với bản gốc. Đây là bước quan trọng nhất. Nó giúp bạn phát hiện ngay lập tức những lỗi sai về từ vựng, cấu trúc câu, và cách sắp xếp ý tưởng để sửa chữa.</li>
+                        </ol>
+                        <p>Franklin còn thực hành các biến thể nâng cao như xáo trộn thứ tự các ý chính để rèn luyện tư duy logic, hoặc chuyển văn xuôi thành thơ để làm giàu vốn từ.</p>
+                        <h4>Nguyên Tắc Vàng</h4>
+                        <p>Thành công của phương pháp này không đến từ việc lặp lại vô thức, mà đến từ vòng lặp phản hồi trực tiếp. Việc so sánh với bản gốc buộc bạn phải đối mặt và sửa chữa những điểm yếu cụ thể của mình, biến việc học từ một quá trình mơ hồ thành một bài tập có thể đo lường được.</p>
+                        <p><i>Để viết giỏi hơn, đừng chỉ đọc. Hãy chọn một bài viết hay, phân tích nó, cố gắng viết lại, và so sánh để tìm ra lỗi sai.</i></p>
+                    </div>
+                </details>
+
+                <details class="method-item">
+                    <summary>Nguyên Tắc 80/20 Để Chinh Phục Lĩnh Vực Mới</summary>
+                    <div class="method-content">
+                        <p>Để không bị choáng ngợp khi học một lĩnh vực mới, hãy tập trung vào 20% kiến thức cốt lõi mang lại 80% kết quả (Liều lượng Hiệu quả Tối thiểu).</p>
+                        <h4>20% cốt lõi: Áp dụng Khung Phân tích 5 Bước để xác định 20% quan trọng nhất:</h4>
+                        <ol>
+                            <li><strong>Xác định Kết quả:</strong> Mục tiêu cuối cùng của bạn là gì? (ví dụ: xây dựng được một trang web).</li>
+                            <li><strong>Phân tích Nền tảng:</strong> Tìm 3-5 nguyên lý bất biến của ngành.</li>
+                            <li><strong>Nhận diện Lỗi sai Phổ biến:</strong> Học cách tránh những lỗi mà người mới hay mắc phải.</li>
+                            <li><strong>Tìm "Yếu tố Nhân":</strong> Kỹ năng nào sẽ giúp học mọi thứ khác dễ dàng hơn? (ví dụ: nhạc lý trong âm nhạc).</li>
+                            <li><strong>Lập bản đồ Ứng dụng Thực tiễn:</strong> Tập trung vào 20% công việc chiếm 80% thời gian thực tế của ngành.</li>
+                        </ol>
+                    </div>
+                </details>
+
+                <details class="method-item">
+                    <summary>Gợi Nhớ Chủ Động (Active Recall): Nguyên Tắc Cốt Lõi Để Học Sâu</summary>
+                    <div class="method-content">
+                        <p>Gợi nhớ chủ động là hành động nỗ lực truy xuất thông tin từ não bộ mà không nhìn vào tài liệu. Đây là phương pháp học hiệu quả vượt trội so với việc đọc lại, highlight hay tóm tắt một cách thụ động.</p>
+                        <h4>Nguyên Tắc 20/80</h4>
+                        <p><strong>20% Cốt lõi:</strong> Hành động "vắt óc" để nhớ lại thông tin sẽ củng cố các liên kết thần kinh, giúp chuyển kiến thức vào bộ nhớ dài hạn. Cảm giác khó khăn khi cố gắng nhớ chính là dấu hiệu của việc học tập hiệu quả đang diễn ra.</p>
+                        <p><strong>80% Kết quả:</strong> Bạn sẽ ghi nhớ kiến thức sâu và lâu hơn, đồng thời biết chính xác mình đang yếu ở đâu.</p>
+                        <h4>Các Phương Pháp Quan Trọng Nhất</h4>
+                        <ul>
+                            <li><strong>Tự Kiểm Tra (Self-testing):</strong> Thay vì đọc lại ghi chú, hãy che chúng đi và tự đặt câu hỏi cho mình. Ví dụ: Dùng flashcards (thẻ ghi nhớ) và luôn trả lời trước khi lật xem đáp án.</li>
+                            <li><strong>Kỹ thuật "Blurting":</strong> Sau khi học một chủ đề, hãy đóng sách lại và viết ra giấy mọi thứ bạn có thể nhớ. Sau đó, so sánh với tài liệu gốc để lấp đầy những lỗ hổng kiến thức.</li>
+                            <li><strong>Dạy lại cho người khác:</strong> Giải thích một khái niệm cho người khác buộc bạn phải truy xuất, đơn giản hóa và sắp xếp lại thông tin một cách mạch lạc.</li>
+                        </ul>
+                        <h4>Lợi Ích Vượt Trội: Phá Vỡ "Ảo Giác Thành Thạo"</h4>
+                        <p>Sai lầm lớn nhất của việc học thụ động là nó tạo ra "ảo giác về sự thành thạo" – cảm giác quen thuộc với tài liệu nhưng thực chất không thể nhớ lại hay giải thích được.</p>
+                        <p>Gợi nhớ chủ động đóng vai trò như một công cụ chẩn đoán. Mỗi lần bạn không thể nhớ ra điều gì, bạn đã phát hiện chính xác một lỗ hổng kiến thức. Điều này cho phép bạn tập trung ôn tập vào đúng điểm yếu, thay vì lãng phí thời gian xem lại những gì đã biết.</p>
+                        <p><i>Tóm lại: Đừng chỉ đọc lại. Hãy dừng lại, che tài liệu đi, và tự hỏi: "Mình thực sự nhớ được gì?"</i></p>
+                    </div>
+                </details>
+
+                <details class="method-item">
+                    <summary>Lặp Lại Ngắt Quãng (Spaced Repetition): Học Đúng Thời Điểm</summary>
+                    <div class="method-content">
+                        <p>Nếu Gợi nhớ chủ động là về cách học, thì Lặp lại ngắt quãng là về thời điểm học. Đây là một hệ thống lên lịch ôn tập để đưa thông tin vào trí nhớ dài hạn một cách hiệu quả nhất.</p>
+                        <h4>Nguyên Tắc Cốt Lõi: Chống Lại Sự Lãng Quên 🧠</h4>
+                        <p>Phương pháp này dựa trên "Đường cong Lãng quên", cho thấy chúng ta quên thông tin nhanh nhất ngay sau khi học. Lặp lại ngắt quãng hoạt động bằng cách yêu cầu bạn ôn tập lại một thông tin ngay trước khi bạn sắp quên nó.</p>
+                        <p>Mỗi lần ôn tập thành công sẽ làm cho khoảng thời gian bạn nhớ thông tin đó dài ra. Lần đầu bạn có thể quên sau 1 ngày, nhưng sau khi ôn tập, bạn sẽ nhớ được trong 3 ngày, rồi 1 tuần, 1 tháng, và cứ thế xa dần.</p>
+                        <h4>Công Cụ Hiệu Quả Nhất: Phần Mềm SRS 📱</h4>
+                        <p>Thay vì tự lên lịch thủ công, cách hiệu quả nhất là sử dụng các phần mềm Lặp lại ngắt quãng (Spaced Repetition Software - SRS). Anki được xem là tiêu chuẩn vàng. Nó tự động hóa hoàn toàn việc lên lịch ôn tập cho hàng ngàn thẻ ghi nhớ dựa trên độ khó mà bạn tự đánh giá, đảm bảo bạn luôn ôn tập vào thời điểm tối ưu nhất.</p>
+                        <h4>Sai Lầm Lớn Nhất Cần Tránh ❌</h4>
+                        <p>Lý do số một khiến mọi người thất bại với phương pháp này là "Quá tải Lịch ôn tập" (Review Overload). Điều này xảy ra khi bạn tạo quá nhiều thẻ mới mỗi ngày hoặc bỏ lỡ vài ngày ôn tập, dẫn đến một lượng thẻ tồn đọng khổng lồ gây nản chí.</p>
+                        <p><strong>Giải pháp (20% hành động, 80% kết quả):</strong> Hãy nhất quán. Đặt ra giới hạn thực tế về số lượng thẻ mới mỗi ngày (ví dụ: 10-20 thẻ) và duy trì việc ôn tập hàng ngày. Thà học ít mà đều còn hơn học dồn.</p>
+                        <h4>Sự Kết Hợp Sống Còn: AR + SR</h4>
+                        <p>Lặp lại ngắt quãng (SR) và Gợi nhớ chủ động (AR) là hai mặt của cùng một đồng xu và không thể tách rời. SR cung cấp lịch trình KHI NÀO nên ôn tập. AR là hành động bạn thực hiện KHI ôn tập. Sự kết hợp này đảm bảo nỗ lực gợi nhớ của bạn xảy ra vào "điểm ngọt" của trí nhớ. Sử dụng Anki chính là cách triển khai kỹ thuật kết hợp này một cách hiệu quả nhất.</p>
+                    </div>
+                </details>
+            </div>
+        </div>
       </div>
 
       <div id="view-guide" class="view">
