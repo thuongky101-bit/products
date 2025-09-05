@@ -323,102 +323,8 @@
     .tab-btn { background: transparent; border: none; color: var(--sub); padding: 8px 16px; cursor: pointer; border-bottom: 2px solid transparent; transition: all .2s ease; font-weight: 600; }
     .tab-btn:hover { color: var(--text); }
     .tab-btn.active { color: var(--acc); border-bottom-color: var(--acc); }
-    /* === START: CẢI THIỆN HIỆU ỨNG CHUYỂN TAB === */
-
-    /* 1. Tái sử dụng keyframe đã có để tạo hiệu ứng nhất quán */
-
-    /* 2. Thiết lập cơ bản cho các tab-content */
-    .tab-content {
-      display: none; /* Vẫn ẩn các tab không hoạt động bằng display */
-      padding-top: 8px;
-    }
-
-    /* 3. Áp dụng hiệu ứng KHI một tab được kích hoạt */
-    /* Hiệu ứng này sẽ chạy mỗi khi class "active" được thêm vào */
-    .tab-content.active {
-      /* Tốc độ 0.25s là vừa đủ, không quá chậm, không quá nhanh */
-      animation: fadeIn 0.25s ease-out;
-    }
-
-    /* 4. Đảm bảo các loại display khác nhau vẫn hoạt động sau khi có animation */
-    /* Phần này rất quan trọng để không phá vỡ layout hiện có */
-    #tasks.tab-content.active,
-    #notes.tab-content.active,
-    #ai.tab-content.active {
-        display: block;
-    }
-
-    #settings-timer.tab-content.active,
-    #settings-ui.tab-content.active,
-    #settings-integrations.tab-content.active {
-        display: flex;
-    }
-
-    /* === END: CẢI THIỆN HIỆU ỨNG CHUYỂN TAB === */
-
-    /* === START: CSS CHO NÚT GẠT (TOGGLE SWITCH) TINH TẾ HƠN === */
-    .settings-row-toggle {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 16px; /* Giữ lại khoảng cách từ code cũ */
-    }
-
-    .settings-row-toggle span {
-      flex: 1;
-      cursor: pointer;
-    }
-
-    .toggle-switch {
-      position: relative;
-      display: inline-block;
-      width: 44px;
-      height: 24px;
-      flex-shrink: 0; /* Ngăn nút gạt bị co lại */
-    }
-
-    /* Ẩn checkbox gốc đi */
-    .toggle-switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-
-    /* Phần nền của nút gạt */
-    .toggle-switch .slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: var(--muted); /* Màu khi ở trạng thái TẮT */
-      transition: .3s;
-      border-radius: 24px;
-    }
-
-    /* Phần chấm tròn di chuyển */
-    .toggle-switch .slider:before {
-      position: absolute;
-      content: "";
-      height: 18px;
-      width: 18px;
-      left: 3px;
-      bottom: 3px;
-      background-color: white;
-      transition: .3s;
-      border-radius: 50%;
-    }
-
-    /* Kiểu dáng khi nút được BẬT */
-    .toggle-switch input:checked + .slider {
-      background-color: var(--acc-2); /* Màu xanh lá cây cho trạng thái BẬT */
-    }
-
-    .toggle-switch input:checked + .slider:before {
-      transform: translateX(20px); /* Di chuyển chấm tròn sang phải */
-    }
-    /* === END: CSS CHO NÚT GẠT (TOGGLE SWITCH) TINH TẾ HƠN === */
+    .tab-content { display: none; padding-top: 8px; }
+    .tab-content.active { display: block; animation: fadeIn .3s ease; }
     
     .chat-messages { max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; padding: 4px; }
     .chat-msg { padding: 8px 12px; border-radius: 12px; max-width: 85%; word-break: break-word; }
@@ -901,7 +807,7 @@ body.bg-view-mode .draggable-timer {
               <button class="tab-btn" data-tab="settings-integrations">Tích hợp</button>
           </nav>
           <div class="settings-content">
-              <div id="settings-timer" class="tab-content active" style="flex-direction:column; gap:20px;">
+              <div id="settings-timer" class="tab-content active" style="display:flex; flex-direction:column; gap:20px;">
                   <div>
                       <h4>Thời lượng Pomodoro</h4>
                       <div class="row" id="timerPresetSelector" style="margin-bottom:16px;">
@@ -918,15 +824,12 @@ body.bg-view-mode .draggable-timer {
                           <label>Chu kỳ nghỉ dài<input type="number" id="set_interval" min="2" /></label>
                       </div>
                   </div>
-                      <div class="settings-row-toggle">
-                          <label for="set_autoStartNext">Tự động bắt đầu phiên tiếp theo</label>
-                          <label class="toggle-switch">
-                              <input type="checkbox" id="set_autoStartNext">
-                              <span class="slider"></span>
-                          </label>
+                      <div class="row" style="margin-top: 16px; align-items: center;">
+                          <label for="set_autoStartNext" style="flex: 1; cursor: pointer;"> Tự động bắt đầu phiên tiếp theo </label>
+                          <input type="checkbox" id="set_autoStartNext" style="width: 20px; height: 20px; flex: 0;">
                       </div>
               </div>
-              <div id="settings-ui" class="tab-content" style="flex-direction: column; gap: 20px;">
+              <div id="settings-ui" class="tab-content" style="display: none; flex-direction: column; gap: 20px;">
                   <div>
                       <h4>Giao diện</h4>
                       <div class="row">
@@ -985,7 +888,7 @@ body.bg-view-mode .draggable-timer {
                       </div>
                   </div>
               </div>
-              <div id="settings-integrations" class="tab-content" style="flex-direction: column; gap: 20px;">
+              <div id="settings-integrations" class="tab-content" style="display: none; flex-direction: column; gap: 20px;">
                   <div>
                       <h4>Tích hợp AI</h4>
                       <label>Gemini API Key
@@ -1906,11 +1809,6 @@ body.bg-view-mode .draggable-timer {
   },
   _startTick(){ if(this.tickHandle) clearInterval(this.tickHandle); this.tickHandle = setInterval(()=>{ if(this.remaining>0){ this.remaining -= 1; this.updateUI(); this.persistTimerState(); } if(this.remaining<=0){ clearInterval(this.tickHandle); this.tickHandle=null; this._onFinishSegment(); } }, 1000); },
   _onFinishSegment(){
-    // >>> BẮT ĐẦU THAY ĐỔI
-    if (this.state === 'work') {
-        this.cycleIndex++; // TĂNG BỘ ĐẾM CHU KỲ LÊN 1
-    }
-    // <<< KẾT THÚC THAY ĐỔI
     if (data.settings.autoStartNext) {
       if(this.state==='work'){
         this.beginBreak();
@@ -1927,31 +1825,7 @@ body.bg-view-mode .draggable-timer {
     }
   },
   beginWork(){ this.prevState=this.state; this.state='work'; const d=this.currentDurations().work*60; this.segmentTotal=d; if(this.prevState!=='paused') this.remaining=d; this._startTick(); this.updateUI(); },
-  beginBreak() {
-    this.prevState = this.state;
-    const config = this.currentConfig(); // Lấy cài đặt chu kỳ và khoảng nghỉ dài
-    const durations = this.currentDurations(); // Lấy cài đặt thời lượng
-
-    // KIỂM TRA XEM ĐÃ ĐẾN LÚC NGHỈ DÀI CHƯA
-    // Ví dụ: cycleIndex = 4, interval = 4 -> 4 % 4 = 0 -> Nghỉ dài
-    if (this.cycleIndex > 0 && this.cycleIndex % config.interval === 0) {
-      // Bắt đầu phiên NGHỈ DÀI
-      this.state = 'long_break';
-      const d = durations.long * 60;
-      this.segmentTotal = d;
-      if (this.prevState !== 'paused') this.remaining = d;
-      toast(`Tuyệt vời! Đã đến lúc nghỉ dài.`);
-    } else {
-      // Bắt đầu phiên NGHỈ NGẮN
-      this.state = 'break';
-      const d = durations.short * 60;
-      this.segmentTotal = d;
-      if (this.prevState !== 'paused') this.remaining = d;
-    }
-
-    this._startTick();
-    this.updateUI();
-  },
+  beginBreak(){ this.prevState=this.state; this.state='break'; const d=this.currentDurations().short*60; this.segmentTotal=d; if(this.prevState!=='paused') this.remaining=d; this._startTick(); this.updateUI(); },
   async start(){ if(!getCurrentSubtopic()){ toast('Hãy chọn một Chủ đề con trước khi bắt đầu'); return; } ensureAudio(); if(this.state==='idle'){ this.cycleIndex = this.cycleIndex || 0; this.beginWork(); } else if(this.state==='paused'){ this.resume(); } await this.persistTimerState(true); },
   async pause(){ if(this.tickHandle){ clearInterval(this.tickHandle); this.tickHandle=null; } this.prevState=this.state; this.state='paused'; this.updateUI(); await this.persistTimerState(true); },
   async resume(){ if(this.state!=='paused'){ return; } this.state=this.prevState||'work'; this._startTick(); this.updateUI(); await this.persistTimerState(true); },
@@ -2914,35 +2788,8 @@ function exportSummary(sum) {
         $$('.presets button').forEach(button => {
           button.addEventListener('click', (e) => {
             const newPreset = e.target.dataset.preset;
-            const currentPreset = data.settings.preset;
-
-            // Nếu người dùng bấm vào preset đang active thì không làm gì cả
-            if (newPreset === currentPreset) {
-              return;
-            }
-
-            // Trường hợp 1: Đồng hồ đang chạy -> Cần hỏi xác nhận
-            if (timer.state !== 'idle') {
-              showConfirmModal(
-                'Xác nhận chuyển đổi',
-                `Bạn có chắc muốn chuyển sang Kiểu ${newPreset}? Thao tác này sẽ dừng và đặt lại phiên làm việc hiện tại.`,
-                (confirmed) => {
-                  if (confirmed) {
-                    timer.reset(); // Đặt lại hoàn toàn đồng hồ
-                    timer.setPreset(newPreset); // Áp dụng preset mới
-                    renderAll(); // Cập nhật lại toàn bộ giao diện
-                    toast(`Đã chuyển sang Kiểu ${newPreset}.`);
-                  }
-                  // Nếu không xác nhận, không làm gì cả
-                }
-              );
-            } 
-            // Trường hợp 2: Đồng hồ đang nghỉ -> Chuyển đổi ngay lập tức
-            else {
-              timer.setPreset(newPreset);
-              renderAll();
-              toast(`Đã chuyển sang Kiểu ${newPreset}.`);
-            }
+            timer.setPreset(newPreset);
+            renderAll();
           });
         });
 
