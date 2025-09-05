@@ -12,40 +12,81 @@
     */
 
     :root {
+      /* Theme Dark (Mặc định) - Cập nhật từ file 2 */
       --bg: #0f1222;
       --panel: #171a2e;
+      --panel-rgb: 23, 26, 46; /* Thêm biến RGB cho panel */
       --muted: #212646;
       --text: #f4f6ff;
-      --sub: #cdd5ff;
+      --sub: #b7c1ff;
       --acc: #6c8cff;
       --acc-2: #27d3a2;
       --warn: #ffb020;
       --danger: #ff5c7a;
-      --shadow: 0px 1.8px 2.2px rgba(0, 0, 0, 0.034),
-                0px 4.3px 5.3px rgba(0, 0, 0, 0.048),
-                0px 8.1px 10px rgba(0, 0, 0, 0.06),
-                0px 14.5px 17.9px rgba(0, 0, 0, 0.072),
-                0px 27.2px 33.4px rgba(0, 0, 0, 0.086),
-                0px 65px 80px rgba(0, 0, 0, 0.12);
+      --shadow: 0px 1.8px 2.2px rgba(0, 0, 0, 0.054), 0px 4.3px 5.3px rgba(0, 0, 0, 0.077), 0px 8.1px 10px rgba(0, 0, 0, 0.095), 0px 14.5px 17.9px rgba(0, 0, 0, 0.113), 0px 27.2px 33.4px rgba(0, 0, 0, 0.136), 0px 65px 80px rgba(0, 0, 0, 0.19);
       --radius: 16px;
       --panel-opacity: 0.85;
       --gradient-border: linear-gradient(135deg, var(--acc), var(--acc-2));
     }
+    
+    /* === START: THÊM CÁC THEME MỚI === */
+    [data-theme='light'] {
+      --bg: #f5f0e8; --panel: #ffffff; --panel-rgb: 255, 255, 255; --muted: #eaddcf; --text: #4a4a4a; --sub: #8a817c; --acc: #d4a373; --acc-2: #a3b18a; --warn: #e76f51; --danger: #d00000;
+      --shadow: 0px 1.8px 2.2px rgba(0, 0, 0, 0.024), 0px 4.3px 5.3px rgba(0, 0, 0, 0.037), 0px 8.1px 10px rgba(0, 0, 0, 0.045), 0px 14.5px 17.9px rgba(0, 0, 0, 0.053), 0px 27.2px 33.4px rgba(0, 0, 0, 0.066), 0px 65px 80px rgba(0, 0, 0, 0.09);
+      --panel-opacity: 0.9;
+      /* Ngăn nền tối mặc định khi không có ảnh */
+      --bg-image: none;
+    }
+
+    [data-theme='pastel'] {
+      --bg: #fde2e4; --panel: #fff1f2; --panel-rgb: 255, 241, 242; --muted: #fad2e1; --text: #595260; --sub: #8c7a8a; --acc: #c78283; --acc-2: #7ec4cf; --warn: #f9bf45; --danger: #d7263d;
+      --shadow: 0 5px 20px rgba(200,150,150,0.2);
+      --panel-opacity: 0.9;
+      /* Ngăn nền tối mặc định khi không có ảnh */
+      --bg-image: none;
+    }
+    
+    [data-theme='lofi'] {
+      --bg: #2a2a3e; --panel: #3c3c52; --panel-rgb: 60, 60, 82; --muted: #4d4d66; --text: #e0e0ff; --sub: #a0a0c0; --acc: #ff8c69; --acc-2: #69c6ff; --warn: #ffd700; --danger: #ff6961;
+      --bg-image: url('https://i.pinimg.com/originals/9f/67/74/9f67742194e8f187b5129b6183571120.gif');
+      --panel-opacity: 0.8;
+    }
+    
+    [data-theme='space'] {
+        --bg: #000000; --panel: #1a1a2e; --panel-rgb: 26, 26, 46; --muted: #2a2a4e; --text: #e0e0ff; --sub: #b0b0e0; --acc: #00aaff; --acc-2: #aaff00; --warn: #ffaa00; --danger: #ff0055;
+        --bg-image: url('https://i.gifer.com/origin/a2/a2322310816930a8094f8263e6a7150a_w200.gif');
+        --panel-opacity: 0.75;
+    }
+    /* === END: THÊM CÁC THEME MỚI === */
 
     *:focus-visible {
       outline: 2px solid var(--acc); outline-offset: 2px; border-radius: 4px;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{margin:0; font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; background: var(--bg-image, radial-gradient(1200px 800px at 10% -10%, #20285b 0%, #0f1222 50%, #0b0e1a 100%)); background-size: cover; background-position: center; color:var(--text); transition: background-image 0.5s ease; text-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);}
+    body {
+      margin:0; 
+      font-family: system-ui, -apple-system, 'Segoe UI Variable', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Inter', sans-serif; 
+      
+      background-color: var(--bg);
+      background-image: var(--bg-image, radial-gradient(1200px 800px at 10% -10%, #20285b 0%, #0f1222 50%, #0b0e1a 100%));
+      
+      background-size: cover; 
+      background-position: center; 
+      color:var(--text); 
+      transition: background 0.5s ease, color 0.5s ease, filter 0.5s ease;
+      text-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+    }
     a{color:var(--acc)}
 
     .app{display:flex; min-height:100vh}
     
     .app-nav {
         width: 60px;
-        background: rgba(15, 18, 34, var(--panel-opacity));
-        backdrop-filter: blur(10px);
+        background: rgba(var(--panel-rgb), var(--panel-opacity));
         border-right: 1px solid rgba(255,255,255,.08);
         padding: 16px 0;
         display: flex;
@@ -76,9 +117,7 @@
         left: 110%;
         top: 50%;
         transform: translateY(-50%);
-        background: rgba(23, 26, 46, var(--panel-opacity));
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
+        background: rgba(var(--panel-rgb), var(--panel-opacity));
         border: 1px solid rgba(255,255,255,0.12);
         color: var(--text);
         padding: 4px 8px;
@@ -107,7 +146,16 @@
 
     .main.reloading { opacity: 0; transition: opacity 0.2s ease-out; }
 
-    .panel-bg{background: rgba(23, 26, 46, var(--panel-opacity)); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border:1px solid rgba(255,255,255,.08);}
+    .panel-bg{
+        background: rgba(var(--panel-rgb), var(--panel-opacity)); /* SỬA ĐỔI QUAN TRỌNG */
+        border:1px solid rgba(127,127,127,0.1);
+        transition: background-color 0.3s ease, box-shadow 0.3s ease; /* Thêm transition */
+    }
+    /* Thêm các quy tắc border cho theme light/pastel */
+    [data-theme='light'] .panel-bg, [data-theme='pastel'] .panel-bg { border:1px solid rgba(0,0,0,0.05); }
+    [data-theme='lofi'] .panel-bg { border:1px solid rgba(255,255,255,0.1); }
+    [data-theme='space'] .panel-bg { border:1px solid rgba(255,255,255,0.12); }
+
 
     header.app-header{display:flex; align-items:center; justify-content:space-between; padding:10px 14px; border-radius:var(--radius); box-shadow:var(--shadow); margin-bottom: 24px;}
     header .actions{display:flex; gap:8px; align-items:center}
@@ -115,7 +163,7 @@
     .btn {
       background: rgba(255, 255, 255, 0.08);
       color: var(--text);
-      border: 1px solid transparent;
+      border: none; /* Sửa đổi: bỏ border mặc định */
       padding: 10px 14px;
       border-radius: 12px;
       cursor: pointer;
@@ -136,20 +184,11 @@
         -webkit-mask-composite: destination-out; mask-composite: exclude; opacity: 0; transition: opacity 0.3s ease;
     }
     .btn:hover::before { opacity: 1; }
-    .btn:hover {
-        background: rgba(255, 255, 255, 0.12);
-        filter: none;
-    }
+    .btn:hover { background: rgba(255, 255, 255, 0.12); }
     .btn:active { transform: translateY(1px) scale(0.98); filter: brightness(1); }
     .btn:disabled { cursor: not-allowed; filter: brightness(0.8) saturate(0.5); }
-    .btn.ghost {
-        background: transparent;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-    .btn.ghost:hover {
-        background: rgba(255, 255, 255, 0.1);
-        border-color: rgba(255, 255, 255, 0.3);
-    }
+    .btn.ghost { background: transparent; border: 1px solid rgba(255, 255, 255, 0.2); }
+    .btn.ghost:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.3); }
     .btn.acc { background: var(--acc); color: white; }
     .btn.warn { background: var(--warn); color: white; }
     .btn.danger { background: var(--danger); color: white; }
@@ -159,8 +198,8 @@
 
     /* === START: CẬP NHẬT GIAO DIỆN QUẢN LÝ CHỦ ĐỀ === */
     #view-topics { grid-template-columns: 1fr; }
-    .topic-item { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:8px; margin-bottom:8px; }
-    .topic-header, .sub-row { display:flex; align-items:center; gap:8px; position: relative; /* Cần cho menu */ }
+    .topic-item { background:rgba(255,255,255,.04); border:1px solid var(--muted); border-radius:12px; padding:8px; margin-bottom:8px; } /* Sửa đổi */
+    .topic-header, .sub-row { display:flex; align-items:center; gap:8px; position: relative; }
     .topic-title { flex:1; font-weight:600; }
     .chev { width:28px; height:28px; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; flex-shrink: 0; }
     .chev .ico { display:inline-block; transition: transform .18s ease; }
@@ -168,7 +207,6 @@
     .subtopics { margin-top:8px; display:flex; flex-direction:column; gap:6px; }
     .subtopics.hidden { display:none; }
     
-    /* Ẩn các nút hành động mặc định */
     .topic-actions, .sub-row .actions {
         opacity: 0;
         visibility: hidden;
@@ -177,12 +215,10 @@
         gap: 6px;
         align-items: center;
     }
-    /* Hiện các nút hành động khi di chuột vào item cha */
     .topic-item:hover .topic-actions, .sub-row:hover .actions {
         opacity: 1;
         visibility: visible;
     }
-    /* Nút "thêm tùy chọn" (...) */
     .actions-menu-btn {
         padding: 0;
         width: 28px;
@@ -190,26 +226,22 @@
         font-size: 1.2em;
         line-height: 1;
     }
-    /* Khung chứa menu */
     .actions-menu {
         position: absolute;
         top: 100%;
         right: 0;
-        background: rgba(23, 26, 46, var(--panel-opacity));
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255,255,255,.08);
+        background: rgba(var(--panel-rgb), var(--panel-opacity));
+        border: 1px solid var(--muted); /* Sửa đổi */
         border-radius: 8px;
         padding: 6px;
         box-shadow: var(--shadow);
         z-index: 10;
         min-width: 150px;
-        display: none; /* Ẩn mặc định, hiện bằng JS */
+        display: none;
         flex-direction: column;
         gap: 4px;
     }
     .actions-menu.show { display: flex; }
-    /* Các mục trong menu */
     .menu-item {
         background: transparent; border: none; color: var(--text);
         padding: 8px 10px; border-radius: 6px; text-align: left;
@@ -223,17 +255,16 @@
     .subtopic-btn{
         flex:1; 
         text-align:left;
-        background-color: rgba(255, 255, 255, 0.05);
+        background-color: rgba(0,0,0,0.02); /* Sửa đổi */
     }
     .subtopic-btn:hover {
-        background-color: rgba(255, 255, 255, 0.1);
+        background-color: var(--muted); /* Sửa đổi */
     }
-    .subtopic-btn.active {
-        outline: 2px solid var(--acc);
-        background: transparent;
+    .subtopic-btn.active{
+        outline:2px solid var(--acc); 
     }
     .subtopic-btn.active:hover {
-        background: rgba(255, 255, 255, 0.05);
+        background: transparent; /* Giữ nền trong suốt khi di chuột qua */
     }
     
     .panel{border-radius:var(--radius); padding:24px; box-shadow:var(--shadow)}
@@ -242,47 +273,52 @@
     .timer{display:grid; gap:16px; grid-template-columns: 1fr; align-items:center; text-align:center}
     .big-time{font-size: clamp(60px, 12vw, 96px); letter-spacing:1px; font-weight:700; color: var(--text)}
     .state{font-weight:700; letter-spacing:.6px}
-    .state.work{color:#8be28b}
-    .state.break{color:#ffd479}
-    .state.long{color:#ff9bb1}
+    .state.work{color:var(--acc-2)} /* Sửa đổi màu */
+    .state.break{color:var(--warn)}
+    .state.long{color:var(--danger)} /* Sửa đổi màu */
     .controls{display:flex; flex-wrap:wrap; gap:12px; justify-content:center}    
     #btnStart { padding: 14px 28px; font-size: 1.2em; }
     #btnPause, #btnResume { padding: 12px 24px; font-size: 1.1em; }
 
+    /* === START: TÙY CHỈNH DẢI PHÂN CÁCH MỀM MẠI HƠN === */
+    #view-timer .panel-bg hr {
+        border: none; /* Bỏ đường viền mặc định */
+        height: 1px;  /* Đặt chiều cao cho đường kẻ */
+        background-color: var(--muted); /* Sử dụng màu phụ của theme */
+        opacity: 0.3; /* Làm cho nó mờ đi, hòa vào nền */
+        margin-top: 0; /* Điều chỉnh lại khoảng cách */
+    }
+    /* === END: TÙY CHỈNH DẢI PHÂN CÁCH MỀM MẠI HƠN === */
+
     .stats-grid{display:grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap:12px}
-    .stat-card{background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:12px; text-align:center}
+    .stat-card{background:rgba(255,255,255,0.04); border:1px solid var(--muted); border-radius:14px; padding:12px; text-align:center} /* Sửa đổi */
     .stat-card h4{margin:4px 0 8px; color:var(--sub); font-weight:600; font-size: 14px;}
     .stat-value{font-size: 20px; font-weight: 600;}
     .tiny{font-size:12px; color:var(--sub)}
     .history{display:grid; gap:8px; max-height:300px; overflow:auto; padding-right:6px}
-    .hist-item{display:grid; grid-template-columns: 1fr auto; gap:10px; align-items:start; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08); border-radius:10px; padding:10px}
-    .hist-meta{font-size:12px; color:var(--sub)}
+    .hist-item{display:grid; grid-template-columns: 1fr auto; gap:10px; align-items:start; background:rgba(255,255,255,0.04); border:1px solid var(--muted); border-radius:10px; padding:10px} /* Sửa đổi */
 
     .row{display:flex; gap:8px; align-items:center}
     .row > * {flex:1}
-    input[type="text"], input[type="password"], input[type="number"], select, textarea{width:100%; background:var(--panel); color:var(--text); border:1px solid var(--muted); border-radius:10px; padding:10px; outline:none}
+    input[type="text"], input[type="password"], input[type="number"], select, textarea{width:100%; background:rgba(255,255,255,0.04); color:var(--text); border:1px solid var(--muted); border-radius:10px; padding:10px; outline:none}
     textarea{min-height:80px; resize: vertical;}
 
     .toasts{position:fixed; right:16px; bottom:16px; display:flex; flex-direction:column; gap:8px; z-index:9999}
     .toast{
-        background: rgba(23, 26, 46, var(--panel-opacity));
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border:1px solid rgba(255,255,255,.12);
+        background: var(--panel); /* Sửa đổi */
+        border:1px solid var(--muted);
         color:var(--text);
         padding:10px 12px; border-radius:12px; box-shadow:var(--shadow);
         animation: toast-in .3s ease; transform-origin: bottom right;
     }
     @keyframes toast-in { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
 
-    .modal{position:fixed; inset:0; display:none; align-items:center; justify-content:center; background: rgba(0,0,0, var(--panel-opacity)); z-index:1000; backdrop-filter: blur(5px);}
+    .modal{position:fixed; inset:0; display:none; align-items:center; justify-content:center; background: rgba(0,0,0,0.65); z-index:1000;} /* Sửa đổi */
     .modal.show{display:flex}
     .modal-card{
         width:min(720px, 94vw);
-        background: rgba(18, 22, 50, var(--panel-opacity));
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border:1px solid rgba(255,255,255,.1);
+        background: rgba(var(--panel-rgb), var(--panel-opacity));
+        border:1px solid var(--muted);
         border-radius:16px;
         padding:16px;
         box-shadow:var(--shadow);
@@ -302,7 +338,7 @@
     .hidden{display:none !important}
 
     .notes-list { display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto; padding-right: 6px; }
-    .note-item { background: rgba(255,255,255,0.04); border-radius: 10px; padding: 10px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; cursor: pointer; }
+    .note-item { background: rgba(255,255,255,0.04); border-radius: 10px; padding: 10px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; cursor: pointer; } /* Sửa đổi */
     .note-content-wrapper { flex: 1; min-width: 0; }
     .note-content { white-space: pre-wrap; word-break: break-word; max-height: 60px; overflow: hidden; position: relative; transition: max-height 0.35s ease-in-out; }
     .note-content:not(.expanded)::after {
@@ -311,7 +347,7 @@
     .note-content.expanded { max-height: 500px; }
     .note-meta { font-size: 11px; color: var(--sub); margin-top: 4px; }
     
-    .spinner { border: 2px solid rgba(255,255,255,.2); border-top-color: var(--text); border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; }
+    .spinner { border: 2px solid var(--muted); border-top-color: var(--text); border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; } /* Sửa đổi */
     @keyframes spin { to { transform: rotate(360deg); } }
 
     .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
@@ -319,12 +355,79 @@
     .panel-header .actions { display: flex; gap: 8px; }
     
     .aux-panel { margin-top: 24px; }
-    .tab-nav { display: flex; gap: 4px; border-bottom: 1px solid var(--muted); margin-bottom: 16px; }
+    .tab-nav { display: flex; gap: 4px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 16px; }
     .tab-btn { background: transparent; border: none; color: var(--sub); padding: 8px 16px; cursor: pointer; border-bottom: 2px solid transparent; transition: all .2s ease; font-weight: 600; }
     .tab-btn:hover { color: var(--text); }
     .tab-btn.active { color: var(--acc); border-bottom-color: var(--acc); }
-    .tab-content { display: none; padding-top: 8px; }
-    .tab-content.active { display: block; animation: fadeIn .3s ease; }
+    .tab-content {
+      display: none;
+      padding-top: 8px;
+    }
+    .tab-content.active {
+      animation: fadeIn 0.25s ease-out;
+    }
+    #tasks.tab-content.active,
+    #notes.tab-content.active,
+    #ai.tab-content.active {
+        display: block;
+    }
+
+    #settings-timer.tab-content.active,
+    #settings-ui.tab-content.active,
+    #settings-integrations.tab-content.active {
+        display: flex;
+    }
+
+    .settings-row-toggle {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 16px;
+    }
+    .settings-row-toggle span {
+      flex: 1;
+      cursor: pointer;
+    }
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .toggle-switch .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--muted);
+      transition: .3s;
+      border-radius: 24px;
+    }
+    .toggle-switch .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+    .toggle-switch input:checked + .slider {
+      background-color: var(--acc-2);
+    }
+    .toggle-switch input:checked + .slider:before {
+      transform: translateX(20px);
+    }
     
     .chat-messages { max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; padding: 4px; }
     .chat-msg { padding: 8px 12px; border-radius: 12px; max-width: 85%; word-break: break-word; }
@@ -334,7 +437,7 @@
 
     .methods-list { list-style: none; padding: 0; }
     .method-item { align-items: flex-start; padding: 12px; display: flex; gap: 10px; border-radius: 8px; }
-    .method-item:hover { background: rgba(255,255,255,0.05); }
+    .method-item:hover { background: rgba(0,0,0,0.03); } /* Sửa đổi */
     .method-item input[type="checkbox"] { width: 18px; height: 18px; margin-top: 2px; flex-shrink: 0;}
     .method-item label { flex: 1; }
     .method-item label.completed { text-decoration: line-through; color: var(--sub); }
@@ -345,11 +448,10 @@
     .subtopic-todo-list li.removing { transform: translateX(100%); opacity: 0; }
     .subtopic-todo-list label { flex: 1; }
 
-    /* Đặt player ngoài khung nhìn nhưng vẫn tồn tại để một số trình duyệt cho phép phát audio */
     #youtube-player-container { position: absolute; top: -9999px; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 
     ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); border-radius: 10px; }
+    ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.1); border-radius: 10px; } /* Sửa đổi */
     ::-webkit-scrollbar-thumb { background: var(--muted); border-radius: 10px; border: 2px solid transparent; background-clip: content-box; }
     ::-webkit-scrollbar-thumb:hover { background: var(--sub); background-clip: content-box; }
     
@@ -358,12 +460,13 @@
     }
     .timer-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
     .timer-circle-bg, .timer-circle-progress { fill: none; stroke-width: 8; }
-    .timer-circle-bg { stroke: rgba(255, 255, 255, 0.1); }
+    .timer-circle-bg { stroke: var(--muted); } /* Sửa đổi */
     .timer-circle-progress { stroke: var(--acc); stroke-linecap: round; transition: stroke-dashoffset 0.3s linear, stroke 0.5s ease; }
     @keyframes flash { 0%, 100% { box-shadow: 0 0 10px 2px transparent; } 50% { box-shadow: 0 0 20px 8px currentColor; } }
     .timer-circle-container.finished { color: var(--acc-2); animation: flash 1s ease-out; }
     @keyframes breathing-effect { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
     .timer-circle-container.breathing { animation: breathing-effect 3s ease-in-out infinite; }
+    
     @media (max-width: 1024px) {
       .app-content { padding: 20px; }
       .panel { padding: 20px; }
@@ -397,70 +500,58 @@
     header.app-header .actions #btnFullscreen:hover::before { opacity: 0; }
 
     input[type="text"], input[type="password"], input[type="number"], select, textarea {
-        background: rgba(255, 255, 255, 0.04) !important;
+        background: rgba(255,255,255,0.04) !important; /* Sửa đổi: chuyển sang nền trắng trong suốt */
         color: var(--text);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid var(--muted);
         transition: background .2s ease, border-color .2s ease;
     }
     input[type="text"]:focus, input[type="password"]:focus, input[type="number"]:focus, select:focus, textarea:focus {
-        background: rgba(255, 255, 255, 0.06) !important;
+        background: rgba(255,255,255,0.06) !important; /* Tinh chỉnh: sát mẫu hơn */
         border-color: var(--acc);
     }
+    /* === START: SỬA LỖI NỀN INPUT/SELECT TRÊN THEME SÁNG === */
+    [data-theme='light'] input, [data-theme='light'] select, [data-theme='light'] textarea,
+    [data-theme='pastel'] input, [data-theme='pastel'] select, [data-theme='pastel'] textarea {
+        background: rgba(0, 0, 0, 0.05) !important; /* Dùng nền đen mờ thay vì trắng mờ */
+    }
+
+    [data-theme='light'] input:focus, [data-theme='light'] select:focus, [data-theme='light'] textarea:focus,
+    [data-theme='pastel'] input:focus, [data-theme='pastel'] select:focus, [data-theme='pastel'] textarea:focus {
+        background: rgba(0, 0, 0, 0.07) !important; /* Tăng độ đậm khi focus */
+    }
+    /* === END: SỬA LỖI NỀN INPUT/SELECT TRÊN THEME SÁNG === */
     
-    ::placeholder { color: var(--sub); opacity: 1; }
+    ::placeholder { color: var(--sub); opacity: 0.7; } /* Sửa đổi */
     ::-ms-input-placeholder { color: var(--sub); }
     :-ms-input-placeholder { color: var(--sub); }
 
-    #modalSettings select {
-      background: rgba(23,26,46, var(--panel-opacity)) !important;
-      border: 1px solid rgba(255,255,255,0.2);
+    
+    
+    .draggable-timer {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: rgba(var(--panel-rgb), var(--panel-opacity));
+        color: var(--text);
+        padding: 8px 16px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: var(--shadow);
+        font-size: 2em;
+        font-weight: 600;
+        cursor: move;
+        user-select: none;
+        z-index: 9998;
+        opacity: 0;
+        transform: scale(0.9);
+        pointer-events: none;
+        transition: opacity 0.35s ease, transform 0.35s ease;
     }
-    #modalSettings select:focus {
-      background: rgba(23,26,46, calc(var(--panel-opacity) + 0.05)) !important;
-      border-color: var(--acc);
+    body.bg-view-mode .draggable-timer {
+        opacity: 1;
+        transform: scale(1);
+        pointer-events: auto;
     }
-    
-    
-
-/* === START: CSS CHO ĐỒNG HỒ ZEN MODE KÉO THẢ === */
-.draggable-timer {
-    position: fixed; /* Quan trọng để có thể di chuyển tự do */
-    bottom: 20px;    /* Vị trí mặc định ban đầu */
-    right: 20px;     /* Vị trí mặc định ban đầu */
-    
-    background: rgba(23, 26, 46, var(--panel-opacity)); /* Nền mờ đồng bộ panel */
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    
-    color: var(--text);
-    padding: 8px 16px;
-    border-radius: 12px; /* Bo góc để tạo thành "ô vuông" mềm mại */
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: var(--shadow);
-    
-    font-size: 2em; /* Kích thước chữ to, rõ ràng */
-    font-weight: 600;
-    
-    cursor: move; /* Biểu tượng con trỏ cho biết có thể di chuyển */
-    user-select: none; /* Ngăn người dùng vô tình chọn text khi kéo */
-    z-index: 9998;
-    
-    opacity: 0; /* Mặc định ẩn đi */
-    transform: scale(0.9);
-    pointer-events: none; /* Mặc định không thể tương tác */
-    transition: opacity 0.35s ease, transform 0.35s ease;
-}
-
-/* Khi ở chế độ Zen Mode, hiện đồng hồ này lên */
-body.bg-view-mode .draggable-timer {
-    opacity: 1;
-    transform: scale(1);
-    pointer-events: auto; /* Cho phép tương tác khi hiện */
-}
-/* === END: CSS CHO ĐỒNG HỒ ZEN MODE KÉO THẢ === */
-/* === END: CSS CHO THANH TIMER ZEN MODE === */
-
-    /* === START: CSS CHO CHẾ ĐỘ XEM NỀN (Zen Mode) === */
     .app-nav, .panel-bg, .app-header .actions > *, .app-header > .row {
         transition: opacity 0.35s ease, transform 0.35s ease, background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
     }
@@ -484,15 +575,10 @@ body.bg-view-mode .draggable-timer {
         opacity: 1;
         pointer-events: auto;
     }
-    /* === END: CSS CHO CHẾ ĐỘ XEM NỀN (Zen Mode) === */
-
-    /* === START: Xin quyền phát âm thanh === */
     .sound-permission-bar {
       position: fixed; left: 50%; transform: translateX(-50%);
       bottom: 48px; z-index: 9999;
-      background: rgba(23, 26, 46, var(--panel-opacity));
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      background: rgba(var(--panel-rgb), var(--panel-opacity));
       border: 1px solid rgba(255,255,255,0.12);
       border-radius: 12px; padding: 10px 14px;
       display: none; align-items: center; gap: 10px;
@@ -500,43 +586,110 @@ body.bg-view-mode .draggable-timer {
     }
     .sound-permission-bar.show { display: flex; }
     .sound-permission-bar .msg { font-size: 14px; color: var(--text); }
-    /* === END: Xin quyền phát âm thanh === */
-    /* Override: Zen Mode floating timer for better contrast */
-    .draggable-timer {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
+    .draggable-timer { text-shadow: 0px 0px 8px rgba(0, 0, 0, 0.9); }
 
-        /* Nearly transparent background with lighter blur */
-        background: rgba(23, 26, 46, var(--panel-opacity));
-        backdrop-filter: blur(5px);
-        -webkit-backdrop-filter: blur(5px);
+    /* Giảm/loại bỏ bóng chữ cho theme sáng để tránh nhòe/lóa */
+    body[data-theme='light'],
+    body[data-theme='pastel'] { text-shadow: none; }
+    body[data-theme='light'] .draggable-timer,
+    body[data-theme='pastel'] .draggable-timer { text-shadow: none; }
 
-        color: var(--text);
-        padding: 8px 16px;
-        border-radius: 12px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        box-shadow: var(--shadow);
-
-        font-size: 2em;
-        font-weight: 600;
-
-        /* Important: keep digits readable on any background */
-        text-shadow: 0px 0px 8px rgba(0, 0, 0, 0.9);
-
-        cursor: move;
-        user-select: none;
-        z-index: 9998;
-
-        opacity: 0;
-        transform: scale(0.9);
-        pointer-events: none;
-        transition: opacity 0.35s ease, transform 0.35s ease;
+    /* ============================================= */
+    /* START: BỘ LỌC NÂNG CAO NỀN CHO THEME TỐI      */
+    /* ============================================= */
+    
+    /* Áp dụng cho theme Mặc định, Lofi và Space */
+    body[data-theme='default'],
+    body[data-theme='lofi'],
+    body[data-theme='space'] {
+        /* Tăng độ sáng lên 115% và độ bão hòa màu lên 110% */
+        filter: brightness(115%) saturate(110%);
     }
+    
+    /* Gỡ bỏ bộ lọc cho các theme sáng để giữ màu gốc */
+    body[data-theme='light'],
+    body[data-theme='pastel'] {
+        filter: none;
+    }
+    
+    /* ============================================= */
+    /* END: BỘ LỌC NÂNG CAO NỀN CHO THEME TỐI        */
+    /* ============================================= */
+
+    /* ========================================================= */
+    /* START: THIẾT LẬP PANEL MÀU ĐẶC (KHÔNG TRONG SUỐT)           */
+    /* ========================================================= */
+    .app-nav, 
+    .modal-card, 
+    .actions-menu, 
+    .draggable-timer, 
+    .sound-permission-bar, 
+    .nav-btn .tooltip {
+        background: rgba(var(--panel-rgb), var(--panel-opacity)); /* Dùng nền bán trong suốt của theme */
+        border: 1px solid rgba(127, 127, 127, 0.1); /* Thêm viền nhẹ để panel nổi khối hơn */
+    }
+
+    /* Lớp phủ của Modal cũng không cần blur */
+    .modal {
+        background: rgba(0, 0, 0, 0.65);
+    }
+
+    /* ========================================================= */
+    /* START: TẠO LỚP NỀN MỜ TOÀN MÀN HÌNH                        */
+    /* ========================================================= */
+    body::before {
+        content: '';
+        position: fixed; /* Cố định để che toàn bộ màn hình */
+        inset: 0; /* (viết tắt của top: 0; left: 0; right: 0; bottom: 0;) */
+        
+        /* Tự động lấy ảnh nền được thiết lập trong <body> */
+        background-image: inherit; 
+        background-size: cover;
+        background-position: center;
+        
+        /* Đây là chìa khóa:
+          - blur(20px): Độ mờ, bạn có thể tăng/giảm (ví dụ 15px, 25px)
+          - brightness(0.8): Giảm độ sáng nền đi 20% để chữ nổi bật hơn
+          - saturate(1.2): Tăng độ bão hòa màu lên 20% cho ảnh sống động hơn
+        */
+        filter: blur(20px) brightness(0.8) saturate(1.2);
+        
+        /* Đặt lớp nền này nằm ở phía sau cùng, dưới tất cả nội dung khác */
+        z-index: -1;
+    }
+
+    /* === START: LÀM MỜ VIỀN TAB CHO THEME SÁNG === */
+    [data-theme='light'] .tab-nav,
+    [data-theme='pastel'] .tab-nav {
+        border-bottom-color: rgba(0, 0, 0, 0.1); /* Viền đen trong suốt */
+    }
+    /* === END: LÀM MỜ VIỀN TAB CHO THEME SÁNG === */
+
+    /* === START: ĐỒNG BỘ GIAO DIỆN CÁC PANEL PHỤ === */
+    .topic-item, .stat-card, .hist-item, .hist-item {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08); /* Làm viền mờ hơn một chút */
+    }
+
+    .subtopic-btn {
+        background-color: transparent; /* Bỏ nền cũ */
+    }
+
+    /* Áp dụng nền và viền riêng cho theme sáng để dễ nhìn hơn */
+    [data-theme='light'] .topic-item,
+    [data-theme='light'] .stat-card,
+    [data-theme='light'] .hist-item,
+    [data-theme='pastel'] .topic-item,
+    [data-theme='pastel'] .stat-card,
+    [data-theme='pastel'] .hist-item {
+        background: rgba(0, 0, 0, 0.02); /* Một lớp nền đen rất mờ */
+        border: 1px solid rgba(0, 0, 0, 0.06); /* Viền đen mờ */
+    }
+    /* === END: ĐỒNG BỘ GIAO DIỆN CÁC PANEL PHỤ === */
+
     </style>
 </head>
-<body>
-  <div class="app" id="app">
+<body data-theme="default"> <div class="app" id="app">
     <nav class="app-nav">
         <button class="nav-btn active" id="navBtnTimer" data-view="timer" aria-label="Đồng hồ">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
@@ -579,7 +732,6 @@ body.bg-view-mode .draggable-timer {
       </header>
       
 
-      <!-- VIEW: TIMER (Mặc định) -->
       <div id="view-timer" class="view active">
         <section class="panel panel-bg">
           <div class="timer-header">
@@ -593,7 +745,7 @@ body.bg-view-mode .draggable-timer {
                 <button id="btnPresetB" class="btn small ghost" data-preset="B"></button>
             </div>
           </div>
-          <hr style="border-color:rgba(255,255,255,.08)" />
+          <hr />
           <div class="timer" aria-live="polite">
             <div class="badge" id="stateBadge">TRẠNG THÁI</div>
             
@@ -618,7 +770,6 @@ body.bg-view-mode .draggable-timer {
           </div>
         </section>
 
-        <!-- KHU VỰC TAB MỚI -->
         <section class="panel panel-bg aux-panel">
             <nav class="tab-nav">
                 <button class="tab-btn active" data-tab="tasks">Nhiệm vụ</button>
@@ -651,15 +802,19 @@ body.bg-view-mode .draggable-timer {
                     </div>
                 </div>
                 <div id="chatMessages" class="chat-messages"></div>
+                <div id="aiPromptSuggestions" style="display: flex; gap: 6px; margin: 8px 0; flex-wrap: wrap;">
+                  <button class="btn small ghost" data-prompt="Giải thích khái niệm chính của chủ đề này">Giải thích khái niệm</button>
+                  <button class="btn small ghost" data-prompt="Tạo một dàn ý chi tiết cho chủ đề này">Tạo dàn ý</button>
+                  <button class="btn small ghost" data-prompt="Liệt kê 5 câu hỏi ôn tập quan trọng về chủ đề này">Tạo câu hỏi ôn tập</button>
+                </div>
                 <div class="chat-input-area">
-                    <input type="text" id="chatInput" placeholder="Hỏi Gemini điều gì đó..." />
-                    <button id="btnSendMessage" class="btn acc">Gửi</button>
+                  <input type="text" id="chatInput" placeholder="Hỏi Gemini điều gì đó..." />
+                  <button id="btnSendMessage" class="btn acc">Gửi</button>
                 </div>
             </div>
         </section>
       </div>
 
-      <!-- VIEW: TOPICS -->
       <div id="view-topics" class="view">
         <div class="panel panel-bg">
             <div class="row" style="gap:8px; align-items: center; margin-bottom: 12px;">
@@ -671,7 +826,6 @@ body.bg-view-mode .draggable-timer {
         </div>
       </div>
       
-      <!-- VIEW: STATS -->
       <div id="view-stats" class="view">
         <section class="panel panel-bg">
             <h3 style="margin:0 0 12px 0;">Thống kê & Lịch sử — <span id="currentSubtopicName">(chưa chọn)</span></h3>
@@ -687,22 +841,9 @@ body.bg-view-mode .draggable-timer {
         </section>
       </div>
 
-      <!-- VIEW: TOOLS
-      <div id="view-tools" class="view">
-        <section class="panel panel-bg">
-          <h3>Tóm tắt ghi chú</h3>
-          <textarea id="summaryInput" rows="4" placeholder="Nhập nội dung hoặc để trống để dùng ghi chú hiện có"></textarea>
-          <div style="margin-top:8px;">
-            <button class="btn acc" id="btnSummarize">Tóm tắt</button>
-          </div>
-          <div id="summariesList" class="notes-list" style="margin-top:12px;"></div>
-        </section>
-      </div> -->
-
       <div id="view-guide" class="view">
         <div class="panel panel-bg">
             <h3 style="margin-top: 0;">📖 Hướng dẫn sử dụng Pomodoro Study App</h3>
-
             <h4>Bắt đầu nhanh</h4>
             <p>
                 Ứng dụng được tổ chức theo cấu trúc <strong>Chủ đề</strong> và <strong>Chủ đề con</strong>.
@@ -713,9 +854,7 @@ body.bg-view-mode .draggable-timer {
                 <li>Nhấn nút <strong>"＋ Thêm"</strong> bên cạnh chủ đề vừa tạo để thêm một chủ đề con (ví dụ: "ReactJS Cơ bản").</li>
                 <li>Chọn chủ đề con bạn vừa tạo. Bây giờ bạn đã sẵn sàng để bắt đầu một phiên Pomodoro!</li>
             </ol>
-
-            <hr style="border-color:rgba(255,255,255,.08)">
-
+            <hr />
             <h4>Các Tính Năng Chính</h4>
             <ul>
                 <li><strong>Đồng hồ (Timer):</strong> Nơi bạn thực hiện các phiên học Pomodoro. Bạn có thể chọn giữa 2 cấu hình (Preset A/B) trong phần Cài đặt.</li>
@@ -723,21 +862,16 @@ body.bg-view-mode .draggable-timer {
                 <li><strong>Chế độ Zen (Zen Mode):</strong> Nhấn vào biểu tượng con mắt 👁️ ở góc trên bên phải để ẩn mọi thứ và chỉ tập trung vào hình nền và đồng hồ.</li>
                 <li><strong>Thống kê (Stats):</strong> Theo dõi tổng thời gian học, số phiên hoàn thành và nhiệm vụ đã làm cho mỗi chủ đề con.</li>
             </ul>
-
-            <hr style="border-color:rgba(255,255,255,.08)">
-            
+            <hr />
             <h4>Phím tắt</h4>
             <ul>
                 <li><kbd>Space</kbd>: Bắt đầu / Tạm dừng / Tiếp tục đồng hồ.</li>
                 <li><kbd>N</kbd>: Bỏ qua (Skip) phiên làm việc hoặc nghỉ hiện tại.</li>
                 <li><kbd>Esc</kbd>: Đóng các cửa sổ pop-up (như Cài đặt).</li>
             </ul>
-
-            <hr style="border-color:rgba(255,255,255,.08)">
-
+            <hr />
             <h4>Cài đặt & Tích hợp Nâng cao</h4>
             <p>Bạn có thể truy cập tất cả các mục này trong phần <strong>Cài đặt</strong> ⚙️.</p>
-            
             <strong style="display: block; margin-top: 1em;">🧠 Tích hợp Gemini AI</strong>
             <p>
                 Tính năng này kết nối ứng dụng với trí tuệ nhân tạo của Google, cho phép bạn sử dụng trợ lý AI trong tab "Gemini AI". Bạn có thể hỏi đáp, yêu cầu giải thích các khái niệm khó, hoặc tóm tắt ghi chú.
@@ -752,7 +886,6 @@ body.bg-view-mode .draggable-timer {
                     </ol>
                 </li>
             </ul>
-
             <strong style="display: block; margin-top: 1em;">🎶 Nhạc nền YouTube</strong>
             <p>
                 Tự động phát một video hoặc một danh sách phát từ YouTube làm nhạc nền trong khi bạn học. Rất tuyệt vời cho các playlist nhạc lofi hoặc âm thanh tự nhiên.
@@ -767,7 +900,6 @@ body.bg-view-mode .draggable-timer {
                 </li>
                 <li><strong>Tùy chọn thêm:</strong> Bạn có thể tích vào ô "Dùng ảnh bìa video làm nền" để tự động đổi hình nền của ứng dụng thành thumbnail của video.</li>
             </ul>
-
             <strong style="display: block; margin-top: 1em;">🛡️ Phục hồi dữ liệu</strong>
             <p>
                 Đây là một tính năng an toàn. Ứng dụng sẽ tự động tạo một bản sao lưu dữ liệu của bạn mỗi ngày. Nếu bạn vô tình xóa mất một chủ đề quan trọng, bạn có thể dùng tính năng này để quay trở lại.
@@ -784,11 +916,9 @@ body.bg-view-mode .draggable-timer {
             </ul>
         </div>
       </div>
-
     </main>
   </div>
 
-  <!-- ========= MODALS ========= -->
   <div class="modal" id="modalMilestone" role="dialog" aria-modal="true" aria-labelledby="milestoneTitle">
     <div class="modal-card" style="width: min(600px, 94vw);">
         <h3 id="milestoneTitle">🎉 Chúc mừng Bạn!</h3>
@@ -807,7 +937,7 @@ body.bg-view-mode .draggable-timer {
               <button class="tab-btn" data-tab="settings-integrations">Tích hợp</button>
           </nav>
           <div class="settings-content">
-              <div id="settings-timer" class="tab-content active" style="display:flex; flex-direction:column; gap:20px;">
+              <div id="settings-timer" class="tab-content active" style="flex-direction:column; gap:20px;">
                   <div>
                       <h4>Thời lượng Pomodoro</h4>
                       <div class="row" id="timerPresetSelector" style="margin-bottom:16px;">
@@ -824,18 +954,25 @@ body.bg-view-mode .draggable-timer {
                           <label>Chu kỳ nghỉ dài<input type="number" id="set_interval" min="2" /></label>
                       </div>
                   </div>
-                      <div class="row" style="margin-top: 16px; align-items: center;">
-                          <label for="set_autoStartNext" style="flex: 1; cursor: pointer;"> Tự động bắt đầu phiên tiếp theo </label>
-                          <input type="checkbox" id="set_autoStartNext" style="width: 20px; height: 20px; flex: 0;">
+                      <div class="settings-row-toggle">
+                          <label for="set_autoStartNext">Tự động bắt đầu phiên tiếp theo</label>
+                          <label class="toggle-switch">
+                              <input type="checkbox" id="set_autoStartNext">
+                              <span class="slider"></span>
+                          </label>
                       </div>
               </div>
-              <div id="settings-ui" class="tab-content" style="display: none; flex-direction: column; gap: 20px;">
+              <div id="settings-ui" class="tab-content" style="flex-direction: column; gap: 20px;">
                   <div>
                       <h4>Giao diện</h4>
                       <div class="row">
                           <label>Theme Giao Diện
                                 <select id="set_theme_color">
                                     <option value="default">Mặc định (Dark Blue)</option>
+                                    <option value="light">Light - Trà Sữa</option>
+                                    <option value="pastel">Pastel - Dễ thương</option>
+                                    <option value="lofi">Lofi Study Room</option>
+                                    <option value="space">Space Station</option>
                                 </select>
                           </label>
                       </div>
@@ -850,8 +987,10 @@ body.bg-view-mode .draggable-timer {
                           <label style="flex: 1;">Độ trong suốt của nền</label>
                           <input type="range" id="set_panelOpacity" min="0.1" max="1" step="0.05" style="flex: 2;">
                       </div>
-                  </div>
-                  <div>
+                      
+                   </div>
+                  
+                   <div>
                       <h4>Âm thanh</h4>
                       <div class="row">
                           <label>Âm lượng (0–1)<input type="number" id="set_volume" step="0.05" min="0" max="1"/></label>
@@ -888,7 +1027,7 @@ body.bg-view-mode .draggable-timer {
                       </div>
                   </div>
               </div>
-              <div id="settings-integrations" class="tab-content" style="display: none; flex-direction: column; gap: 20px;">
+              <div id="settings-integrations" class="tab-content" style="flex-direction: column; gap: 20px;">
                   <div>
                       <h4>Tích hợp AI</h4>
                       <label>Gemini API Key
@@ -913,6 +1052,14 @@ body.bg-view-mode .draggable-timer {
                           <input type="range" id="ytSoundVolume" min="0" max="100" step="1" value="80" style="flex:1;">
                       </div>
                       <div class="tiny" style="text-align:center; margin-top:4px;">Âm lượng</div>
+                  </div>
+                  <div>
+                      <h4>🛡️ Cài đặt sao lưu</h4>
+                      <div class="row">
+                          <label>Số ngày sao lưu cần giữ lại
+                               <input type="number" id="set_backupDays" min="1" max="30" />
+                          </label>
+                      </div>
                   </div>
                   <div>
                       <h4>🛡️ Phục hồi dữ liệu</h4>
@@ -979,7 +1126,11 @@ body.bg-view-mode .draggable-timer {
     <span class="msg">Đang phát (tắt tiếng). Nhấn nút ▶️ để bật tiếng.</span>
   </div>
 <script src="https://www.youtube.com/iframe_api"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
   <script>
+    // Đã bỏ fixVietnameseUI: dùng trực tiếp tiếng Việt (UTF-8) trong HTML/JS
+    // Nút toàn màn hình: dùng biểu tượng ↗️/↙️ thay vì chữ
+    window.addEventListener('load', ()=>{ try { updateFullscreenButton(); } catch(_) {} });
     const IS_FILE_PROTOCOL = (window.location.protocol === 'file:');
     // Watchdog: thông báo nếu API YouTube tải chậm hoặc thất bại
     function startYtApiWatchdog(){
@@ -1027,7 +1178,6 @@ body.bg-view-mode .draggable-timer {
                 const request = indexedDB.open(this.DB_NAME, this.DB_VERSION);
                 request.onupgradeneeded = (event) => {
                     const db = event.target.result;
-                    // Create core stores
                     if (!db.objectStoreNames.contains('settings')) {
                         db.createObjectStore('settings');
                     }
@@ -1114,14 +1264,10 @@ body.bg-view-mode .draggable-timer {
                 const topicsStore = tx.objectStore('topics');
                 const subtopicsStore = tx.objectStore('subtopics');
 
-                // 1. Persist settings
                 settingsStore.put(data.settings, 'main_settings');
-
-                // 2. Clear old topics/subtopics
                 topicsStore.clear();
                 subtopicsStore.clear();
 
-                // 3. Store topics and subtopics
                 data.topics.forEach(topic => {
                     const { subtopics, ...topicData } = topic;
                     topicsStore.put(topicData);
@@ -1145,7 +1291,7 @@ body.bg-view-mode .draggable-timer {
                 request.onsuccess = () => {
                     localStorage.setItem('lastBackupDate', today);
                     console.log('Daily backup successful.');
-                    this.cleanupOldBackups(2);
+                    this.cleanupOldBackups((data?.settings?.backupDaysToKeep) || 7);
                 };
                 request.onerror = (event) => {
                     console.error('Backup failed:', event.target.error);
@@ -1267,7 +1413,6 @@ body.bg-view-mode .draggable-timer {
         const match = url.match(regExp);
         return match ? match[1] : null;
     }
-    // Quản lý URL YouTube cho phiên làm việc (không lưu vào storage)
     let sessionYoutubeUrl = '';
     function getActiveYoutubeUrl(){
         try {
@@ -1289,9 +1434,7 @@ body.bg-view-mode .draggable-timer {
             feedbackEl.textContent = "OK. Link hợp lệ. Đang chuẩn bị phát...";
             feedbackEl.style.color = 'var(--acc-2)';
             toggleBtn.disabled = false;
-            // Cập nhật player ngay lập tức mà không cần lưu (ưu tiên file://)
             sessionYoutubeUrl = url;
-            // Tải nền từ thumbnail YouTube ngay lập tức (không cần nhấn Lưu)
             try {
                 const thumbUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
                 const img = new Image();
@@ -1303,7 +1446,6 @@ body.bg-view-mode .draggable-timer {
                 if (IS_FILE_PROTOCOL) {
                     const isMuted = _ytUnlocked ? 0 : 1;
                     fallbackLoadVideo(videoId, { autoplay: 1, mute: isMuted });
-                    // Nudge play to ensure autoplay kicks in on some browsers
                     try { setTimeout(() => { try { fallbackPostMessage('playVideo'); } catch(_) {} }, 250); } catch(_) {}
                     if (!_ytUnlocked) { showSoundPermission(); }
                 try { setTimeout(() => { const fb = document.getElementById('ytUrlFeedback'); if (fb) fb.textContent = 'Đang phát'; }, 500); } catch(_) {}
@@ -1312,7 +1454,7 @@ body.bg-view-mode .draggable-timer {
                 }
             } catch(_) {}
         } else if (url === '') {
-            feedbackEl.textContent = ""; // Xóa thông báo nếu ô trống
+            feedbackEl.textContent = "";
             toggleBtn.disabled = true;
             if (IS_FILE_PROTOCOL) { try { fallbackStop(); } catch(_) {} }
             else if (ytPlayer && ytPlayer.stopVideo) { ytPlayer.stopVideo(); }
@@ -1322,13 +1464,40 @@ body.bg-view-mode .draggable-timer {
             toggleBtn.disabled = true;
         }
     }
-    function applyTheme() {
-        const theme = data.settings.theme || 'default';
-        document.body.className = ''; // Xóa tất cả các class cũ
-        if (theme !== 'default') {
-            document.body.classList.add(theme);
+    
+    // THAY ĐỔI: Hàm applyTheme được cập nhật hoàn toàn
+    function applyTheme(previewTheme) {
+        const theme = previewTheme || data.settings.theme || 'default';
+        document.body.dataset.theme = theme;
+        
+        const themeHasBg = ['lofi', 'space'].includes(theme);
+        const isLightTheme = (theme === 'light' || theme === 'pastel');
+        const customBg = data.settings.customBg;
+
+        // helper: always clear any previously forced inline fallback
+        const clearInlineBgFallback = () => { try { document.body.style.backgroundImage = ''; } catch(_) {} };
+
+        if (customBg && !data.settings.useYtThumbnailAsBg) {
+            document.body.style.setProperty('--bg-image', `url(${customBg})`);
+            clearInlineBgFallback();
+        } else if (customBg && data.settings.useYtThumbnailAsBg) {
+            document.body.style.setProperty('--bg-image', `url(${customBg})`);
+            clearInlineBgFallback();
+        } else if (themeHasBg) {
+            // Use theme-provided background (e.g., lofi/space)
+            document.body.style.removeProperty('--bg-image');
+            clearInlineBgFallback();
+        } else if (isLightTheme) {
+            // For light/pastel, avoid dark radial fallback
+            document.body.style.setProperty('--bg-image', 'none');
+            clearInlineBgFallback();
+        } else {
+            // Dark/default fallback
+            document.body.style.setProperty('--bg-image', '');
+            document.body.style.backgroundImage = 'radial-gradient(1200px 800px at 10% -10%, #20285b 0%, #0f1222 50%, #0b0e1a 100%)';
         }
     }
+
 
     const defaults = {
         version: 11,
@@ -1355,6 +1524,8 @@ body.bg-view-mode .draggable-timer {
             youtubeVolume: 80,
             useYtThumbnailAsBg: true,
             panelOpacity: 0.85,
+            panelBlur: 10,
+            backupDaysToKeep: 7,
             achievedMilestones: []
         },
         topics: [{
@@ -1376,9 +1547,9 @@ body.bg-view-mode .draggable-timer {
     let data;
     let editingPreset = 'A';
 
-    // =============================
-    // Gemini API Integration
-    // =============================
+    // (Các hàm còn lại giữ nguyên)
+    // ...
+    // ...
     async function callGeminiAPI(prompt, retries = 3, delay = 1000) {
         const apiKey = data.settings.apiKey || "";
         if (!apiKey) {
@@ -1414,14 +1585,9 @@ body.bg-view-mode .draggable-timer {
             return "Đã xảy ra lỗi khi kết nối với AI. Vui lòng kiểm tra kết nối mạng và thử lại.";
         }
     }
-
-    // =============================
-    // Audio
-    // =============================
     let AUDIO_CTX = null;
     function ensureAudio(){ if(!AUDIO_CTX) AUDIO_CTX = new (window.AudioContext||window.webkitAudioContext)(); }
     function tone(freq=880, durMs=200, vol=0.2, type='sine', when=0){ ensureAudio(); const ctx=AUDIO_CTX; const o=ctx.createOscillator(); const g=ctx.createGain(); o.type=type; o.frequency.value=freq; o.connect(g); g.connect(ctx.destination); const t = ctx.currentTime + when; g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t+0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + durMs/1000); o.start(t); o.stop(t + durMs/1000 + 0.05); }
-
     function playSound(kind){
       if(!data.settings.soundOn) return;
       const vol = Math.max(0, Math.min(1, data.settings.volume ?? 0.8));
@@ -1451,10 +1617,6 @@ body.bg-view-mode .draggable-timer {
         if(kind==='work_end') { tone(1200,160,vol*0.9,'triangle'); tone(900,220,vol*0.8,'triangle',0.18); } else if(kind==='break_end') { tone(880,240,vol*0.8,'triangle'); } else if(kind==='long_end') { tone(600,220,vol*0.9,'triangle'); tone(950,240,vol*0.9,'triangle',0.22); tone(1200,240,vol,'triangle',0.44); }
       }
     }
-
-    // =============================
-      // Storage
-      // =============================
       async function saveData() {
         try {
           await storageManager.save(data);
@@ -1463,7 +1625,6 @@ body.bg-view-mode .draggable-timer {
           toast(`Lỗi lưu dữ liệu: ${err.message}`);
         }
       }
-
         async function ensureValidSelection(){
           const set = data.settings;
           if (!data.topics || data.topics.length === 0) { set.selectedTopicId = ''; set.selectedSubtopicId = ''; await saveData(); return; }
@@ -1477,10 +1638,6 @@ body.bg-view-mode .draggable-timer {
             await saveData();
           }
         }
-
-    // =============================
-    // Generic Modals & View Switching
-    // =============================
     function showInputModal(title, okCallback, defaultValue = '') {
         $('#genericTitle').textContent = title;
         $('#genericMessage').classList.add('hidden');
@@ -1492,7 +1649,6 @@ body.bg-view-mode .draggable-timer {
         $('#btnGenericOk').onclick = okHandler; $('#btnGenericCancel').onclick = cancelHandler; input.onkeydown = keyHandler;
         function cleanup() { $('#modalGeneric').classList.remove('show'); $('#btnGenericOk').onclick = null; $('#btnGenericCancel').onclick = null; input.onkeydown = null; }
     }
-
     function showConfirmModal(title, message, okCallback) {
         $('#genericTitle').textContent = title;
         const msgEl = $('#genericMessage'); msgEl.textContent = message; msgEl.classList.remove('hidden');
@@ -1502,7 +1658,6 @@ body.bg-view-mode .draggable-timer {
         $('#btnGenericOk').onclick = okHandler; $('#btnGenericCancel').onclick = cancelHandler;
         function cleanup() { $('#modalGeneric').classList.remove('show'); $('#btnGenericOk').onclick = null; $('#btnGenericCancel').onclick = null; }
     }
-
     async function switchView(viewId) {
         $$('.view').forEach(v => v.classList.remove('active'));
         $(`#view-${viewId}`).classList.add('active');
@@ -1515,15 +1670,9 @@ body.bg-view-mode .draggable-timer {
             renderDashboard();
         }
     }
-
-    // =============================
-    // Sidebar: Topics & Subtopics
-    // =============================
     function closeAllMenus() {
         $$('.actions-menu.show').forEach(menu => menu.classList.remove('show'));
     }
-
-    // === START: HÀM renderTopics ĐÃ ĐƯỢC CẬP NHẬT ===
     function renderTopics(){
       const wrap = $('#topicsList');
       if (!wrap) return;
@@ -1532,123 +1681,141 @@ body.bg-view-mode .draggable-timer {
       data.topics.forEach(topic => {
         const box = document.createElement('div');
         box.className='topic-item';
+        box.dataset.tid = topic.id;
         const header = document.createElement('div');
         header.className='topic-header';
-        
         const isCollapsed = !!collapsedMap[topic.id];
         const chev = document.createElement('button');
         chev.className='btn small ghost chev';
         chev.setAttribute('title','Mở/đóng subtopics');
         chev.setAttribute('aria-expanded', String(!isCollapsed));
         chev.innerHTML = '<span class="ico">▼</span>';
-        
         const title = document.createElement('div');
         title.className='topic-title';
         title.textContent = topic.name;
-        
-        // --- Khu vực nút hành động cho Topic ---
         const act = document.createElement('div');
         act.className='topic-actions';
-
         const bAdd = document.createElement('button');
         bAdd.className='btn small';
         bAdd.innerHTML = '＋ Thêm';
         bAdd.title = 'Thêm Chủ đề con';
-
         const menuContainer = document.createElement('div');
         menuContainer.style.position = 'relative';
-
         const bMore = document.createElement('button');
         bMore.className = 'btn small ghost actions-menu-btn';
         bMore.innerHTML = '...';
         bMore.title = 'Thêm tùy chọn';
-
         const menu = document.createElement('div');
         menu.className = 'actions-menu';
-
         const bEdit = document.createElement('button');
         bEdit.className = 'menu-item';
         bEdit.innerHTML = 'Sửa tên Chủ đề';
-        
         const bDel = document.createElement('button');
         bDel.className = 'menu-item danger';
         bDel.innerHTML = 'Xóa Chủ đề';
-        
         menu.append(bEdit, bDel);
         menuContainer.append(bMore, menu);
         act.append(bAdd, menuContainer);
-        // --- Kết thúc khu vực nút hành động cho Topic ---
-
         header.append(chev, title, act);
-        
         const subs = document.createElement('div');
         subs.className='subtopics' + (isCollapsed? ' hidden':'');
-        
+        subs.dataset.tid = topic.id;
         topic.subtopics.forEach(st => {
           const row = document.createElement('div');
           row.className='sub-row';
+          row.dataset.sid = st.id;
           const btn = document.createElement('button');
           btn.className='btn subtopic-btn';
           btn.textContent = '• '+st.name;
           btn.dataset.sid = st.id;
           btn.dataset.tid = topic.id;
           if(data.settings.selectedSubtopicId===st.id) btn.classList.add('active');
-
-          // --- Khu vực nút hành động cho Subtopic ---
           const subActions = document.createElement('div');
           subActions.className = 'actions';
-          
           const subMenuContainer = document.createElement('div');
           subMenuContainer.style.position = 'relative';
-
           const subBMore = document.createElement('button');
           subBMore.className = 'btn small ghost actions-menu-btn';
           subBMore.innerHTML = '...';
           subBMore.title = 'Thêm tùy chọn';
-
           const subMenu = document.createElement('div');
           subMenu.className = 'actions-menu';
-
           const subBEdit = document.createElement('button');
           subBEdit.className = 'menu-item';
           subBEdit.innerHTML = 'Sửa tên Chủ đề con';
-
           const subBDel = document.createElement('button');
           subBDel.className = 'menu-item danger';
           subBDel.innerHTML = 'Xóa Chủ đề con';
-
           subMenu.append(subBEdit, subBDel);
           subMenuContainer.append(subBMore, subMenu);
           subActions.append(subMenuContainer);
-          // --- Kết thúc khu vực nút hành động cho Subtopic ---
-
           row.append(btn, subActions);
           subs.appendChild(row);
-
-          // Event Listeners for Subtopic actions
           btn.addEventListener('click', ()=> selectSubtopic(topic.id, st.id));
           subBMore.addEventListener('click', (e) => { e.stopPropagation(); closeAllMenus(); subMenu.classList.toggle('show'); });
           subBEdit.addEventListener('click', ()=> showInputModal('Đổi tên Chủ đề con', async (newName) => { if(!newName) return; st.name=newName; await storageManager.update('subtopics', st); renderAll(); }, st.name));
           subBDel.addEventListener('click', ()=> showConfirmModal('Xác nhận xóa', `Bạn có chắc muốn xóa Chủ đề con "${st.name}"? Mọi dữ liệu liên quan sẽ bị mất.`, async (ok) => { if(!ok) return; topic.subtopics = topic.subtopics.filter(x=>x.id!==st.id); const set=data.settings; if(set.selectedSubtopicId===st.id){ set.selectedSubtopicId=''; set.selectedTopicId=''; ensureValidSelection(); } await storageManager.delete('subtopics', st.id); renderAll(); }));
         });
-
-        // Event Listeners for Topic actions
         chev.addEventListener('click', async ()=>{ if(isCollapsed){ delete collapsedMap[topic.id]; } else { collapsedMap[topic.id] = true; } data.settings.collapsedTopics = collapsedMap; await storageManager.updateSettings(data.settings); renderTopics(); });
         bMore.addEventListener('click', (e) => { e.stopPropagation(); closeAllMenus(); menu.classList.toggle('show'); });
         bAdd.addEventListener('click', ()=> showInputModal('Tên Chủ đề con mới?', async (name) => { if(!name) return; const newSub = { id: uid('s'), topicId: topic.id, name, tasks: [], generalNotes: [], summaries: [], chatHistory: [], stats:{ totalMinutes:0, sessionsCompleted:0, tasksCompleted: 0 }, sessions: [], timerState: { state: 'idle', prevState: null, remaining: 0, segmentTotal: 0, cycleIndex: 0 } }; topic.subtopics.push(newSub); await storageManager.add('subtopics', newSub); renderTopics(); }));
         bEdit.addEventListener('click', ()=> showInputModal('Đổi tên Chủ đề', async (newName) => { if(!newName) return; topic.name=newName; await storageManager.update('topics', topic); renderTopics(); }, topic.name));
         bDel.addEventListener('click', ()=> showConfirmModal('Xác nhận xóa', `Bạn có chắc muốn xóa Chủ đề "${topic.name}"? Mọi chủ đề con và dữ liệu liên quan sẽ bị mất.`, async (ok) => { if(!ok) return; data.topics = data.topics.filter(t=>t.id!==topic.id); delete collapsedMap[topic.id]; if(data.settings.selectedTopicId===topic.id){ data.settings.selectedTopicId=''; data.settings.selectedSubtopicId=''; ensureValidSelection(); } await storageManager.delete('topics', topic.id); for(const sub of topic.subtopics){ await storageManager.delete('subtopics', sub.id); } renderAll(); }));
-
         box.append(header, subs);
         wrap.appendChild(box);
       });
+      if (window.Sortable) {
+        const topicsListEl = document.getElementById('topicsList');
+        if (topicsListEl) {
+          if (topicsListEl._sortable) { try { topicsListEl._sortable.destroy(); } catch (e) {} }
+          topicsListEl._sortable = new Sortable(topicsListEl, {
+            animation: 150,
+            draggable: '.topic-item',
+            onEnd: async function (evt) {
+              if (evt.oldIndex === evt.newIndex) return;
+              const moved = data.topics.splice(evt.oldIndex, 1)[0];
+              data.topics.splice(evt.newIndex, 0, moved);
+              await saveData();
+              renderTopics();
+            }
+          });
+          topicsListEl.querySelectorAll('.subtopics').forEach(subsEl => {
+            new Sortable(subsEl, {
+              group: 'subtopics-group',
+              animation: 150,
+              draggable: '.sub-row',
+              onEnd: async function (evt) {
+                const fromTopicId = evt.from?.dataset?.tid || evt.from?.closest('.topic-item')?.dataset?.tid;
+                const toTopicId = evt.to?.dataset?.tid || evt.to?.closest('.topic-item')?.dataset?.tid;
+                const fromTopic = data.topics.find(t => t.id === fromTopicId);
+                const toTopic = data.topics.find(t => t.id === toTopicId);
+                if (!fromTopic || !toTopic) return;
+                let movedSubtopic = null;
+                const movedSid = evt.item?.dataset?.sid || evt.item?.querySelector('.subtopic-btn')?.dataset?.sid;
+                if (movedSid) {
+                  const idx = fromTopic.subtopics.findIndex(s => s.id === movedSid);
+                  if (idx >= 0) movedSubtopic = fromTopic.subtopics.splice(idx, 1)[0];
+                }
+                if (!movedSubtopic) {
+                  movedSubtopic = fromTopic.subtopics.splice(evt.oldIndex, 1)[0];
+                }
+                if (!movedSubtopic) return;
+                movedSubtopic.topicId = toTopic.id;
+                toTopic.subtopics.splice(evt.newIndex, 0, movedSubtopic);
+                if (data.settings.selectedSubtopicId === movedSubtopic.id) {
+                  data.settings.selectedTopicId = toTopic.id;
+                }
+                await saveData();
+                renderTopics();
+              }
+            });
+          });
+        }
+      }
     }
-    // === END: HÀM renderTopics ĐÃ ĐƯỢC CẬP NHẬT ===
-
     function selectSubtopic(topicId, subId) {
         const mainEl = $('.app-content');
         const oldSubtopic = getCurrentSubtopic();
-
         if (oldSubtopic && timer.state !== 'idle') {
             oldSubtopic.timerState = {
                 state: timer.state,
@@ -1658,15 +1825,11 @@ body.bg-view-mode .draggable-timer {
                 cycleIndex: timer.cycleIndex
             };
         }
-
         mainEl.classList.add('reloading');
-
         setTimeout(async () => {
             data.settings.selectedTopicId = topicId;
             data.settings.selectedSubtopicId = subId;
-
             const newSubtopic = getCurrentSubtopic();
-
             if (newSubtopic.timerState) {
                 timer.state = newSubtopic.timerState.state;
                 timer.prevState = newSubtopic.timerState.prevState || null;
@@ -1676,11 +1839,10 @@ body.bg-view-mode .draggable-timer {
             } else {
                 timer.reset();
             }
-
             await saveData();
             timer.updateUI();
             renderAll();
-            switchView('timer'); // Quay về màn hình timer sau khi chọn
+            switchView('timer');
             mainEl.classList.remove('reloading');
         }, 200);
     }
@@ -1695,10 +1857,6 @@ body.bg-view-mode .draggable-timer {
       if (currentName) currentName.textContent = name;
       if (currentChatName) currentChatName.textContent = name;
     }
-
-    // =============================
-    // Timer & Session To-Do List
-    // =============================
     function renderSubtopicTasks() {
         const s = getCurrentSubtopic();
         const listEl = $('#subtopicTasksList');
@@ -1723,7 +1881,6 @@ body.bg-view-mode .draggable-timer {
             listEl.appendChild(item);
         });
     }
-
     async function addSubtopicTask() {
         const s = getCurrentSubtopic();
         if (!s) { toast(t('timer.selectSubtopicPrompt')); return; }
@@ -1738,7 +1895,6 @@ body.bg-view-mode .draggable-timer {
         }
         input.focus();
     }
-
     async function toggleSubtopicTask(taskId, listItemElement) {
         const s = getCurrentSubtopic();
         if (!s || !s.tasks) return;
@@ -1747,7 +1903,6 @@ body.bg-view-mode .draggable-timer {
             task.isCompleted = true;
             s.stats.tasksCompleted = (s.stats.tasksCompleted || 0) + 1;
             await saveData();
-
             listItemElement.classList.add('removing');
             setTimeout(() => {
                 renderSubtopicTasks();
@@ -1755,84 +1910,121 @@ body.bg-view-mode .draggable-timer {
             }, 200);
         }
     }
-
-
     const timer = {
-  state:'idle', prevState:null, tickHandle:null, endAt:null,
-  remaining:0, segmentTotal:0, cyclesTarget:4, cycleIndex:0, mode:'A',
-  persistInterval: 60*1000,
-  lastPersist: 0,
-  async setPreset(p, {silent=false}={}){
-    const st = data.settings;
-    this.mode = p;
-    this.cyclesTarget = (p==='A' ? st.cyclesA : st.cyclesB);
-    st.preset = p;
-    await saveData();
-    if (this.state === 'idle') {
-      this.reset();
-    }
-  },
-  currentDurations(){ const d=data.settings.durations; return this.mode==='A'? {work:d.A_work, short:d.A_short, long:d.A_long} : {work:d.B_work, short:d.B_short, long:d.B_long}; },
-  currentConfig(){ const s=data.settings; return this.mode==='A'? {cycles:s.cyclesA, interval:s.longBreakIntervalA} : {cycles:s.cyclesB, interval:s.longBreakIntervalB}; },
-  updateUI() {
-    const badge = $('#stateBadge');
-    const progressCircle = $('.timer-circle-progress');
-    const container = $('.timer-circle-container');
-    if (!badge || !progressCircle || !container) return;
-    $('#btnStart').classList.toggle('hidden', this.state !== 'idle');
-    $('#btnPause').classList.toggle('hidden', !['work', 'break', 'long_break'].includes(this.state));
-    $('#btnResume').classList.toggle('hidden', this.state !== 'paused');
-    let currentColor = 'var(--muted)';
-    if (this.state === 'work') { badge.textContent = 'LÀM VIỆC'; badge.className = 'badge state work'; currentColor = 'var(--acc)'; }
-    else if (this.state === 'break') { badge.textContent = 'NGHỈ NGẮN'; badge.className = 'badge state break'; currentColor = 'var(--warn)'; }
-    else if (this.state === 'long_break') { badge.textContent = 'NGHỈ DÀI'; badge.className = 'badge state long'; currentColor = 'var(--danger)'; }
-    else if (this.state === 'paused') { badge.textContent = 'TẠM DỪNG'; badge.className = 'badge'; }
-    else { badge.textContent = 'SẴN SÀNG'; badge.className = 'badge'; }
-    if (['work','break','long_break'].includes(this.state)) { container.classList.add('breathing'); } else { container.classList.remove('breathing'); }
-    progressCircle.style.stroke = currentColor; container.classList.remove('finished');
-    const timeEl = $('#timeDisplay'); if (timeEl) timeEl.textContent = formatMMSS(this.remaining);
-    const radius = progressCircle.r.baseVal.value; const circumference = 2 * Math.PI * radius;
-    const offset = this.segmentTotal>0 ? (circumference - (this.remaining / this.segmentTotal) * circumference) : circumference;
-    progressCircle.style.strokeDasharray = circumference;
-    progressCircle.style.strokeDashoffset = isNaN(offset) ? circumference : offset;
-    const cyc = $('#cycleInfo'); if (cyc) { const cfg=this.currentConfig(); cyc.textContent = t('timer.cycleInfo', { current: this.cycleIndex, target: cfg.cycles }); }
-    // Đồng hồ kéo thả
-    const draggableTimer = $('#draggableTimer'); if (draggableTimer) draggableTimer.textContent = formatMMSS(this.remaining);
-  },
-  persistTimerState(force=false){
-    try{
-      const s = getCurrentSubtopic(); if(!s) return;
-      const state = { state:this.state, prevState:this.prevState, remaining:this.remaining, segmentTotal:this.segmentTotal, cycleIndex:this.cycleIndex };
-      s.timerState = state; try{ localStorage.setItem('timerState_'+s.id, JSON.stringify(state)); }catch(_){ }
-      this.lastPersist = Date.now();
-    }catch(_){ }
-  },
-  _startTick(){ if(this.tickHandle) clearInterval(this.tickHandle); this.tickHandle = setInterval(()=>{ if(this.remaining>0){ this.remaining -= 1; this.updateUI(); this.persistTimerState(); } if(this.remaining<=0){ clearInterval(this.tickHandle); this.tickHandle=null; this._onFinishSegment(); } }, 1000); },
-  _onFinishSegment(){
-    if (data.settings.autoStartNext) {
-      if(this.state==='work'){
-        this.beginBreak();
-      } else {
-        this.beginWork();
-      }
-    } else {
-      playSound('work_end');
-      if(this.tickHandle){ clearInterval(this.tickHandle); this.tickHandle=null; }
-      this.state = 'idle';
-      this.prevState = null;
-      this.updateUI();
-      toast("Phiên đã hoàn thành! Nhấn Bắt đầu để bắt đầu phiên tiếp theo.");
-    }
-  },
-  beginWork(){ this.prevState=this.state; this.state='work'; const d=this.currentDurations().work*60; this.segmentTotal=d; if(this.prevState!=='paused') this.remaining=d; this._startTick(); this.updateUI(); },
-  beginBreak(){ this.prevState=this.state; this.state='break'; const d=this.currentDurations().short*60; this.segmentTotal=d; if(this.prevState!=='paused') this.remaining=d; this._startTick(); this.updateUI(); },
-  async start(){ if(!getCurrentSubtopic()){ toast('Hãy chọn một Chủ đề con trước khi bắt đầu'); return; } ensureAudio(); if(this.state==='idle'){ this.cycleIndex = this.cycleIndex || 0; this.beginWork(); } else if(this.state==='paused'){ this.resume(); } await this.persistTimerState(true); },
-  async pause(){ if(this.tickHandle){ clearInterval(this.tickHandle); this.tickHandle=null; } this.prevState=this.state; this.state='paused'; this.updateUI(); await this.persistTimerState(true); },
-  async resume(){ if(this.state!=='paused'){ return; } this.state=this.prevState||'work'; this._startTick(); this.updateUI(); await this.persistTimerState(true); },
-  async skip(){ this.remaining=0; if(this.tickHandle){ clearInterval(this.tickHandle); this.tickHandle=null; } this._onFinishSegment(); await this.persistTimerState(true); },
-  async reset(){ if(this.tickHandle){ clearInterval(this.tickHandle); this.tickHandle=null; } this.state='idle'; this.prevState=null; this.remaining=0; this.segmentTotal=0; this.cycleIndex=0; this.updateUI(); await this.persistTimerState(true); }
-};
-
+      state:'idle', prevState:null, tickHandle:null, endAt:null,
+      remaining:0, segmentTotal:0, cyclesTarget:4, cycleIndex:0, mode:'A',
+      persistInterval: 60*1000,
+      lastPersist: 0,
+      async setPreset(p, {silent=false}={}){
+        const st = data.settings;
+        this.mode = p;
+        this.cyclesTarget = (p==='A' ? st.cyclesA : st.cyclesB);
+        st.preset = p;
+        await saveData();
+        if (this.state === 'idle') {
+          this.reset();
+        }
+      },
+      currentDurations(){ const d=data.settings.durations; return this.mode==='A'? {work:d.A_work, short:d.A_short, long:d.A_long} : {work:d.B_work, short:d.B_short, long:d.B_long}; },
+      currentConfig(){ const s=data.settings; return this.mode==='A'? {cycles:s.cyclesA, interval:s.longBreakIntervalA} : {cycles:s.cyclesB, interval:s.longBreakIntervalB}; },
+      updateUI() {
+        const badge = $('#stateBadge');
+        const progressCircle = $('.timer-circle-progress');
+        const container = $('.timer-circle-container');
+        if (!badge || !progressCircle || !container) return;
+        $('#btnStart').classList.toggle('hidden', this.state !== 'idle');
+        $('#btnPause').classList.toggle('hidden', !['work', 'break', 'long_break'].includes(this.state));
+        $('#btnResume').classList.toggle('hidden', this.state !== 'paused');
+        let currentColor = 'var(--muted)';
+        if (this.state === 'work') { badge.textContent = 'LÀM VIỆC'; badge.className = 'badge state work'; currentColor = 'var(--acc)'; }
+        else if (this.state === 'break') { badge.textContent = 'NGHỈ NGẮN'; badge.className = 'badge state break'; currentColor = 'var(--warn)'; }
+        else if (this.state === 'long_break') { badge.textContent = 'NGHỈ DÀI'; badge.className = 'badge state long'; currentColor = 'var(--danger)'; }
+        else if (this.state === 'paused') { badge.textContent = 'TẠM DỪNG'; badge.className = 'badge'; }
+        else { badge.textContent = 'SẴN SÀNG'; badge.className = 'badge'; }
+        if (['work','break','long_break'].includes(this.state)) { container.classList.add('breathing'); } else { container.classList.remove('breathing'); }
+        progressCircle.style.stroke = currentColor; container.classList.remove('finished');
+        const timeEl = $('#timeDisplay'); if (timeEl) timeEl.textContent = formatMMSS(this.remaining);
+        const radius = progressCircle.r.baseVal.value; const circumference = 2 * Math.PI * radius;
+        const offset = this.segmentTotal>0 ? (circumference - (this.remaining / this.segmentTotal) * circumference) : circumference;
+        progressCircle.style.strokeDasharray = circumference;
+        progressCircle.style.strokeDashoffset = isNaN(offset) ? circumference : offset;
+        const cyc = $('#cycleInfo'); if (cyc) { const cfg=this.currentConfig(); cyc.textContent = t('timer.cycleInfo', { current: this.cycleIndex, target: cfg.cycles }); }
+        const draggableTimer = $('#draggableTimer'); if (draggableTimer) draggableTimer.textContent = formatMMSS(this.remaining);
+      },
+      persistTimerState(force=false){
+        try{
+          const s = getCurrentSubtopic(); if(!s) return;
+          const state = { state:this.state, prevState:this.prevState, remaining:this.remaining, segmentTotal:this.segmentTotal, cycleIndex:this.cycleIndex };
+          s.timerState = state; try{ localStorage.setItem('timerState_'+s.id, JSON.stringify(state)); }catch(_){ }
+          this.lastPersist = Date.now();
+        }catch(_){ }
+      },
+      _startTick(){ if(this.tickHandle) clearInterval(this.tickHandle); this.tickHandle = setInterval(()=>{ if(this.remaining>0){ this.remaining -= 1; this.updateUI(); this.persistTimerState(); } if(this.remaining<=0){ clearInterval(this.tickHandle); this.tickHandle=null; this._onFinishSegment(); } }, 1000); },
+      _onFinishSegment(){
+        if (this.state === 'work') {
+            const s = getCurrentSubtopic();
+            if (s) {
+                const duration = this.currentDurations().work;
+                s.stats.totalMinutes = (s.stats.totalMinutes || 0) + duration;
+                s.stats.sessionsCompleted = (s.stats.sessionsCompleted || 0) + 1;
+                const newSession = {
+                    id: uid('sess'),
+                    dateISO: todayISO(),
+                    durationMinutes: duration,
+                    mode: this.mode,
+                    note: ''
+                };
+                if (!s.sessions) s.sessions = [];
+                s.sessions.unshift(newSession);
+                saveData();
+                renderStatsHistory();
+                checkAndShowMilestones();
+            }
+            this.cycleIndex++;
+        }
+        playSound(this.state === 'work' ? 'work_end' : 'break_end');
+        const container = $('.timer-circle-container');
+        if(container) container.classList.add('finished');
+        if (data.settings.autoStartNext) {
+          if(this.state==='work'){
+            this.beginBreak();
+          } else {
+            this.beginWork();
+          }
+        } else {
+          if(this.tickHandle){ clearInterval(this.tickHandle); this.tickHandle=null; }
+          this.state = 'idle';
+          this.prevState = null;
+          this.updateUI();
+          toast("Phiên đã hoàn thành! Nhấn Bắt đầu để bắt đầu phiên tiếp theo.");
+        }
+      },
+      beginWork(){ this.prevState=this.state; this.state='work'; const d=this.currentDurations().work*60; this.segmentTotal=d; if(this.prevState!=='paused') this.remaining=d; this._startTick(); this.updateUI(); },
+      beginBreak() {
+        this.prevState = this.state;
+        const config = this.currentConfig();
+        const durations = this.currentDurations();
+        if (this.cycleIndex > 0 && this.cycleIndex % config.interval === 0) {
+          this.state = 'long_break';
+          const d = durations.long * 60;
+          this.segmentTotal = d;
+          if (this.prevState !== 'paused') this.remaining = d;
+          toast(`Tuyệt vời! Đã đến lúc nghỉ dài.`);
+        } else {
+          this.state = 'break';
+          const d = durations.short * 60;
+          this.segmentTotal = d;
+          if (this.prevState !== 'paused') this.remaining = d;
+        }
+        this._startTick();
+        this.updateUI();
+      },
+      async start(){ if(!getCurrentSubtopic()){ toast('Hãy chọn một Chủ đề con trước khi bắt đầu'); return; } ensureAudio(); if(this.state==='idle'){ this.cycleIndex = this.cycleIndex || 0; this.beginWork(); } else if(this.state==='paused'){ this.resume(); } await this.persistTimerState(true); },
+      async pause(){ if(this.tickHandle){ clearInterval(this.tickHandle); this.tickHandle=null; } this.prevState=this.state; this.state='paused'; this.updateUI(); await this.persistTimerState(true); },
+      async resume(){ if(this.state!=='paused'){ return; } this.state=this.prevState||'work'; this._startTick(); this.updateUI(); await this.persistTimerState(true); },
+      async skip(){ this.remaining=0; if(this.tickHandle){ clearInterval(this.tickHandle); this.tickHandle=null; } this._onFinishSegment(); await this.persistTimerState(true); },
+      async reset(){ if(this.tickHandle){ clearInterval(this.tickHandle); this.tickHandle=null; } this.state='idle'; this.prevState=null; this.remaining=0; this.segmentTotal=0; this.cycleIndex=0; this.updateUI(); await this.persistTimerState(true); }
+    };
     async function deleteSummary(id) {
         showConfirmModal('Xác nhận xóa', 'Bạn có chắc muốn xóa tóm tắt này?', async (ok) => {
             if (!ok) return;
@@ -1851,7 +2043,6 @@ body.bg-view-mode .draggable-timer {
             }
         });
     }
-
 function exportSummary(sum) {
         const blob = new Blob([sum.content], { type: 'text/plain' });
         const a = document.createElement('a');
@@ -1862,8 +2053,6 @@ function exportSummary(sum) {
         a.click();
         URL.revokeObjectURL(a.href);
 }
-
-    // Hiển thị thống kê và lịch sử phiên theo Subtopic hiện tại
     function renderStatsHistory(){
         const s = getCurrentSubtopic();
         const statTotal = $('#statTotal');
@@ -1906,8 +2095,6 @@ function exportSummary(sum) {
             list.appendChild(row);
         });
     }
-
-    // Hiển thị ghi chú chung của Subtopic hiện tại
     function renderGeneralNotes(){
         const listEl = $('#generalNotesList');
         if (!listEl) return;
@@ -1935,8 +2122,6 @@ function exportSummary(sum) {
             listEl.appendChild(item);
         });
     }
-
-    // Thêm ghi chú chung
     function addGeneralNote(){
         showInputModal('Thêm ghi chú', async (text) => {
             if (!text) return;
@@ -1948,8 +2133,6 @@ function exportSummary(sum) {
             renderGeneralNotes();
         }, '');
     }
-
-    // Tóm tắt ghi chú chung bằng AI (nếu có API key)
     async function summarizeNotes(){
         const s = getCurrentSubtopic();
         if (!s) { toast('Chọn chủ đề con trước.'); return; }
@@ -1971,7 +2154,6 @@ function exportSummary(sum) {
             if (btn) { btn.disabled = false; btn.textContent = 'Tóm tắt'; }
         }
     }
-
     function renderSummaries() {
         const listEl = $('#summariesList');
         if (!listEl) return;
@@ -1994,10 +2176,6 @@ function exportSummary(sum) {
             listEl.appendChild(item);
         });
     }
-
-      // =============================
-      // Settings & Customization
-      // =============================
       function loadEditingPresetFields(){
           const s = data.settings;
           const d = s.durations;
@@ -2030,8 +2208,8 @@ function exportSummary(sum) {
           highlightPresetSelector();
           $('#set_volume').value=s.volume ?? 0.8;
           $('#set_theme').value=s.soundTheme || 'beep';
+          // THAY ĐỔI: Cập nhật giá trị dropdown
           $('#set_theme_color').value = s.theme || 'default';
-          // Không tự động điền lại link đã lưu; dùng URL tạm của phiên nếu có
           const activeUrl = getActiveYoutubeUrl();
           $('#set_youtubeUrl').value = activeUrl || '';
           const initialVideoId = extractYouTubeID(activeUrl);
@@ -2043,6 +2221,7 @@ function exportSummary(sum) {
           $('#set_ytThumbAsBg').checked = !!s.useYtThumbnailAsBg;
           $('#set_panelOpacity').value = s.panelOpacity || 0.85;
           if ($('#set_autoStartNext')) { $('#set_autoStartNext').checked = !!s.autoStartNext; }
+          if ($('#set_backupDays')) { $('#set_backupDays').value = s.backupDaysToKeep || 7; }
         const backupListEl = $('#backupList');
         if (backupListEl) {
             storageManager.getBackupList().then(backups => {
@@ -2061,7 +2240,6 @@ function exportSummary(sum) {
         }
         $('#modalSettings').classList.add('show');
     }
-
     function closeSettings(){ $('#modalSettings').classList.remove('show'); }
     async function setDefaults(){
         data.settings.durations={A_work:25,A_short:5,A_long:15,B_work:50,B_short:10,B_long:30};
@@ -2073,10 +2251,8 @@ function exportSummary(sum) {
         data.settings.volume=0.8;
         data.settings.soundTheme='beep';
         await saveData(); openSettings(); toast('Đã khôi phục mặc định'); }
-      // THAY THẾ HÀM CŨ BẰNG HÀM NÀY
       async function saveSettings(){
           const s = data.settings;
-          // ... phần khác giữ nguyên
           s.apiKey = $('#set_apiKey').value.trim();
           const d = s.durations;
           if(editingPreset === 'A'){
@@ -2094,23 +2270,33 @@ function exportSummary(sum) {
           }
           s.volume = clampFloat($('#set_volume').value,0,1,0.8);
           s.soundTheme = $('#set_theme').value==='chime' ? 'chime':'beep';
+          // THAY ĐỔI: Lưu giá trị theme
           s.theme = $('#set_theme_color').value;
           s.panelOpacity = parseFloat($('#set_panelOpacity').value) || 0.85;
           s.autoStartNext = !!($('#set_autoStartNext') && $('#set_autoStartNext').checked);
+          if ($('#set_backupDays')) { s.backupDaysToKeep = clampInt($('#set_backupDays').value, 1, 30); }
 
-          // --- LOGIC YOUTUBE ĐƯỢC ĐƠN GIẢN HÓA ---
+          // Bổ sung: Nếu chọn theme sáng, luôn tắt thumbnail YouTube làm nền
+          if (s.theme === 'light' || s.theme === 'pastel') {
+              s.useYtThumbnailAsBg = false;
+              // Nếu nền hiện tại là thumbnail YouTube, bỏ nền để giữ nền gốc của theme sáng
+              if (typeof s.customBg === 'string' && s.customBg.includes('img.youtube.com/vi/')) {
+                  s.customBg = '';
+              }
+          } else {
+              // Ngược lại, với theme tối thì bật dùng thumbnail YouTube (nếu có link)
+              s.useYtThumbnailAsBg = true;
+          }
+
           const newYtUrl = $('#set_youtubeUrl').value.trim();
           s.useYtThumbnailAsBg = $('#set_ytThumbAsBg').checked;
           s.youtubeVolume = parseInt($('#ytSoundVolume').value, 10);
-          // Cập nhật URL trong phiên làm việc (không lưu storage)
           sessionYoutubeUrl = newYtUrl;
-
-          // Gọi hàm update đã được cải tiến
           updateYouTubePlayer(); 
 
-          // Áp dụng các thay đổi còn lại
           await saveData();
           applyTheme();
+          applyCustomBg();
           applyPanelOpacity();
           updatePresetButtonsText();
           timer.setPreset(s.preset, {silent:true});
@@ -2120,7 +2306,6 @@ function exportSummary(sum) {
       }
     function clampInt(v,min,max){ v=parseInt(v||0,10); if(isNaN(v)) v=min; return Math.max(min, Math.min(max, v)); }
     function clampFloat(v,min,max,def){ v=parseFloat(v); if(Number.isNaN(v)) v=def; return Math.max(min, Math.min(max, v)); }
-
     const dbPromise = new Promise((resolve, reject) => {
         const req = indexedDB.open('pomodoro_files', 1);
         req.onupgradeneeded = (e) => e.target.result.createObjectStore('files');
@@ -2157,20 +2342,41 @@ function exportSummary(sum) {
     }
     function applyCustomBg() {
         const ref = data.settings.customBg;
-        if (!ref) { document.body.style.setProperty('--bg-image', ''); return; }
-        if (ref.startsWith('data:') || ref.startsWith('http') || ref.startsWith('blob:')) {
-            document.body.style.setProperty('--bg-image', `url(${ref})`);
-        } else {
-            getStoredFileUrl(ref).then(url => {
-                document.body.style.setProperty('--bg-image', url ? `url(${url})` : '');
+        const theme = data.settings.theme;
+        const themeHasBg = ['lofi', 'space'].includes(theme);
+        const isLightTheme = (theme === 'light' || theme === 'pastel');
+
+        const clearInlineBgFallback = () => { try { document.body.style.backgroundImage = ''; } catch(_) {} };
+
+        if (ref) {
+            const urlPromise = (ref.startsWith('data:') || ref.startsWith('http') || ref.startsWith('blob:'))
+                ? Promise.resolve(ref)
+                : getStoredFileUrl(ref);
+            
+            urlPromise.then(url => {
+                if (url) {
+                    document.body.style.setProperty('--bg-image', `url(${url})`);
+                } else {
+                    document.body.style.setProperty('--bg-image', isLightTheme ? 'none' : '');
+                }
+                clearInlineBgFallback();
             });
+        } else if (!themeHasBg) {
+            if (isLightTheme) {
+                // Light/pastel: không dùng nền tối
+                document.body.style.setProperty('--bg-image', 'none');
+                clearInlineBgFallback();
+            } else {
+                // Dark/default fallback
+                document.body.style.setProperty('--bg-image', 'radial-gradient(1200px 800px at 10% -10%, #20285b 0%, #0f1222 50%, #0b0e1a 100%)');
+            }
+        } else {
+            // Let the CSS for the theme handle the background
+            document.body.style.removeProperty('--bg-image');
+            clearInlineBgFallback();
         }
     }
     function applyPanelOpacity() { document.documentElement.style.setProperty('--panel-opacity', data.settings.panelOpacity); }
-
-    // =============================
-    // Dashboard
-    // =============================
       function renderDashboard(){
           const stats = data.topics.flatMap(t => t.subtopics.map(s => ({ topic: t.name, subtopic: s.name, m: s.stats.totalMinutes || 0, c: s.stats.sessionsCompleted || 0, t: s.stats.tasksCompleted || 0 })));
           const totalM = stats.reduce((a, b) => a + b.m, 0);
@@ -2190,39 +2396,13 @@ function exportSummary(sum) {
         const contentEl = $('#dashboardContent');
         if (contentEl) contentEl.innerHTML = tableHTML;
     }
-
-    // =============================
-    // Dashboard & MILESTONES
-    // =============================
-    
-    // Override milestones to latest spec
     function getMilestones(){
         return [
-            {
-                hours: 10000,
-                title: "Gửi bạn, 10.000+ giờ (Chân Sư)",
-                message: "Thật vinh dự khi được trò chuyện cùng bạn. Không có nhiều người trên thế giới đạt đến cấp độ này. Bạn không chỉ thành thạo một kỹ năng, bạn đã định nghĩa lại nó. Sự nỗ lực và hy sinh của bạn đã tạo ra những điều phi thường.\nCó lẽ bây giờ bạn không còn nghĩ về việc học kỹ năng nữa, mà là về việc để lại di sản. Bạn sẽ truyền lại ngọn đuốc này như thế nào? Bạn sẽ phá vỡ những giới hạn nào tiếp theo mà chưa ai từng nghĩ tới? Thế giới đang dõi theo những gì bạn làm, không phải để học theo một công thức, mà để được truyền cảm hứng từ chính hành trình và sự sáng tạo của bạn.\nCảm ơn bạn vì đã cho chúng tôi thấy những giới hạn của con người có thể được đẩy xa đến nhường nào."
-            },
-            {
-                hours: 5000,
-                title: "Gửi bạn, 5.000 giờ (Tinh Thông)",
-                message: "Sự cống hiến của bạn thật đáng kinh ngạc. Bạn đã trở thành một chuyên gia, một người mà người khác tìm đến để học hỏi và xin lời khuyên. Kỹ năng của bạn không chỉ là một công cụ, nó đã trở thành một phần con người bạn.\nLời nhắn của tôi dành cho bạn là: Hãy luôn giữ cho mình \"tâm trí của người mới bắt đầu\". Đừng để kiến thức sâu rộng của mình biến thành sự tự mãn. Hãy tiếp tục học hỏi từ những lĩnh vực khác, lắng nghe những người mới vào nghề và không ngừng đặt câu hỏi. Giờ đây, vai trò của bạn không chỉ là làm tốt công việc của mình, mà còn là nâng đỡ và truyền cảm hứng cho những người đi sau."
-            },
-            {
-                hours: 1000,
-                title: "Gửi bạn, 1.000 giờ (Vững Vàng)",
-                message: "Bạn không còn là người mới nữa. Bạn đã có năng lực, sự tự tin và có thể tạo ra những kết quả đáng tự hào. Bạn xứng đáng được công nhận vì sự kiên trì của mình.\nBây giờ, thử thách của bạn là chuyển từ \"làm theo\" sang \"thấu hiểu\". Hãy tự hỏi mình \"Tại sao nó lại hoạt động như vậy?\". Hãy thử dạy lại cho người khác, vì đó là cách tốt nhất để củng cố kiến thức của chính mình. Đây là lúc để tinh chỉnh, tối ưu hóa và bắt đầu hình thành phong cách độc đáo của riêng bạn. Hãy biến sự thành thạo thành nghệ thuật."
-            },
-            {
-                hours: 100,
-                title: "Gửi bạn, 100 giờ (Định Hình)",
-                message: "Bạn đã vượt qua được giai đoạn khó khăn nhất và giờ đây, kỹ năng này đang thực sự \"ngấm\" vào bạn. Những tia sáng của sự thành thạo đã bắt đầu xuất hiện. Thật tuyệt vời!\nĐây là giai đoạn bạn cảm thấy hứng khởi nhất, nhưng cũng là lúc dễ rơi vào cái bẫy \"biết đủ rồi\". Đừng dừng lại. Hãy bắt đầu khám phá sâu hơn, thử nghiệm những kỹ thuật mới và đừng ngại phá vỡ các quy tắc bạn vừa học được. Hãy tìm một cộng đồng hoặc một người hướng dẫn để nhận được phản hồi. Sự tò mò chính là nhiên liệu tốt nhất để đưa bạn tiến xa hơn. Hãy biến kỹ năng này thành của riêng bạn."
-            },
-            {
-                hours: 20,
-                title: "Gửi bạn, 20 giờ (Khai Mở)",
-                message: "Chúc mừng bạn đã làm được điều khó nhất: Bắt đầu.\nĐừng lo lắng nếu bây giờ bạn cảm thấy mình thật vụng về, chậm chạp và liên tục mắc lỗi. Mọi bậc thầy đều từng là một \"thảm họa\" khi mới bắt đầu. Hãy nhớ rằng mục tiêu của bạn lúc này không phải là sự hoàn hảo, mà là sự hiện diện. Mỗi giờ bạn dành ra để luyện tập là một chiến thắng trước sự trì hoãn và nỗi sợ thất bại.\nHãy kiên nhẫn với chính mình, tận hưởng từng tiến bộ nhỏ nhất và đừng bao giờ so sánh khởi đầu của mình với \"đoạn giữa\" của người khác. Bạn đang xây dựng nền móng, và một nền móng vững chắc cần thời gian. Cứ tiếp tục nhé!"
-            }
+            { hours: 10000, title: "Gửi bạn, 10.000+ giờ (Chân Sư)", message: "Thật vinh dự khi được trò chuyện cùng bạn. Không có nhiều người trên thế giới đạt đến cấp độ này. Bạn không chỉ thành thạo một kỹ năng, bạn đã định nghĩa lại nó. Sự nỗ lực và hy sinh của bạn đã tạo ra những điều phi thường.\nCó lẽ bây giờ bạn không còn nghĩ về việc học kỹ năng nữa, mà là về việc để lại di sản. Bạn sẽ truyền lại ngọn đuốc này như thế nào? Bạn sẽ phá vỡ những giới hạn nào tiếp theo mà chưa ai từng nghĩ tới? Thế giới đang dõi theo những gì bạn làm, không phải để học theo một công thức, mà để được truyền cảm hứng từ chính hành trình và sự sáng tạo của bạn.\nCảm ơn bạn vì đã cho chúng tôi thấy những giới hạn của con người có thể được đẩy xa đến nhường nào." },
+            { hours: 5000, title: "Gửi bạn, 5.000 giờ (Tinh Thông)", message: "Sự cống hiến của bạn thật đáng kinh ngạc. Bạn đã trở thành một chuyên gia, một người mà người khác tìm đến để học hỏi và xin lời khuyên. Kỹ năng của bạn không chỉ là một công cụ, nó đã trở thành một phần con người bạn.\nLời nhắn của tôi dành cho bạn là: Hãy luôn giữ cho mình \"tâm trí của người mới bắt đầu\". Đừng để kiến thức sâu rộng của mình biến thành sự tự mãn. Hãy tiếp tục học hỏi từ những lĩnh vực khác, lắng nghe những người mới vào nghề và không ngừng đặt câu hỏi. Giờ đây, vai trò của bạn không chỉ là làm tốt công việc của mình, mà còn là nâng đỡ và truyền cảm hứng cho những người đi sau." },
+            { hours: 1000, title: "Gửi bạn, 1.000 giờ (Vững Vàng)", message: "Bạn không còn là người mới nữa. Bạn đã có năng lực, sự tự tin và có thể tạo ra những kết quả đáng tự hào. Bạn xứng đáng được công nhận vì sự kiên trì của mình.\nBây giờ, thử thách của bạn là chuyển từ \"làm theo\" sang \"thấu hiểu\". Hãy tự hỏi mình \"Tại sao nó lại hoạt động như vậy?\". Hãy thử dạy lại cho người khác, vì đó là cách tốt nhất để củng cố kiến thức của chính mình. Đây là lúc để tinh chỉnh, tối ưu hóa và bắt đầu hình thành phong cách độc đáo của riêng bạn. Hãy biến sự thành thạo thành nghệ thuật." },
+            { hours: 100, title: "Gửi bạn, 100 giờ (Định Hình)", message: "Bạn đã vượt qua được giai đoạn khó khăn nhất và giờ đây, kỹ năng này đang thực sự \"ngấm\" vào bạn. Những tia sáng của sự thành thạo đã bắt đầu xuất hiện. Thật tuyệt vời!\nĐây là giai đoạn bạn cảm thấy hứng khởi nhất, nhưng cũng là lúc dễ rơi vào cái bẫy \"biết đủ rồi\". Đừng dừng lại. Hãy bắt đầu khám phá sâu hơn, thử nghiệm những kỹ thuật mới và đừng ngại phá vỡ các quy tắc bạn vừa học được. Hãy tìm một cộng đồng hoặc một người hướng dẫn để nhận được phản hồi. Sự tò mò chính là nhiên liệu tốt nhất để đưa bạn tiến xa hơn. Hãy biến kỹ năng này thành của riêng bạn." },
+            { hours: 20, title: "Gửi bạn, 20 giờ (Khai Mở)", message: "Chúc mừng bạn đã làm được điều khó nhất: Bắt đầu.\nĐừng lo lắng nếu bây giờ bạn cảm thấy mình thật vụng về, chậm chạp và liên tục mắc lỗi. Mọi bậc thầy đều từng là một \"thảm họa\" khi mới bắt đầu. Hãy nhớ rằng mục tiêu của bạn lúc này không phải là sự hoàn hảo, mà là sự hiện diện. Mỗi giờ bạn dành ra để luyện tập là một chiến thắng trước sự trì hoãn và nỗi sợ thất bại.\nHãy kiên nhẫn với chính mình, tận hưởng từng tiến bộ nhỏ nhất và đừng bao giờ so sánh khởi đầu của mình với \"đoạn giữa\" của người khác. Bạn đang xây dựng nền móng, và một nền móng vững chắc cần thời gian. Cứ tiếp tục nhé!" }
         ];
     }
     async function checkAndShowMilestones() {
@@ -2233,10 +2413,8 @@ function exportSummary(sum) {
                 return subTotal + (subtopic.stats.totalMinutes || 0);
             }, 0);
         }, 0);
-
         const totalHours = totalMinutes / 60;
         const milestones = getMilestones();
-
         const achieved = Array.isArray(data.settings.achievedMilestones) ? data.settings.achievedMilestones : [];
         const eligible = milestones.filter(m => totalHours >= m.hours && !achieved.includes(m.hours));
         if (eligible.length === 0) return false;
@@ -2245,65 +2423,49 @@ function exportSummary(sum) {
         $('#milestoneTitle').textContent = target.title;
         $('#milestoneMessage').textContent = target.message;
         $('#modalMilestone').classList.add('show');
-
         data.settings.achievedMilestones.push(target.hours);
         await saveData();
         return true;
     }
-
     async function seedAchievedMilestones() {
-        // Do not alter user achievements on import/init.
-        // Only ensure the array exists to avoid runtime errors.
         if (!data || !data.settings) return;
         if (!Array.isArray(data.settings.achievedMilestones)) {
             data.settings.achievedMilestones = [];
             await saveData();
         }
     }
-
-    // =============================
-    // Gemini & Other Feature Handlers
-    // =============================
     async function handleSendMessage() {
         const btn = $('#btnSendMessage');
         const input = $('#chatInput');
         const query = input.value.trim();
         const subtopic = getCurrentSubtopic();
-
         if (!query) return;
         if (!subtopic) { toast(t('timer.selectSubtopicPrompt')); return; }
-
         input.value = '';
         btn.disabled = true;
         btn.innerHTML = '<div class="spinner"></div>';
-
         subtopic.chatHistory.push({ role: 'user', text: query });
         renderChat();
-
         const response = await callGeminiAPI(query);
         if (response) {
             subtopic.chatHistory.push({ role: 'model', text: response });
             await saveData();
             renderChat();
         }
-
         btn.disabled = false;
         btn.innerHTML = 'Gửi';
     }
-
     function renderChat() {
         const s = getCurrentSubtopic();
         const messagesEl = $('#chatMessages');
         const chatInput = $('#chatInput');
         const sendBtn = $('#btnSendMessage');
         if (!messagesEl || !chatInput || !sendBtn) return;
-
         if (!s) {
             messagesEl.innerHTML = '<div class="tiny">Chọn chủ đề con để bắt đầu chat.</div>';
             chatInput.disabled = true; sendBtn.disabled = true;
             return;
         }
-
         chatInput.disabled = false; sendBtn.disabled = false;
         messagesEl.innerHTML = '';
         if (!s.chatHistory || s.chatHistory.length === 0) {
@@ -2318,15 +2480,12 @@ function exportSummary(sum) {
         });
         messagesEl.scrollTop = messagesEl.scrollHeight;
     }
-
     async function handleSummarizeNote() {
         const btn = $('#btnSummarizeNote');
         const noteTextEl = $('#noteText');
         const noteText = noteTextEl.value.trim();
         const subtopic = getCurrentSubtopic();
-
         if (!noteText) { toast("Vui lòng nhập ghi chú trước khi tóm tắt."); return; }
-
         const originalContent = btn.innerHTML;
         btn.innerHTML = '<div class="spinner"></div>'; btn.disabled = true;
         const prompt = `Dựa vào thông tin sau:\n- Chủ đề: "${subtopic?.name || 'không rõ'}"\n- Ghi chú của người dùng sau một phiên làm việc: "${noteText}"\n\nHãy tạo một bản tóm tắt ngắn gọn về những gì đã làm và đề xuất một bước hợp lý tiếp theo. Định dạng câu trả lời như sau:\n\n---\n**✨ Tóm tắt AI:**\n[Tóm tắt ở đây]\n\n**🚀 Gợi ý tiếp theo:**\n[Gợi ý ở đây]`;
@@ -2336,7 +2495,6 @@ function exportSummary(sum) {
         }
         btn.innerHTML = originalContent; btn.disabled = false;
     }
-
     function clearChat() {
         const s = getCurrentSubtopic();
         if (!s) { toast(t('timer.selectSubtopicPrompt')); return; }
@@ -2349,15 +2507,9 @@ function exportSummary(sum) {
             }
         });
     }
-
-
-    // =============================
-    // YouTube Player
-    // =============================
     let ytPlayer;
-    let ytUserPaused = false; // Theo dõi người dùng có ấn Pause thủ công không
-    // Fallback khi mở qua file:// không ổn định với Iframe API
-    let ytFallbackFrame = null; // <iframe> fallback
+    let ytUserPaused = false;
+    let ytFallbackFrame = null;
     let ytFallbackIsPlaying = false;
     function buildFallbackSrc(videoId, { autoplay=1, mute=1 }={}){
         const params = new URLSearchParams({
@@ -2386,15 +2538,10 @@ function exportSummary(sum) {
         ytFallbackFrame = ifr;
         return ifr;
     }
-    // THAY THẾ TOÀN BỘ HÀM CŨ BẰNG HÀM MỚI NÀY
     function fallbackLoadVideo(videoId, {autoplay=1, mute=1}={}){
         const cont = document.getElementById('youtube-player-container');
         if (!cont) return;
-
-        // Xóa hoàn toàn iframe cũ để đảm bảo làm mới triệt để
         cont.innerHTML = '';
-
-        // Tạo một iframe hoàn toàn mới
         const ifr = document.createElement('iframe');
         ifr.id = 'yt-fallback';
         ifr.width = '1';
@@ -2403,12 +2550,8 @@ function exportSummary(sum) {
         ifr.style.top='-9999px';
         ifr.style.left='-9999px';
         ifr.allow = 'autoplay; encrypted-media; picture-in-picture';
-        
-        // Gán link mới và thêm vào trang
         ifr.src = buildFallbackSrc(videoId, {autoplay, mute});
         cont.appendChild(ifr);
-        
-        // Cập nhật lại biến toàn cục và trạng thái nút
         ytFallbackFrame = ifr;
         ytFallbackIsPlaying = !!autoplay;
         try { 
@@ -2436,9 +2579,8 @@ function exportSummary(sum) {
     function fallbackMute(){ fallbackPostMessage('mute'); }
     window.onYouTubeIframeAPIReady = function() {
         if (IS_FILE_PROTOCOL) {
-            // Khi chạy file://, một số trình duyệt hạn chế Iframe API. Dùng fallback đơn giản.
             try { window.__ytApiWatchdog && window.__ytApiWatchdog.cancel(); } catch(_) {}
-            return; // Không khởi tạo YT.Player
+            return;
         }
         const opts = {
             height: '1',
@@ -2447,7 +2589,6 @@ function exportSummary(sum) {
             events: { onReady: onPlayerReady, onStateChange: onPlayerStateChange },
             host: 'https://www.youtube.com'
         };
-        // Tránh set origin khi chạy từ file:// vì có thể chặn play
         if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
             opts.origin = window.location.origin;
         }
@@ -2458,7 +2599,6 @@ function exportSummary(sum) {
     let _ytPrimed = false;
     let _ytUnlocked = false;
     try { _ytUnlocked = localStorage.getItem('sound_unlocked') === '1'; } catch(_) {}
-
     function showSoundPermission() {
         const bar = document.getElementById('soundPermissionBar');
         if (!bar) return;
@@ -2470,22 +2610,17 @@ function exportSummary(sum) {
         if (!bar) return;
         bar.classList.remove('show');
     }
-    // THAY THẾ HÀM CŨ BẰNG HÀM NÀY
     function unlockAudioChain() {
-        // Mở khóa Audio Context chung của trình duyệt
         try { if (AUDIO_CTX && typeof AUDIO_CTX.resume === 'function') AUDIO_CTX.resume(); } catch(_) {}
-        
-        // Gửi lệnh bật tiếng cho video
         try {
             if (IS_FILE_PROTOCOL) {
                 fallbackUnMute();
-                fallbackPlay(); // Đảm bảo video đang phát
+                fallbackPlay();
             } else if (ytPlayer && ytPlayer.unMute) {
                 ytPlayer.unMute();
                 ytPlayer.playVideo();
             }
         } catch(_) {}
-        
         _ytUnlocked = true;
         try { localStorage.setItem('sound_unlocked','1'); } catch(_) {}
         hideSoundPermission();
@@ -2498,28 +2633,21 @@ function exportSummary(sum) {
                 iframe.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture');
             }
         } catch (_) {}
-        // Áp dụng âm lượng hiện tại ngay khi sẵn sàng
         try { if (ytPlayer && ytPlayer.setVolume) ytPlayer.setVolume((data && data.settings && data.settings.youtubeVolume) || 80); } catch(_) {}
-        // Không tự động phát. Chỉ cue video nếu có URL.
         updateYouTubePlayer();
     }
-
     function onPlayerStateChange(event) {
         const btn = $('#btnToggleYtSound');
         if (event.data == YT.PlayerState.PLAYING) {
             btn.textContent = '⏸️';
-            // Đã phát thành công, ẩn thanh xin quyền nếu còn hiển thị
             hideSoundPermission();
         } else {
             btn.textContent = '▶️';
         }
         if (event.data === YT.PlayerState.ENDED) {
-            // Chỉ tự loop nếu người dùng KHÔNG bấm dừng thủ công
             if (!ytUserPaused) ytPlayer.playVideo();
         }
     }
-
-    // Các helper điều khiển âm lượng/phát nhạc
     async function ytFadeTo(target, ms=250) {
         try {
             if (!ytPlayer || !ytPlayer.getVolume || !ytPlayer.setVolume) return;
@@ -2566,12 +2694,8 @@ function exportSummary(sum) {
             }
         } catch(_) {}
     }
-
-    // THAY THẾ HÀM CŨ BẰNG HÀM NÀY
     async function updateYouTubePlayer() {
         const videoId = getActiveVideoId();
-
-        // Xử lý hình nền (giữ nguyên)
         if (data.settings.useYtThumbnailAsBg && videoId) {
             const thumbUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
             const img = new Image();
@@ -2583,27 +2707,19 @@ function exportSummary(sum) {
             await saveData();
             applyCustomBg();
         }
-
-        // Logic quan trọng khi chạy file trực tiếp
         if (IS_FILE_PROTOCOL) {
             if (!videoId) { 
                 fallbackStop();
                 hideSoundPermission();
                 return;
             }
-            // Luôn tải video ở chế độ autoplay và mute (nếu chưa được cho phép)
-            // Đây là chìa khóa để trình duyệt cho phép video chạy nền
             const isMuted = _ytUnlocked ? 0 : 1;
             fallbackLoadVideo(videoId, { autoplay: 1, mute: isMuted });
-            
-            // Hiển thị thanh yêu cầu bật âm thanh nếu cần
             if (!_ytUnlocked) {
                 showSoundPermission();
             }
             return;
         }
-
-        // Logic cho môi trường server (giữ nguyên cho linh hoạt)
         if (!ytPlayer || !ytPlayer.cueVideoById) return;
         if (!videoId) {
             if (ytPlayer.stopVideo) ytPlayer.stopVideo();
@@ -2613,18 +2729,13 @@ function exportSummary(sum) {
         ytPlayer.cueVideoById(videoId);
         ytPlayer.setVolume(data.settings.youtubeVolume);
     }
-
-    // THAY THẾ HÀM CŨ BẰNG HÀM NÀY
     function toggleYtSound() {
-        // Nếu chưa cho phép âm thanh, yêu cầu người dùng cho phép trước
         if (!_ytUnlocked) {
             try { ensureAudio(); } catch(_) {}
             try { unlockAudioChain(); } catch(_) {}
             return;
         }
-
         if (IS_FILE_PROTOCOL) {
-            // Nếu chưa có iframe hoặc chưa có videoId, cố gắng nạp trước
             const vid = getActiveVideoId();
             if (!ytFallbackFrame || !ytFallbackFrame.isConnected) {
                 if (!vid) { toast('Chưa có link hợp lệ. Dán link rồi bấm ▶️.'); return; }
@@ -2644,15 +2755,12 @@ function exportSummary(sum) {
                 ytFallbackIsPlaying = true;
                 toast('Đang phát nhạc nền...');
             }
-            // Cập nhật icon nút
             try { 
                 const btn = document.getElementById('btnToggleYtSound'); 
                 if (btn) btn.textContent = ytFallbackIsPlaying ? '⏸️' : '▶️'; 
             } catch(_) {}
             return;
         }
-        
-        // Logic cho môi trường server
         if (!ytPlayer || typeof ytPlayer.getPlayerState !== 'function') return;
         const playerState = ytPlayer.getPlayerState();
         if (playerState === YT.PlayerState.PLAYING || playerState === YT.PlayerState.BUFFERING) {
@@ -2665,16 +2773,11 @@ function exportSummary(sum) {
             toast('Đang phát nhạc nền...');
         }
     }
-
-    // =============================
-    // Bindings
-    // =============================
     function bindEvents(){
       on($('#btnToggleBg'), 'click', toggleBackgroundView);
       on($('#btnMilestoneClose'), 'click', () => $('#modalMilestone').classList.remove('show'));
       on($('#btnAddTopic'), 'click', () => showInputModal('Tên Chủ đề mới?', async (name) => { if (!name) return; data.topics.push({ id: uid('t'), name, subtopics: [] }); await saveData(); renderTopics(); }));
       on($('#btnExport'), 'click', ()=> storageManager.exportData(data));
-        // Attach a correct import handler (safe duplicate)
         on($("#importFile"), 'change', (e) => {
           const f = e.target.files[0];
           if (!f) return;
@@ -2683,9 +2786,9 @@ function exportSummary(sum) {
             normalizeDataStructure(data);
             await ensureValidSelection();
             await seedAchievedMilestones();
-            toast('Da nhap du lieu thanh cong!');
+            toast('Đã nhập dữ liệu thành công!');
             renderAll();
-          }).catch(err => toast('Nh?p th?t b?i: ' + err.message));
+          }).catch(err => toast('Nhập thất bại: ' + err.message));
           e.target.value = null;
         });
       on($('#btnRestoreBackup'), 'click', () => {
@@ -2704,47 +2807,64 @@ function exportSummary(sum) {
               }
           });
       });
+      on($('#set_theme_color'), 'input', (e) => {
+          const selectedTheme = e.target.value;
+          applyTheme(selectedTheme);
+          if (selectedTheme === 'light' || selectedTheme === 'pastel') {
+              const ytThumbCheckbox = $('#set_ytThumbAsBg');
+              if (ytThumbCheckbox) {
+                  ytThumbCheckbox.checked = false;
+                  toast('Đã tắt nền YouTube để hợp với theme sáng.', 2000);
+              }
+              // Đảm bảo xem trước nền gốc cho theme sáng
+              try { document.body.style.setProperty('--bg-image', 'none'); } catch(_) {}
+          } else {
+              // Theme tối: tự bật dùng thumbnail YouTube nếu có link
+              const ytThumbCheckbox = $('#set_ytThumbAsBg');
+              if (ytThumbCheckbox) {
+                  ytThumbCheckbox.checked = true;
+              }
+              try { updateYouTubePlayer(); } catch(_) {}
+          }
+      });
       on($('#btnSettings'), 'click', openSettings);
-      
       on($('#btnHelpCreateTopic'), 'click', () => {
           switchView('topics');
           $('#btnAddTopic').click();
       });
-
       on($('#btnDashboard'), 'click', () => {
           renderDashboard();
           $('#modalDashboard').classList.add('show');
       });
-
       on($('#btnCloseDashboard'), 'click', () => {
           $('#modalDashboard').classList.remove('show');
       });
-
       on($('#btnCloseSettings'), 'click', closeSettings);
       on($('#btnSaveSettings'), 'click', saveSettings);
       on($('#btnDefaults'), 'click', setDefaults);
       on($('#btnTestSound'), 'click', ()=>{ ensureAudio(); playSound('work_end'); });
-
-      // Toggle hiển thị khu vực tùy chỉnh âm báo
       on($('#btnToggleCustomSounds'), 'click', (e) => {
           e.preventDefault();
           const container = $('#customSoundsContainer');
           if (container) container.classList.toggle('hidden');
       });
-
       on($('#btnSaveNote'), 'click', async ()=>{ const s=getCurrentSubtopic(); if(!s) return; const id=pendingNoteSessionId; const sess=s.sessions.find(x=>x.id===id); if(sess){ sess.note=$('#noteText').value.trim(); await saveData(); renderStatsHistory(); toast('Đã lưu ghi chú'); } closeNoteModal(); });
       on($('#btnSkipNote'), 'click', ()=> closeNoteModal());
       on($('#btnAddGeneralNote'), 'click', addGeneralNote);
-
       on($('#btnSummarizeNote'), 'click', handleSummarizeNote);
       on($('#btnSendMessage'), 'click', handleSendMessage);
       on($('#chatInput'), 'keydown', (e) => { if (e.key === 'Enter') handleSendMessage(); });
-
+      $$('#aiPromptSuggestions button').forEach(btn => {
+        on(btn, 'click', () => {
+          const promptTemplate = btn.dataset.prompt;
+          $('#chatInput').value = promptTemplate;
+          $('#chatInput').focus();
+        });
+      });
       on($('#btnClearChat'), 'click', clearChat);
       on($('#btnNewChat'), 'click', clearChat);
       on($('#btnAddSubtopicTask'), 'click', addSubtopicTask);
       on($('#newSubtopicTaskInput'), 'keydown', (e) => { if (e.key === 'Enter') addSubtopicTask(); });
-
       on($('#btnToggleYtSound'), 'click', toggleYtSound);
       on($('#ytSoundVolume'), 'input', (e) => {
           const vol = parseInt(e.target.value, 10);
@@ -2753,9 +2873,7 @@ function exportSummary(sum) {
           }
       });
       on($('#set_youtubeUrl'), 'input', handleYoutubeUrlInput);
-
       $$('.nav-btn[data-view]').forEach(btn => btn.addEventListener('click', () => switchView(btn.dataset.view)));
-      
       $$('.tab-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const tabId = btn.dataset.tab;
@@ -2784,21 +2902,39 @@ function exportSummary(sum) {
             loadEditingPresetFields();
           });
         });
-
         $$('.presets button').forEach(button => {
           button.addEventListener('click', (e) => {
             const newPreset = e.target.dataset.preset;
-            timer.setPreset(newPreset);
-            renderAll();
+            const currentPreset = data.settings.preset;
+            if (newPreset === currentPreset) {
+              return;
+            }
+            if (timer.state !== 'idle') {
+              showConfirmModal(
+                'Xác nhận chuyển đổi',
+                `Bạn có chắc muốn chuyển sang Kiểu ${newPreset}? Thao tác này sẽ dừng và đặt lại phiên làm việc hiện tại.`,
+                (confirmed) => {
+                  if (confirmed) {
+                    timer.reset();
+                    timer.setPreset(newPreset);
+                    renderAll();
+                    toast(`Đã chuyển sang Kiểu ${newPreset}.`);
+                  }
+                }
+              );
+            } 
+            else {
+              timer.setPreset(newPreset);
+              renderAll();
+              toast(`Đã chuyển sang Kiểu ${newPreset}.`);
+            }
           });
         });
-
       on($('#btnStart'), 'click', ()=> timer.start());
       on($('#btnPause'), 'click', ()=> timer.pause());
       on($('#btnResume'), 'click', ()=> timer.resume());
       on($('#btnSkip'), 'click', ()=> timer.skip());
       on($('#btnReset'), 'click', ()=> timer.reset());
-
       on($('#uploadBg'), 'change', (e) => { handleFileUpload(e.target.files[0], async (id) => { data.settings.customBg = id; await saveData(); applyCustomBg(); toast("Đã cập nhật hình nền."); }); e.target.value = null; });
       on($('#btnClearBg'), 'click', async () => {
           data.settings.customBg = '';
@@ -2810,25 +2946,20 @@ function exportSummary(sum) {
               openSettings();
           }
       });
+      
       on($('#uploadSoundWork'), 'change', (e) => { handleFileUpload(e.target.files[0], async (id) => { data.settings.customSounds.work_end = id; await saveData(); toast("Đã lưu âm báo hết LÀM VIỆC."); }); e.target.value = null; });
       on($('#uploadSoundBreak'), 'change', (e) => { handleFileUpload(e.target.files[0], async (id) => { data.settings.customSounds.break_end = id; await saveData(); toast("Đã lưu âm báo hết NGHỈ NGẮN."); }); e.target.value = null; });
       on($('#uploadSoundLong'), 'change', (e) => { handleFileUpload(e.target.files[0], async (id) => { data.settings.customSounds.long_end = id; await saveData(); toast("Đã lưu âm báo hết NGHỈ DÀI."); }); e.target.value = null; });
-
       on($('#btnFullscreen'), 'click', toggleFullScreen);
       document.addEventListener('fullscreenchange', updateFullscreenButton);
-
       window.addEventListener('keydown', (e)=>{ const tag=(e.target.tagName||'').toLowerCase(); const isTyping=['input','textarea','select'].includes(tag); if(e.code==='Space' && !isTyping){ e.preventDefault(); if(timer.state==='idle'||timer.state==='paused') timer.start(); else timer.pause(); } if(e.key==='n'||e.key==='N'){ if(!isTyping){ e.preventDefault(); timer.skip(); } } if(e.key==='Escape'){ $$('.modal').forEach(m => m.classList.remove('show')); } });
       $$('.modal').forEach(m=> m.addEventListener('click', (ev)=>{ if(ev.target===m) m.classList.remove('show'); }));
-      
-      // Global click listener to close menus
       window.addEventListener('click', (e) => {
         if (!e.target.closest('.actions-menu-btn')) {
             closeAllMenus();
         }
       });
       window.addEventListener('beforeunload', () => timer.persistTimerState(true));
-
-      // --- Logic kéo thả cho đồng hồ Zen Mode ---
       const draggableElement = $('#draggableTimer');
       let isDragging = false;
       let offsetX, offsetY;
@@ -2860,7 +2991,6 @@ function exportSummary(sum) {
         });
       }
     }
-
     function toggleBackgroundView(){
         const body = document.body;
         body.classList.toggle('bg-view-mode');
@@ -2875,16 +3005,13 @@ function exportSummary(sum) {
             btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>`;
         }
     }
-
     function updateMainViewVisibility() {
         const hasSubtopic = !!getCurrentSubtopic();
         const timerView = $('#view-timer');
         const welcomePanel = $('#welcomePanel');
-
         if (welcomePanel) {
             welcomePanel.classList.toggle('hidden', hasSubtopic);
         }
-
         if (timerView) {
             if (hasSubtopic) {
                 timerView.classList.remove('no-subtopic-selected');
@@ -2893,7 +3020,6 @@ function exportSummary(sum) {
             }
         }
     }
-
     function updatePresetButtonsText() {
         const settings = data.settings;
         const cyclesA = settings.cyclesA;
@@ -2909,7 +3035,6 @@ function exportSummary(sum) {
             btnB.textContent = `${cyclesB}×${workB} (B)`;
         }
     }
-
     function renderAll(){
         updatePresetButtonsText();
         const currentPreset = data.settings.preset;
@@ -2919,9 +3044,7 @@ function exportSummary(sum) {
           button.classList.toggle('ghost', !isSelected);
           button.setAttribute('aria-pressed', isSelected);
         });
-
         updateMainViewVisibility();
-
         timer.setPreset(data.settings.preset, {silent:true});
         renderTopics();
         renderContextBadge();
@@ -2933,11 +3056,8 @@ function exportSummary(sum) {
         renderSubtopicTasks();
         updateFullscreenButton();
         switchView(data.settings.currentView);
+        // fixVietnameseUI đã bị loại bỏ; nội dung hiển thị trực tiếp bằng UTF-8
     }
-
-    // =============================
-    // Fullscreen Logic
-    // =============================
     function toggleFullScreen() {
         if (!document.fullscreenElement) {
             document.documentElement.requestFullscreen().catch(err => {
@@ -2949,7 +3069,6 @@ function exportSummary(sum) {
             }
         }
     }
-
     function updateFullscreenButton() {
         const btn = $('#btnFullscreen');
         if (document.fullscreenElement) {
@@ -2960,9 +3079,6 @@ function exportSummary(sum) {
             btn.title = 'Toàn màn hình';
         }
     }
-
-
-    // Boot
     async function initializeApp() {
       try {
         await storageManager.initDB();
@@ -2971,7 +3087,6 @@ function exportSummary(sum) {
           storageManager.getAll('topics'),
           storageManager.getAll('subtopics')
         ]);
-
         let merged;
         if (!settings || topics.length === 0 || subtopics.length === 0) {
           const defaultData = JSON.parse(JSON.stringify(defaults));
@@ -2990,18 +3105,61 @@ function exportSummary(sum) {
           for (const s of subtopics) map[s.topicId]?.subtopics.push(s);
           merged = { version: defaults.version, settings, topics: Object.values(map) };
         }
-
         data = window.data = merged;
         normalizeDataStructure(data);
         await ensureValidSelection();
         await seedAchievedMilestones();
         renderAll();
+        try { storageManager.autoBackup(data); } catch (e) { console.warn('AutoBackup error:', e); }
         bindEvents();
         applyTheme();
       } catch (err) {
         console.error('Initialization error:', err);
         toast(`Lỗi khởi tạo: ${err.message}`);
       }
+    }
+    callGeminiAPI = async function(prompt, retries = 3, delay = 1000) {
+        const apiKey = data?.settings?.apiKey || "";
+        if (!apiKey) {
+            toast("Vui lòng nhập Gemini API Key trong phần Cài đặt.");
+            return null;
+        }
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+        const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
+        try {
+            const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            if (!response.ok) {
+                if (response.status === 429 && retries > 0) {
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    return callGeminiAPI(prompt, retries - 1, delay * 2);
+                }
+                let errorData = null;
+                try { errorData = await response.json(); } catch (e) {}
+                let errorMessage = `Lỗi HTTP: ${response.status}`;
+                if (response.status === 400) {
+                    errorMessage = "Lỗi: Gemini API Key không hợp lệ hoặc đã bị thay đổi. Vui lòng kiểm tra lại trong Cài đặt.";
+                } else if (response.status === 429) {
+                    errorMessage = "Lỗi: Đã vượt quá hạn mức yêu cầu tới Gemini. Vui lòng thử lại sau ít phút.";
+                } else if (errorData?.error?.message) {
+                    errorMessage = `Lỗi từ Gemini: ${errorData.error.message}`;
+                }
+                toast(errorMessage, 4000);
+                console.error("Gemini API Error:", errorData || response.statusText);
+                return null;
+            }
+            const result = await response.json();
+            if (result.candidates && result.candidates[0]?.content?.parts?.[0]?.text) {
+                return formatGeminiResponse(result.candidates[0].content.parts[0].text);
+            } else {
+                console.error("API response structure is unexpected:", result);
+                if (result.promptFeedback?.blockReason) { return `Nội dung bị chặn vì: ${result.promptFeedback.blockReason}. Vui lòng thử lại với nội dung khác.`; }
+                return "Không nhận được nội dung hợp lệ từ AI.";
+            }
+        } catch (error) {
+            console.error("Lỗi khi gọi Gemini API:", error);
+            toast("Lỗi mạng khi kết nối đến Gemini. Vui lòng kiểm tra kết nối internet.", 4000);
+            return null;
+        }
     }
     loadLanguage(localStorage.getItem('lang') || 'vi').then(initializeApp);
     </script>
