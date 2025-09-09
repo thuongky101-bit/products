@@ -4,35 +4,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="Ứng dụng Pomodoro hỗ trợ học tập với tích hợp Gemini AI và giao diện hiện đại." />
     <title>Pomodoro Study App — Tích hợp Gemini AI (Giao diện mới)</title>
-<style>
+    <style>
     /*
     =============================================
-    POMODORO STUDY APP — PHIÊN BẢN GIAO DIỆN MỜ ĐỤC (v11.2 MODIFIED)
+    POMODORO STUDY APP — PHIÊN BẢN GIAO DIỆN TẬP TRUNG (v11.2)
     =============================================
     */
 
     :root {
-      /* Theme Dark (Mặc định) - Áp dụng phong cách từ file 1.html */
+      /* Theme Dark (Mặc định) - Cập nhật từ file 2 */
       --bg: #0f1222;
-      --panel: #171a2e; /* Màu nền gốc */
-      --panel-rgb: 23, 26, 46; /* RGB của màu nền gốc */
+      --panel: #171a2e;
+      --panel-rgb: 23, 26, 46; /* Thêm biến RGB cho panel */
       --muted: #212646;
       --text: #f4f6ff;
       --sub: #b7c1ff;
       --acc: #6c8cff;
-      --acc-2: #27d3a2; /* Màu làm việc mới */
-      --warn: #ffb020; /* Màu nghỉ ngắn mới */
-      --danger: #ff5c7a; /* Màu nghỉ dài mới */
+      --acc-2: #27d3a2;
+      --warn: #ffb020;
+      --danger: #ff5c7a;
       --shadow: 0px 1.8px 2.2px rgba(0, 0, 0, 0.054), 0px 4.3px 5.3px rgba(0, 0, 0, 0.077), 0px 8.1px 10px rgba(0, 0, 0, 0.095), 0px 14.5px 17.9px rgba(0, 0, 0, 0.113), 0px 27.2px 33.4px rgba(0, 0, 0, 0.136), 0px 65px 80px rgba(0, 0, 0, 0.19);
       --radius: 16px;
-      --panel-opacity: 0.85; /* Độ mờ đục chính */
+      --panel-opacity: 0.85;
       --gradient-border: linear-gradient(135deg, var(--acc), var(--acc-2));
     }
     
+    /* === START: THÊM CÁC THEME MỚI === */
     [data-theme='light'] {
       --bg: #f5f0e8; --panel: #ffffff; --panel-rgb: 255, 255, 255; --muted: #eaddcf; --text: #4a4a4a; --sub: #8a817c; --acc: #d4a373; --acc-2: #a3b18a; --warn: #e76f51; --danger: #d00000;
       --shadow: 0px 1.8px 2.2px rgba(0, 0, 0, 0.024), 0px 4.3px 5.3px rgba(0, 0, 0, 0.037), 0px 8.1px 10px rgba(0, 0, 0, 0.045), 0px 14.5px 17.9px rgba(0, 0, 0, 0.053), 0px 27.2px 33.4px rgba(0, 0, 0, 0.066), 0px 65px 80px rgba(0, 0, 0, 0.09);
       --panel-opacity: 0.9;
+      /* Ngăn nền tối mặc định khi không có ảnh */
       --bg-image: none;
     }
 
@@ -40,6 +42,7 @@
       --bg: #fde2e4; --panel: #fff1f2; --panel-rgb: 255, 241, 242; --muted: #fad2e1; --text: #595260; --sub: #8c7a8a; --acc: #c78283; --acc-2: #7ec4cf; --warn: #f9bf45; --danger: #d7263d;
       --shadow: 0 5px 20px rgba(200,150,150,0.2);
       --panel-opacity: 0.9;
+      /* Ngăn nền tối mặc định khi không có ảnh */
       --bg-image: none;
     }
     
@@ -54,6 +57,7 @@
         --bg-image: url('https://i.gifer.com/origin/a2/a2322310816930a8094f8263e6a7150a_w200.gif');
         --panel-opacity: 0.75;
     }
+    /* === END: THÊM CÁC THEME MỚI === */
 
     *:focus-visible {
       outline: 2px solid var(--acc); outline-offset: 2px; border-radius: 4px;
@@ -63,40 +67,23 @@
     body {
       margin:0; 
       font-family: system-ui, -apple-system, 'Segoe UI Variable', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Inter', sans-serif; 
+      
       background-color: var(--bg);
       background-image: var(--bg-image, radial-gradient(1200px 800px at 10% -10%, #20285b 0%, #0f1222 50%, #0b0e1a 100%));
+      
       background-size: cover; 
       background-position: center; 
       color:var(--text); 
-      transition: background 0.5s ease, color 0.5s ease;
+      transition: background 0.5s ease, color 0.5s ease, filter 0.5s ease;
       text-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
     }
     a{color:var(--acc)}
-    body[data-theme='light'], body[data-theme='pastel'] { text-shadow: none; }
-    body[data-theme='light'] .draggable-timer, body[data-theme='pastel'] .draggable-timer { text-shadow: none; }
 
     .app{display:flex; min-height:100vh}
-    .app-content { flex: 1; padding: 24px; overflow-y: auto; max-height: 100vh; }
-    .view { display: none; }
-    .view.active { display: grid; gap: 24px; animation: fadeIn .3s ease; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-    /* ========================================================= */
-    /* START: CORE STYLES FOR BLURRED BACKGROUNDS (KIỂU MỜ ĐỤC) */
-    /* ========================================================= */
-    .app-nav, .panel-bg, .modal-card, .actions-menu, .draggable-timer, 
-    .sound-permission-bar, .nav-btn .tooltip, .toast {
-        background: rgba(var(--panel-rgb), var(--panel-opacity));
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        transition: background-color 0.3s ease, box-shadow 0.3s ease;
-    }
-    [data-theme='light'] .app-nav, [data-theme='light'] .panel-bg, [data-theme='light'] .modal-card,
-    [data-theme='pastel'] .app-nav, [data-theme='pastel'] .panel-bg, [data-theme='pastel'] .modal-card {
-        border-color: rgba(0,0,0,0.1);
-    }
-
+    
     .app-nav {
         width: 60px;
         padding: 16px 0;
@@ -105,45 +92,87 @@
         align-items: center;
         gap: 16px;
         z-index: 100;
-        border-right: 1px solid rgba(255,255,255,.08);
     }
-
-    header.app-header{
-        display:flex; align-items:center; justify-content:space-between; 
-        padding:10px 14px; border-radius:var(--radius); 
-        box-shadow:var(--shadow); margin-bottom: 24px;
-    }
-    /* ========================================================= */
-    /* END: CORE STYLES FOR BLURRED BACKGROUNDS                  */
-    /* ========================================================= */
-
     .nav-btn {
-        background: transparent; border: none; color: var(--sub);
-        width: 44px; height: 44px; border-radius: 12px;
-        display: flex; align-items: center; justify-content: center;
-        cursor: pointer; transition: all .2s ease; position: relative;
+        background: transparent;
+        border: none;
+        color: var(--sub);
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all .2s ease;
+        position: relative;
     }
     .nav-btn:hover { background: var(--muted); color: var(--text); }
     .nav-btn.active { background: var(--acc); color: white; }
     .nav-btn svg { width: 24px; height: 24px; }
     .nav-btn .tooltip {
-        position: absolute; left: 110%; top: 50%;
+        position: absolute;
+        left: 110%;
+        top: 50%;
         transform: translateY(-50%);
-        padding: 4px 8px; border-radius: 6px;
-        font-size: 12px; box-shadow: var(--shadow);
-        white-space: nowrap; opacity: 0; visibility: hidden;
+        color: var(--text);
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 12px;
+        box-shadow: var(--shadow);
+        white-space: nowrap;
+        opacity: 0;
+        visibility: hidden;
         transition: opacity .2s ease, visibility .2s ease;
-        pointer-events: none; z-index: 200;
+        pointer-events: none;
+        z-index: 200;
     }
     .nav-btn:hover .tooltip { opacity: 1; visibility: visible; }
+
+    .app-content {
+        flex: 1;
+        padding: 24px;
+        overflow-y: auto;
+        max-height: 100vh;
+    }
+
+    .view { display: none; }
+    .view.active { display: grid; gap: 24px; animation: fadeIn .3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .main.reloading { opacity: 0; transition: opacity 0.2s ease-out; }
+
+    .panel-bg{
+        background: rgba(23, 26, 46, var(--panel-opacity));
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border:1px solid rgba(255,255,255,.08);
+    }
+    /* Thêm các quy tắc border cho theme light/pastel */
+    [data-theme='light'] .panel-bg, [data-theme='pastel'] .panel-bg { border:1px solid rgba(0,0,0,0.05); }
+    [data-theme='lofi'] .panel-bg { border:1px solid rgba(255,255,255,0.1); }
+    [data-theme='space'] .panel-bg { border:1px solid rgba(255,255,255,0.12); }
+
+
+    header.app-header{display:flex; align-items:center; justify-content:space-between; padding:10px 14px; border-radius:var(--radius); box-shadow:var(--shadow); margin-bottom: 24px;}
+    header .actions{display:flex; gap:8px; align-items:center}
     
     .btn {
-      background: rgba(255, 255, 255, 0.08); color: var(--text); border: none;
-      padding: 10px 14px; border-radius: 12px; cursor: pointer;
-      display: inline-flex; align-items: center; justify-content: center;
-      gap: 8px; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.08);
-      font-weight: 600; transition: all .15s ease;
-      position: relative; overflow: hidden;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      border: none; /* Sửa đổi: bỏ border mặc định */
+      padding: 10px 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: inset 0 -2px 0 rgba(0,0,0,0.08);
+      font-weight: 600;
+      transition: all .15s ease;
+      position: relative;
+      overflow: hidden;
     }
     .btn::before {
         content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
@@ -153,7 +182,7 @@
     }
     .btn:hover::before { opacity: 1; }
     .btn:hover { background: rgba(255, 255, 255, 0.12); }
-    .btn:active { transform: translateY(1px) scale(0.98); }
+    .btn:active { transform: translateY(1px) scale(0.98); filter: brightness(1); }
     .btn:disabled { cursor: not-allowed; filter: brightness(0.8) saturate(0.5); }
     .btn.ghost { background: transparent; border: 1px solid rgba(255, 255, 255, 0.2); }
     .btn.ghost:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.3); }
@@ -164,88 +193,9 @@
     .btn.small::before { border-radius: 9px; }
     .btn > svg { width: 16px; height: 16px; stroke-width: 2.5px; }
 
-    /* ========================================================= */
-    /* START: SECONDARY PANELS STYLING (KIỂU MỜ ĐỤC)            */
-    /* ========================================================= */
-    .topic-item, .stat-card, .hist-item, .note-item, .subtopic-btn {
-        background: rgba(255, 255, 255, 0.05); /* Nền tối mờ hơn, không trong suốt */
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 12px;
-        transition: background-color .2s ease, border-color .2s ease;
-    }
-    .topic-item:hover, .stat-card:hover, .hist-item:hover, .note-item:hover, .subtopic-btn:hover {
-        background-color: rgba(255, 255, 255, 0.1);
-        border-color: rgba(255, 255, 255, 0.15);
-    }
-    /* Override for Light/Pastel themes */
-    [data-theme='light'] .topic-item, [data-theme='light'] .stat-card, [data-theme='light'] .hist-item, [data-theme='light'] .note-item, [data-theme='light'] .subtopic-btn,
-    [data-theme='pastel'] .topic-item, [data-theme='pastel'] .stat-card, [data-theme='pastel'] .hist-item, [data-theme='pastel'] .note-item, [data-theme='pastel'] .subtopic-btn {
-        background: rgba(0, 0, 0, 0.03);
-        border-color: rgba(0, 0, 0, 0.08);
-    }
-    [data-theme='light'] .topic-item:hover, [data-theme='light'] .stat-card:hover, [data-theme='light'] .hist-item:hover, [data-theme='light'] .note-item:hover, [data-theme='light'] .subtopic-btn:hover,
-    [data-theme='pastel'] .topic-item:hover, [data-theme='pastel'] .stat-card:hover, [data-theme='pastel'] .hist-item:hover, [data-theme='pastel'] .note-item:hover, [data-theme='pastel'] .subtopic-btn:hover {
-        background-color: rgba(0, 0, 0, 0.06);
-    }
-
-    .topic-item { padding:8px; margin-bottom:8px; }
-    .stat-card { padding:12px; text-align:center; border-radius: 14px; }
-    .hist-item { padding:10px; border-radius: 10px; }
-    .note-item { padding: 10px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; cursor: pointer; }
-    .subtopic-btn { flex:1; text-align:left; padding: 10px 14px; }
-    .subtopic-btn.active{ outline:2px solid var(--acc); background-color: rgba(108, 140, 255, 0.2); }
-    .subtopic-btn.active:hover { background-color: rgba(108, 140, 255, 0.25); }
-
-    input[type="text"], input[type="password"], input[type="number"], select, textarea {
-        background: rgba(0,0,0,0.2) !important; 
-        color: var(--text);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius:10px; padding:10px; outline:none;
-        transition: background .2s ease, border-color .2s ease;
-    }
-    input[type="text"]:focus, input[type="password"]:focus, input[type="number"]:focus, select:focus, textarea:focus {
-        background: rgba(0,0,0,0.3) !important; 
-        border-color: var(--acc);
-    }
-    [data-theme='light'] input, [data-theme='light'] select, [data-theme='light'] textarea,
-    [data-theme='pastel'] input, [data-theme='pastel'] select, [data-theme='pastel'] textarea {
-        background: rgba(0, 0, 0, 0.05) !important;
-        border-color: rgba(0, 0, 0, 0.1);
-    }
-    [data-theme='light'] input:focus, [data-theme='light'] select:focus, [data-theme='light'] textarea:focus,
-    [data-theme='pastel'] input:focus, [data-theme='pastel'] select:focus, [data-theme='pastel'] textarea:focus {
-        background: rgba(0, 0, 0, 0.07) !important;
-    }
-    ::placeholder { color: var(--sub); opacity: 0.7; }
-    /* ========================================================= */
-    /* END: SECONDARY PANELS STYLING                             */
-    /* ========================================================= */
-
-    /* === START: ĐỒNG BỘ GIAO DIỆN CÁC PANEL PHỤ (override) === */
-    .topic-item, .stat-card {
-        background: rgba(255, 255, 255, .04);
-        border: 1px solid rgba(255, 255, 255, .08);
-    }
-    .hist-item {
-        background: rgba(255, 255, 255, .03);
-        border: 1px solid rgba(255, 255, 255, .08);
-    }
-    .subtopic-btn {
-        background-color: transparent;
-    }
-
-    /* Áp dụng nền và viền riêng cho theme sáng để dễ nhìn hơn */
-    [data-theme='light'] .topic-item,
-    [data-theme='light'] .stat-card,
-    [data-theme='light'] .hist-item,
-    [data-theme='pastel'] .topic-item,
-    [data-theme='pastel'] .stat-card,
-    [data-theme='pastel'] .hist-item {
-        background: rgba(0, 0, 0, 0.02);
-        border: 1px solid rgba(0, 0, 0, 0.06);
-    }
-    /* === END: ĐỒNG BỘ GIAO DIỆN CÁC PANEL PHỤ (override) === */
-
+    /* === START: CẬP NHẬT GIAO DIỆN QUẢN LÝ CHỦ ĐỀ === */
+    #view-topics { grid-template-columns: 1fr; }
+    .topic-item { background:rgba(255,255,255,.04); border:1px solid var(--muted); border-radius:12px; padding:8px; margin-bottom:8px; } /* Sửa đổi */
     .topic-header, .sub-row { display:flex; align-items:center; gap:8px; position: relative; }
     .topic-title { flex:1; font-weight:600; }
     .chev { width:28px; height:28px; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; flex-shrink: 0; }
@@ -253,18 +203,38 @@
     .chev[aria-expanded="false"] .ico { transform: rotate(-90deg); }
     .subtopics { margin-top:8px; display:flex; flex-direction:column; gap:6px; }
     .subtopics.hidden { display:none; }
+    
     .topic-actions, .sub-row .actions {
-        opacity: 0; visibility: hidden;
+        opacity: 0;
+        visibility: hidden;
         transition: opacity .2s ease, visibility .2s ease;
-        display: flex; gap: 6px; align-items: center;
+        display: flex;
+        gap: 6px;
+        align-items: center;
     }
-    .topic-item:hover .topic-actions, .sub-row:hover .actions { opacity: 1; visibility: visible; }
-    .actions-menu-btn { padding: 0; width: 28px; height: 28px; font-size: 1.2em; line-height: 1; }
+    .topic-item:hover .topic-actions, .sub-row:hover .actions {
+        opacity: 1;
+        visibility: visible;
+    }
+    .actions-menu-btn {
+        padding: 0;
+        width: 28px;
+        height: 28px;
+        font-size: 1.2em;
+        line-height: 1;
+    }
     .actions-menu {
-        position: absolute; top: 100%; right: 0;
-        border-radius: 8px; padding: 6px; box-shadow: var(--shadow);
-        z-index: 10; min-width: 150px; display: none;
-        flex-direction: column; gap: 4px;
+        position: absolute;
+        top: 100%;
+        right: 0;
+        border-radius: 8px;
+        padding: 6px;
+        box-shadow: var(--shadow);
+        z-index: 10;
+        min-width: 150px;
+        display: none;
+        flex-direction: column;
+        gap: 4px;
     }
     .actions-menu.show { display: flex; }
     .menu-item {
@@ -275,46 +245,81 @@
     }
     .menu-item:hover { background: var(--acc); color: white; }
     .menu-item.danger:hover { background: var(--danger); }
+    /* === END: CẬP NHẬT GIAO DIỆN QUẢN LÝ CHỦ ĐỀ === */
+
+    .subtopic-btn{
+        flex:1; 
+        text-align:left;
+        background-color: rgba(0,0,0,0.02); /* Sửa đổi */
+    }
+    .subtopic-btn:hover {
+        background-color: var(--muted); /* Sửa đổi */
+    }
+    .subtopic-btn.active{
+        outline:2px solid var(--acc); 
+    }
+    .subtopic-btn.active:hover {
+        background: transparent; /* Giữ nền trong suốt khi di chuột qua */
+    }
     
     .panel{border-radius:var(--radius); padding:24px; box-shadow:var(--shadow)}
 
     .timer-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
-    .timer{display:grid; gap:16px; align-items:center; text-align:center}
-    .big-time{font-size: clamp(60px, 12vw, 96px); letter-spacing:1px; font-weight:700;}
+    .timer{display:grid; gap:16px; grid-template-columns: 1fr; align-items:center; text-align:center}
+    .big-time{font-size: clamp(60px, 12vw, 96px); letter-spacing:1px; font-weight:700; color: var(--text)}
     .state{font-weight:700; letter-spacing:.6px}
-    .state.work{color:var(--acc-2)}
+    .state.work{color:var(--acc-2)} /* Sửa đổi màu */
     .state.break{color:var(--warn)}
-    .state.long{color:var(--danger)}
+    .state.long{color:var(--danger)} /* Sửa đổi màu */
     .controls{display:flex; flex-wrap:wrap; gap:12px; justify-content:center}    
     #btnStart { padding: 14px 28px; font-size: 1.2em; }
-    hr {
-        border: none; height: 1px;
-        background-color: var(--muted);
-        opacity: 0.3; margin-top: 0;
+    #btnPause, #btnResume { padding: 12px 24px; font-size: 1.1em; }
+
+    /* === START: TÙY CHỈNH DẢI PHÂN CÁCH MỀM MẠI HƠN === */
+    #view-timer .panel-bg hr {
+        border: none; /* Bỏ đường viền mặc định */
+        height: 1px;  /* Đặt chiều cao cho đường kẻ */
+        background-color: var(--muted); /* Sử dụng màu phụ của theme */
+        opacity: 0.3; /* Làm cho nó mờ đi, hòa vào nền */
+        margin-top: 0; /* Điều chỉnh lại khoảng cách */
     }
-    
+    /* === END: TÙY CHỈNH DẢI PHÂN CÁCH MỀM MẠI HƠN === */
+
     .stats-grid{display:grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap:12px}
+    .stat-card{background:rgba(255,255,255,0.04); border:1px solid var(--muted); border-radius:14px; padding:12px; text-align:center} /* Sửa đổi */
     .stat-card h4{margin:4px 0 8px; color:var(--sub); font-weight:600; font-size: 14px;}
     .stat-value{font-size: 20px; font-weight: 600;}
     .tiny{font-size:12px; color:var(--sub)}
     .history{display:grid; gap:8px; max-height:300px; overflow:auto; padding-right:6px}
-    .hist-item{display:grid; grid-template-columns: 1fr auto; gap:10px; align-items:start;}
+    .hist-item{display:grid; grid-template-columns: 1fr auto; gap:10px; align-items:start; background:rgba(255,255,255,0.04); border:1px solid var(--muted); border-radius:10px; padding:10px} /* Sửa đổi */
 
     .row{display:flex; gap:8px; align-items:center}
     .row > * {flex:1}
+    input[type="text"], input[type="password"], input[type="number"], select, textarea{width:100%; background:rgba(255,255,255,0.04); color:var(--text); border:1px solid var(--muted); border-radius:10px; padding:10px; outline:none}
     textarea{min-height:80px; resize: vertical;}
 
     .toasts{position:fixed; right:16px; bottom:16px; display:flex; flex-direction:column; gap:8px; z-index:9999}
-    .toast{padding:10px 12px; border-radius:12px; box-shadow:var(--shadow); animation: toast-in .3s ease; transform-origin: bottom right;}
+    .toast{
+        background: var(--panel); /* Sửa đổi */
+        border:1px solid var(--muted);
+        color:var(--text);
+        padding:10px 12px; border-radius:12px; box-shadow:var(--shadow);
+        animation: toast-in .3s ease; transform-origin: bottom right;
+    }
     @keyframes toast-in { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
 
-    .modal{position:fixed; inset:0; display:none; align-items:center; justify-content:center; background: rgba(0,0,0,var(--panel-opacity)); z-index:1000; backdrop-filter: blur(5px);}
+    .modal{position:fixed; inset:0; display:none; align-items:center; justify-content:center; background: rgba(0,0,0,var(--panel-opacity)); z-index:1000; backdrop-filter: blur(5px);} /* Sửa đổi: đồng bộ với file 1.html và thêm blur */
     .modal.show{display:flex}
     .modal-card{
         width:min(720px, 94vw);
-        border-radius:16px; padding:16px; box-shadow:var(--shadow);
-        animation: modal-in .25s ease-out; max-height: 90vh;
-        overflow-y: auto; display: flex; flex-direction: column;
+        border-radius:16px;
+        padding:16px;
+        box-shadow:var(--shadow);
+        animation: modal-in .25s ease-out;
+        max-height: 90vh;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
     }
     @keyframes modal-in { from { opacity: 0; transform: scale(0.92) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
     .modal-card h3{margin-top:0}
@@ -322,40 +327,100 @@
     .dashboard-table th, .dashboard-table td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--muted); }
     .dashboard-table th { color: var(--sub); }
 
+    .footer-note{font-size:12px; color:var(--sub)}
+    .hidden{display:none !important}
+
     .notes-list { display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto; padding-right: 6px; }
+    .note-item { background: rgba(255,255,255,0.04); border-radius: 10px; padding: 10px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; cursor: pointer; } /* Sửa đổi */
     .note-content-wrapper { flex: 1; min-width: 0; }
     .note-content { white-space: pre-wrap; word-break: break-word; max-height: 60px; overflow: hidden; position: relative; transition: max-height 0.35s ease-in-out; }
     .note-content:not(.expanded)::after {
-        content: ''; position: absolute; bottom: 0; right: 0; width: 100%; height: 20px; 
-        background: linear-gradient(to top, rgba(var(--panel-rgb), 1) 20%, transparent);
+        content: ''; position: absolute; bottom: 0; right: 0; width: 100%; height: 20px; background: linear-gradient(to top, var(--panel) 20%, transparent);
     }
     .note-content.expanded { max-height: 500px; }
     .note-meta { font-size: 11px; color: var(--sub); margin-top: 4px; }
     
-    .spinner { border: 2px solid var(--muted); border-top-color: var(--text); border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; }
+    .spinner { border: 2px solid var(--muted); border-top-color: var(--text); border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; } /* Sửa đổi */
     @keyframes spin { to { transform: rotate(360deg); } }
 
     .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .panel-header h3 { margin: 0; }
+    .panel-header .actions { display: flex; gap: 8px; }
     
+    .aux-panel { margin-top: 24px; }
     .tab-nav { display: flex; gap: 4px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 16px; }
     .tab-btn { background: transparent; border: none; color: var(--sub); padding: 8px 16px; cursor: pointer; border-bottom: 2px solid transparent; transition: all .2s ease; font-weight: 600; }
     .tab-btn:hover { color: var(--text); }
     .tab-btn.active { color: var(--acc); border-bottom-color: var(--acc); }
-    .tab-content { display: none; padding-top: 8px; }
-    .tab-content.active { animation: fadeIn 0.25s ease-out; }
-    #tasks.tab-content.active, #notes.tab-content.active, #ai.tab-content.active { display: block; }
-    #settings-timer.tab-content.active, #settings-ui.tab-content.active, #settings-integrations.tab-content.active { display: flex; }
-    [data-theme='light'] .tab-nav, [data-theme='pastel'] .tab-nav { border-bottom-color: rgba(0, 0, 0, 0.1); }
+    .tab-content {
+      display: none;
+      padding-top: 8px;
+    }
+    .tab-content.active {
+      animation: fadeIn 0.25s ease-out;
+    }
+    #tasks.tab-content.active,
+    #notes.tab-content.active,
+    #ai.tab-content.active {
+        display: block;
+    }
 
-    .settings-row-toggle { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; }
-    .settings-row-toggle span { flex: 1; cursor: pointer; }
-    .toggle-switch { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
-    .toggle-switch input { opacity: 0; width: 0; height: 0; }
-    .toggle-switch .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--muted); transition: .3s; border-radius: 24px; }
-    .toggle-switch .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
-    .toggle-switch input:checked + .slider { background-color: var(--acc-2); }
-    .toggle-switch input:checked + .slider:before { transform: translateX(20px); }
+    #settings-timer.tab-content.active,
+    #settings-ui.tab-content.active,
+    #settings-integrations.tab-content.active {
+        display: flex;
+    }
+
+    .settings-row-toggle {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 16px;
+    }
+    .settings-row-toggle span {
+      flex: 1;
+      cursor: pointer;
+    }
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .toggle-switch .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--muted);
+      transition: .3s;
+      border-radius: 24px;
+    }
+    .toggle-switch .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+    .toggle-switch input:checked + .slider {
+      background-color: var(--acc-2);
+    }
+    .toggle-switch input:checked + .slider:before {
+      transform: translateX(20px);
+    }
     
     .chat-messages { max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; padding: 4px; }
     .chat-msg { padding: 8px 12px; border-radius: 12px; max-width: 85%; word-break: break-word; }
@@ -363,47 +428,145 @@
     .chat-msg.model { background: var(--muted); align-self: flex-start; border-bottom-left-radius: 4px; }
     .chat-input-area { display: flex; gap: 8px; }
 
+    .methods-list { list-style: none; padding: 0; }
+    .method-item { align-items: flex-start; padding: 12px; display: flex; gap: 10px; border-radius: 8px; }
+    .method-item:hover { background: rgba(0,0,0,0.03); } /* Sửa đổi */
+    .method-item input[type="checkbox"] { width: 18px; height: 18px; margin-top: 2px; flex-shrink: 0;}
+    .method-item label { flex: 1; }
+    .method-item label.completed { text-decoration: line-through; color: var(--sub); }
+    .method-item .content-wrapper { flex: 1; cursor: pointer; }
+    .method-item .concept { font-size: 14px; color: var(--sub); margin-top: 8px; border-left: 2px solid var(--muted); padding-left: 12px; white-space: pre-wrap; word-break: break-word; }
     .subtopic-todo-list { list-style: none; padding: 0; margin: 0; max-height: 100px; overflow-y: auto; text-align: left; }
     .subtopic-todo-list li { display: flex; align-items: center; gap: 8px; padding: 4px; transition: all 0.2s ease-out; }
     .subtopic-todo-list li.removing { transform: translateX(100%); opacity: 0; }
-    
+    .subtopic-todo-list label { flex: 1; }
+
     #youtube-player-container { position: absolute; top: -9999px; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 
-    ::-webkit-scrollbar { width: 8px; }
-    ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.1); border-radius: 10px; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.1); border-radius: 10px; } /* Sửa đổi */
     ::-webkit-scrollbar-thumb { background: var(--muted); border-radius: 10px; border: 2px solid transparent; background-clip: content-box; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--sub); }
+    ::-webkit-scrollbar-thumb:hover { background: var(--sub); background-clip: content-box; }
     
     .timer-circle-container {
-        position: relative; width: clamp(250px, 40vw, 320px); height: clamp(250px, 40vw, 320px); 
-        margin: 24px auto; display: flex; align-items: center; justify-content: center;
+        position: relative; width: clamp(250px, 40vw, 320px); height: clamp(250px, 40vw, 320px); margin: 24px auto; display: flex; align-items: center; justify-content: center;
     }
     .timer-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
     .timer-circle-bg, .timer-circle-progress { fill: none; stroke-width: 8; }
-    .timer-circle-bg { stroke: var(--muted); }
+    .timer-circle-bg { stroke: var(--muted); } /* Sửa đổi */
     .timer-circle-progress { stroke: var(--acc); stroke-linecap: round; transition: stroke-dashoffset 0.3s linear, stroke 0.5s ease; }
-    .timer-circle-container.breathing { animation: breathing-effect 3s ease-in-out infinite; }
+    @keyframes flash { 0%, 100% { box-shadow: 0 0 10px 2px transparent; } 50% { box-shadow: 0 0 20px 8px currentColor; } }
+    .timer-circle-container.finished { color: var(--acc-2); animation: flash 1s ease-out; }
     @keyframes breathing-effect { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
+    .timer-circle-container.breathing { animation: breathing-effect 3s ease-in-out infinite; }
+    
+    @media (max-width: 1024px) {
+      .app-content { padding: 20px; }
+      .panel { padding: 20px; }
+      .timer-circle-container { width: clamp(220px, 50vw, 300px); height: clamp(220px, 50vw, 300px); }
+    }
+
+    @media (max-width: 768px) {
+      .app { flex-direction: column; }
+      .app-nav { width: 100%; height: 60px; flex-direction: row; justify-content: center; border-right: none; border-top: 1px solid rgba(255,255,255,.08); order: 2; padding: 0 16px; }
+      .app-content { padding: 16px; order: 1; }
+      .panel { padding: 16px; }
+      .modal-card .tab-nav { overflow-x: auto; }
+    }
+
+    @media (max-width: 480px) {
+      .app-nav { height: 50px; }
+      .nav-btn { flex: 1; }
+      header.app-header { flex-direction: column; align-items: stretch; gap: 8px; }
+      .btn { padding: 8px 12px; }
+      .timer-circle-container { width: clamp(180px, 80vw, 220px); height: clamp(180px, 80vw, 220px); margin: 16px auto; }
+      .panel { padding: 12px; }
+      .app-content { padding: 12px; }
+    }
+
+    #view-timer.no-subtopic-selected > .panel-bg:not(:first-child) { display: none; }
+    #view-timer.no-subtopic-selected .timer-header > .presets { display: none; }
+    #view-timer.no-subtopic-selected .timer { display: none; }
+
+    header.app-header .actions #btnFullscreen { background: transparent; border: none; box-shadow: none; }
+    header.app-header .actions #btnFullscreen:hover { background: var(--muted); filter: none; }
+    header.app-header .actions #btnFullscreen:hover::before { opacity: 0; }
+
+    input[type="text"], input[type="password"], input[type="number"], select, textarea {
+        background: rgba(255,255,255,0.04) !important; /* Sửa đổi: chuyển sang nền trắng trong suốt */
+        color: var(--text);
+        border: 1px solid rgba(255, 255, 255, 0.1); /* Viền trắng mờ */
+        transition: background .2s ease, border-color .2s ease;
+    }
+    input[type="text"]:focus, input[type="password"]:focus, input[type="number"]:focus, select:focus, textarea:focus {
+        background: rgba(255,255,255,0.06) !important; /* Tinh chỉnh: sát mẫu hơn */
+        border-color: var(--acc);
+    }
+    /* === START: SỬA LỖI NỀN INPUT/SELECT TRÊN THEME SÁNG === */
+    [data-theme='light'] input, [data-theme='light'] select, [data-theme='light'] textarea,
+    [data-theme='pastel'] input, [data-theme='pastel'] select, [data-theme='pastel'] textarea {
+        background: rgba(0, 0, 0, 0.05) !important; /* Dùng nền đen mờ thay vì trắng mờ */
+        border-color: rgba(0, 0, 0, 0.1); /* Viền đen mờ trên theme sáng */
+    }
+
+    [data-theme='light'] input:focus, [data-theme='light'] select:focus, [data-theme='light'] textarea:focus,
+    [data-theme='pastel'] input:focus, [data-theme='pastel'] select:focus, [data-theme='pastel'] textarea:focus {
+        background: rgba(0, 0, 0, 0.07) !important; /* Tăng độ đậm khi focus */
+    }
+    /* === END: SỬA LỖI NỀN INPUT/SELECT TRÊN THEME SÁNG === */
+    
+    ::placeholder { color: var(--sub); opacity: 0.7; } /* Sửa đổi */
+    ::-ms-input-placeholder { color: var(--sub); }
+    :-ms-input-placeholder { color: var(--sub); }
+
+    
     
     .draggable-timer {
-        position: fixed; bottom: 20px; right: 20px;
-        padding: 8px 16px; font-size: 2em; font-weight: 600;
-        cursor: move; user-select: none; z-index: 9998;
-        opacity: 0; transform: scale(0.9); pointer-events: none;
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        color: var(--text);
+        padding: 8px 16px;
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+        font-size: 2em;
+        font-weight: 600;
+        cursor: move;
+        user-select: none;
+        z-index: 9998;
+        opacity: 0;
+        transform: scale(0.9);
+        pointer-events: none;
         transition: opacity 0.35s ease, transform 0.35s ease;
-        text-shadow: 0px 0px 8px rgba(0, 0, 0, 0.9);
     }
-    body.bg-view-mode .draggable-timer { opacity: 1; transform: scale(1); pointer-events: auto; }
-    
+    body.bg-view-mode .draggable-timer {
+        opacity: 1;
+        transform: scale(1);
+        pointer-events: auto;
+    }
     .app-nav, .panel-bg, .app-header .actions > *, .app-header > .row {
         transition: opacity 0.35s ease, transform 0.35s ease, background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
     }
     body.bg-view-mode .app-nav,
-    body.bg-view-mode .view.active > .panel-bg { opacity: 0; pointer-events: none; transform: scale(0.98); }
-    body.bg-view-mode .app-header { background: transparent !important; border-color: transparent !important; box-shadow: none !important; }
+    body.bg-view-mode .view.active > .panel-bg {
+        opacity: 0;
+        pointer-events: none;
+        transform: scale(0.98);
+    }
+    body.bg-view-mode .app-header {
+        background: transparent !important;
+        border-color: transparent !important;
+        box-shadow: none !important;
+    }
     body.bg-view-mode .app-header .actions > *:not(#btnToggleBg),
-    body.bg-view-mode .app-header > .row { opacity: 0; pointer-events: none; }
-    
+    body.bg-view-mode .app-header > .row {
+        opacity: 0;
+        pointer-events: none;
+    }
+    body.bg-view-mode #btnToggleBg {
+        opacity: 1;
+        pointer-events: auto;
+    }
     .sound-permission-bar {
       position: fixed; left: 50%; transform: translateX(-50%);
       bottom: 48px; z-index: 9999;
@@ -412,66 +575,109 @@
       box-shadow: var(--shadow);
     }
     .sound-permission-bar.show { display: flex; }
+    .sound-permission-bar .msg { font-size: 14px; color: var(--text); }
+    .draggable-timer { text-shadow: 0px 0px 8px rgba(0, 0, 0, 0.9); }
 
-    .methods-container { display: flex; flex-direction: column; gap: 12px; }
-    .method-item { border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; transition: all 0.2s ease-in-out; }
-    .method-item[open] { border: 2px solid var(--acc); }
-    .method-item summary { font-size: 1.1em; font-weight: 600; padding: 16px; cursor: pointer; }
-    .method-item summary:hover { background-color: rgba(255, 255, 255, 0.04); }
-    .method-item[open] summary { border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
-    .method-content { padding: 0px 16px 16px 16px; line-height: 1.7; animation: fadeIn .3s ease; }
-    .method-content h4 { margin-top: 20px; margin-bottom: 8px; color: var(--acc-2); }
-    [data-theme='light'] .method-item, [data-theme='pastel'] .method-item { border-color: rgba(0, 0, 0, 0.1); }
-    [data-theme='light'] .method-item summary:hover, [data-theme='pastel'] .method-item summary:hover { background-color: rgba(0, 0, 0, 0.03); }
-    
-    @media (max-width: 768px) {
-      .app { flex-direction: column; }
-      .app-nav { width: 100%; height: 60px; flex-direction: row; justify-content: center; border-right: none; border-top: 1px solid rgba(255,255,255,.08); order: 2; padding: 0 16px; }
-      .app-content { padding: 16px; order: 1; }
-    }
-/* === BỔ SUNG CSS CHO GIAO DIỆN CÀI ĐẶT MỚI === */
-.settings-group {
-  width: 100%;
-  margin-bottom: 28px;
+    /* Giảm/loại bỏ bóng chữ cho theme sáng để tránh nhòe/lóa */
+    body[data-theme='light'],
+    body[data-theme='pastel'] { text-shadow: none; }
+    body[data-theme='light'] .draggable-timer,
+    body[data-theme='pastel'] .draggable-timer { text-shadow: none; }
+
+    /* ============================================= */
+/* ========================================================= */
+/* START: THI?T L?P PANEL KI?U M?  ?C (FROSTED GLASS)        */
+/* ========================================================= */
+
+/* --- 1.  p d?ng hi?u ?ng n?n m? chung cho t?t c? c c panel --- */
+.app-nav,
+.panel-bg,
+.modal-card,
+.actions-menu,
+.nav-btn .tooltip,
+.draggable-timer, 
+.sound-permission-bar,
+.toast,
+.topic-item,
+.stat-card,
+.hist-item,
+.method-item {
+    background: rgba(var(--panel-rgb), var(--panel-opacity));
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
-.settings-group h4 {
-  margin-top: 0;
-  margin-bottom: 16px;
-  color: var(--sub);
-  font-weight: 600;
-  border-bottom: 1px solid var(--muted);
-  padding-bottom: 8px;
-  opacity: 0.7;
+
+/* --- 2.  ?nh nghia vi?n cho t?ng lo?i panel --- */
+.app-nav {
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
 }
-.settings-grid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr); /* Tạo lưới 6 cột */
-  gap: 16px;
-  align-items: center;
+.panel-bg,
+.modal-card,
+.actions-menu,
+.nav-btn .tooltip,
+.draggable-timer, 
+.sound-permission-bar,
+.toast,
+.topic-item,
+.stat-card,
+.hist-item,
+.method-item {
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
-.settings-grid .col-span-2 { grid-column: span 2; }
-.settings-grid .col-span-3 { grid-column: span 3; }
-.settings-grid .col-span-4 { grid-column: span 4; }
-.settings-grid .col-span-6 { grid-column: span 6; }
-.settings-grid label, .settings-grid .label-text {
-  display: block;
-  margin-bottom: 4px;
-  font-size: 14px;
-  font-weight: 500;
+
+/* --- 3. Tinh ch?nh vi?n cho c c theme S NG (Light/Pastel) --- */
+[data-theme='light'] .app-nav,
+[data-theme='light'] .panel-bg,
+[data-theme='light'] .modal-card,
+[data-theme='light'] .actions-menu,
+[data-theme='light'] .nav-btn .tooltip,
+[data-theme='light'] .draggable-timer,
+[data-theme='light'] .sound-permission-bar,
+[data-theme='light'] .toast,
+[data-theme='light'] .topic-item,
+[data-theme='light'] .stat-card,
+[data-theme='light'] .hist-item,
+[data-theme='light'] .method-item,
+[data-theme='pastel'] .app-nav,
+[data-theme='pastel'] .panel-bg,
+[data-theme='pastel'] .modal-card,
+[data-theme='pastel'] .actions-menu,
+[data-theme='pastel'] .nav-btn .tooltip,
+[data-theme='pastel'] .draggable-timer,
+[data-theme='pastel'] .sound-permission-bar,
+[data-theme='pastel'] .toast,
+[data-theme='pastel'] .topic-item,
+[data-theme='pastel'] .stat-card,
+[data-theme='pastel'] .hist-item,
+[data-theme='pastel'] .method-item {
+    border-color: rgba(0, 0, 0, 0.1);
 }
-.settings-grid input, .settings-grid select {
-  width: 100%;
+
+/* --- 4. S?a l?i hi?u ?ng fade-out c?a ghi ch  cho ph  h?p --- */
+.note-content:not(.expanded)::after {
+    background: linear-gradient(to top, rgba(var(--panel-rgb), 1) 20%, transparent);
 }
-.settings-toggle {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: rgba(0,0,0,0.1);
-  padding: 10px;
-  border-radius: 10px;
+
+/* --- C c quy t?c c n l?i gi? nguy n t? file g?c --- */
+[data-theme='light'] .tab-nav,
+[data-theme='pastel'] .tab-nav {
+    border-bottom-color: rgba(0, 0, 0, 0.1);
 }
-/* === KẾT THÚC BỔ SUNG CSS === */
-</style>
+.subtopic-btn {
+    background-color: transparent;
+}
+.subtopic-btn:hover {
+    background-color: var(--muted);
+}
+.method-item[open] summary {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+[data-theme='light'] .method-item[open] summary,
+[data-theme='pastel'] .method-item[open] summary {
+    border-bottom-color: rgba(0, 0, 0, 0.1);
+}
+
+    </style>
 </head>
 <body data-theme="default"> <div class="app" id="app">
     <nav class="app-nav">
@@ -815,161 +1021,138 @@
           </nav>
           <div class="settings-content">
               <div id="settings-timer" class="tab-content active" style="flex-direction:column; gap:20px;">
-    <div class="settings-group">
-        <h4>Thời lượng Pomodoro</h4>
-        <div class="settings-grid">
-            <div class="col-span-3">
-                <button class="btn acc" data-preset-target="A" style="width: 100%;"> Kiểu A </button>
-            </div>
-            <div class="col-span-3">
-                <button class="btn ghost" data-preset-target="B" style="width: 100%;"> Kiểu B </button>
-            </div>
-            <div class="col-span-2">
-                <label>LÀM VIỆC (phút)</label>
-                <input type="number" id="set_work" min="1" />
-            </div>
-            <div class="col-span-2">
-                <label>NGHỈ NGẮN (phút)</label>
-                <input type="number" id="set_short" min="1" />
-            </div>
-            <div class="col-span-2">
-                <label>NGHỈ DÀI (phút)</label>
-                <input type="number" id="set_long" min="1" />
-            </div>
-            <div class="col-span-3">
-                <label>Chu kỳ Pomodoro</label>
-                <input type="number" id="set_cycles" min="1" />
-            </div>
-            <div class="col-span-3">
-                <label>Chu kỳ nghỉ dài</label>
-                <input type="number" id="set_interval" min="2" />
-            </div>
-            <div class="col-span-6 settings-toggle">
-                <label for="set_autoStartNext" style="margin: 0; cursor: pointer;">Tự động bắt đầu phiên tiếp theo</label>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="set_autoStartNext">
-                    <span class="slider"></span>
-                </label>
-            </div>
-        </div>
-    </div>
-</div>
+                  <div>
+                      <h4>Thời lượng Pomodoro</h4>
+                      <div class="row" id="timerPresetSelector" style="margin-bottom:16px;">
+                          <button class="btn acc" data-preset-target="A"> Kiểu A </button>
+                          <button class="btn ghost" data-preset-target="B"> Kiểu B </button>
+                      </div>
+                      <div class="row">
+                          <label>LÀM VIỆC (phút)<input type="number" id="set_work" min="1" /></label>
+                          <label>NGHỈ NGẮN (phút)<input type="number" id="set_short" min="1" /></label>
+                          <label>NGHỈ DÀI (phút)<input type="number" id="set_long" min="1" /></label>
+                      </div>
+                      <div class="row">
+                          <label>Chu kỳ Pomodoro<input type="number" id="set_cycles" min="1" /></label>
+                          <label>Chu kỳ nghỉ dài<input type="number" id="set_interval" min="2" /></label>
+                      </div>
+                  </div>
+                      <div class="settings-row-toggle">
+                          <label for="set_autoStartNext">Tự động bắt đầu phiên tiếp theo</label>
+                          <label class="toggle-switch">
+                              <input type="checkbox" id="set_autoStartNext">
+                              <span class="slider"></span>
+                          </label>
+                      </div>
+              </div>
               <div id="settings-ui" class="tab-content" style="flex-direction: column; gap: 20px;">
-    <div class="settings-group">
-        <h4>Giao diện</h4>
-        <div class="settings-grid">
-            <div class="col-span-6">
-                <label>Theme Giao Diện</label>
-                <select id="set_theme_color">
-                    <option value="default">Mặc định (Dark Blue)</option>
-                    <option value="light">Light - Trà Sữa</option>
-                    <option value="pastel">Pastel - Dễ thương</option>
-                    <option value="lofi">Lofi Study Room</option>
-                    <option value="space">Space Station</option>
-                </select>
-            </div>
-            <div class="col-span-6" style="display: flex; justify-content: space-between; align-items: center;">
-                <span class="label-text">Hình nền</span>
-                <div>
-                    <label class="btn small ghost" for="uploadBg">Tải ảnh mới</label>
-                    <input type="file" id="uploadBg" accept="image/*" style="display:none" />
-                    <button class="btn small danger" id="btnClearBg">Xóa nền</button>
-                </div>
-            </div>
-            <div class="col-span-6" style="display: flex; justify-content: space-between; align-items: center;">
-                <label style="flex: 1;">Độ trong suốt của nền</label>
-                <input type="range" id="set_panelOpacity" min="0.1" max="1" step="0.05" style="flex: 2;">
-            </div>
-        </div>
-    </div>
+                  <div>
+                      <h4>Giao diện</h4>
+                      <div class="row">
+                          <label>Theme Giao Diện
+                                <select id="set_theme_color">
+                                    <option value="default">Mặc định (Dark Blue)</option>
+                                    <option value="light">Light - Trà Sữa</option>
+                                    <option value="pastel">Pastel - Dễ thương</option>
+                                    <option value="lofi">Lofi Study Room</option>
+                                    <option value="space">Space Station</option>
+                                </select>
+                          </label>
+                      </div>
+                      <div class="row">
+                          <label>Hình nền
+                              <label class="btn small ghost" for="uploadBg">Tải ảnh mới</label>
+                              <input type="file" id="uploadBg" accept="image/*" class="hidden" />
+                          </label>
+                          <button class="btn small danger" id="btnClearBg">Xóa nền</button>
+                      </div>
+                      <div class="row">
+                          <label style="flex: 1;">Độ trong suốt của nền</label>
+                          <input type="range" id="set_panelOpacity" min="0.1" max="1" step="0.05" style="flex: 2;">
+                      </div>
+                      
+                   </div>
+                  
+                   <div>
+                      <h4>Âm thanh</h4>
+                      <div class="row">
+                          <label>Âm lượng (0–1)<input type="number" id="set_volume" step="0.05" min="0" max="1"/></label>
+                          <label>Kiểu âm báo
+                              <select id="set_theme">
+                                  <option value="beep">Beep</option>
+                                  <option value="chime">Chime</option>
+                              </select>
+                          </label>
+                           <button class="btn" id="btnTestSound" style="flex: 0 1 auto; align-self: center;">Test</button>
+                      </div>
+                      <div style="text-align: right; margin-top: 12px;">
+                          <button class="btn ghost small" id="btnToggleCustomSounds">Tùy chỉnh âm báo</button>
+                      </div>
 
-    <div class="settings-group">
-        <h4>Âm thanh</h4>
-        <div class="settings-grid">
-            <div class="col-span-2">
-                <label>Âm lượng (0–1)</label>
-                <input type="number" id="set_volume" step="0.05" min="0" max="1"/>
-            </div>
-            <div class="col-span-2">
-                <label>Kiểu âm báo</label>
-                <select id="set_theme">
-                    <option value="beep">Beep</option>
-                    <option value="chime">Chime</option>
-                </select>
-            </div>
-            <div class="col-span-2">
-                <label>&nbsp;</label>
-                <button class="btn" id="btnTestSound" style="width: 100%;">Test</button>
-            </div>
-            <div class="col-span-6" style="text-align: right;">
-                 <button class="btn ghost small" id="btnToggleCustomSounds">Tùy chỉnh âm báo</button>
-            </div>
-            <div id="customSoundsContainer" class="hidden col-span-6">
-                 <div class="row" style="display: flex; gap: 8px; justify-content: flex-end;">
-                    <div><small>Hết LÀM VIỆC</small><label class="btn small ghost" for="uploadSoundWork">Chọn File</label><input type="file" id="uploadSoundWork" accept="audio/*" class="hidden" /></div>
-                    <div><small>Hết NGHỈ NGẮN</small><label class="btn small ghost" for="uploadSoundBreak">Chọn File</label><input type="file" id="uploadSoundBreak" accept="audio/*" class="hidden" /></div>
-                    <div><small>Hết NGHỈ DÀI</small><label class="btn small ghost" for="uploadSoundLong">Chọn File</label><input type="file" id="uploadSoundLong" accept="audio/*" class="hidden" /></div>
-                 </div>
-            </div>
-        </div>
-    </div>
-</div>
+                      <div id="customSoundsContainer" class="hidden" style="margin-top: 8px;">
+                      <div class="row" style="display: flex; gap: 8px; justify-content: flex-end;">
+                          <div>
+                              <small>Âm báo hết LÀM VIỆC</small>
+                              <label title="Âm báo hết LÀM VIỆC" class="btn small ghost" for="uploadSoundWork">LÀM VIỆC</label>
+                              <input type="file" id="uploadSoundWork" accept="audio/*" class="hidden" />
+                          </div>
+                          <div>
+                              <small>Âm báo hết NGHỈ NGẮN</small>
+                              <label title="Âm báo hết NGHỈ NGẮN" class="btn small ghost" for="uploadSoundBreak">NGHỈ NGẮN</label>
+                              <input type="file" id="uploadSoundBreak" accept="audio/*" class="hidden" />
+                          </div>
+                          <div>
+                              <small>Âm báo hết NGHỈ DÀI</small>
+                              <label title="Âm báo hết NGHỈ DÀI" class="btn small ghost" for="uploadSoundLong">NGHỈ DÀI</label>
+                              <input type="file" id="uploadSoundLong" accept="audio/*" class="hidden" />
+                          </div>
+                      </div>
+                      </div>
+                  </div>
+              </div>
               <div id="settings-integrations" class="tab-content" style="flex-direction: column; gap: 20px;">
-    <div class="settings-group">
-        <h4>Tích hợp AI</h4>
-        <div class="settings-grid">
-            <div class="col-span-6">
-                <label>Gemini API Key</label>
-                <input type="password" id="set_apiKey" placeholder="Dán API Key của bạn vào đây..." />
-                <div class="tiny" style="margin-top: 4px;">Cần có để sử dụng các tính năng AI. Lấy key miễn phí tại <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer">Google AI Studio</a>.</div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="settings-group">
-        <h4>🎵 Nhạc nền YouTube</h4>
-        <div class="settings-grid">
-            <div class="col-span-6">
-                <label>Link Video/Playlist YouTube</label>
-                <input type="text" id="set_youtubeUrl" placeholder="Dán link YouTube vào đây...">
-                <div id="ytUrlFeedback" class="tiny" style="min-height: 1.2em; padding: 4px 0;"></div>
-            </div>
-            <div class="col-span-6">
-                 <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500;">
-                    <input type="checkbox" id="set_ytThumbAsBg">
-                    <span>Dùng ảnh bìa video làm nền</span>
-                </label>
-            </div>
-             <div class="col-span-6" style="display: flex; align-items: center; gap: 12px;">
-                <button id="btnToggleYtSound" class="btn small" style="flex:0 1 auto;">▶️</button>
-                <input type="range" id="ytSoundVolume" min="0" max="100" step="1" value="80" style="flex:1;">
-            </div>
-        </div>
-    </div>
-
-    <div class="settings-group">
-        <h4>🛡️ Cài đặt sao lưu</h4>
-        <div class="settings-grid">
-            <div class="col-span-6">
-                <label>Số ngày sao lưu cần giữ lại</label>
-                <input type="number" id="set_backupDays" min="1" max="30" />
-            </div>
-        </div>
-    </div>
-
-    <div class="settings-group">
-        <h4>🛡️ Phục hồi dữ liệu</h4>
-        <p class="tiny" style="margin-top: -12px; margin-bottom: 12px;">Hành động này sẽ ghi đè lên dữ liệu hiện tại của bạn.</p>
-        <div class="settings-grid">
-            <div class="col-span-4">
-                <select id="backupList"></select>
-            </div>
-            <div class="col-span-2">
-                <button id="btnRestoreBackup" class="btn warn" style="width: 100%;">Phục hồi</button>
-            </div>
-        </div>
-    </div>
-</div>
+                  <div>
+                      <h4>Tích hợp AI</h4>
+                      <label>Gemini API Key
+                          <input type="password" id="set_apiKey" placeholder="Dán API Key của bạn vào đây..." />
+                      </label>
+                      <div class="tiny">Cần có để sử dụng các tính năng AI. Lấy key miễn phí tại <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer">Google AI Studio</a>.</div>
+                  </div>
+                  <div>
+                      <h4>🎵 Nhạc nền YouTube</h4>
+                      <div class="row" style="gap:8px; align-items:center;">
+                          <input type="text" id="set_youtubeUrl" placeholder="Dán link YouTube vào đây..." style="flex:1;">
+                          </div>
+                      <div id="ytUrlFeedback" class="tiny" style="min-height: 1.2em; padding: 4px 0;"></div>
+                      <div class="row" style="margin-top: 4px;">
+                          <label style="flex: 0 1 auto; display: flex; align-items: center; gap: 8px; font-size: 14px;">
+                              <input type="checkbox" id="set_ytThumbAsBg">
+                              <span>Dùng ảnh bìa video làm nền</span>
+                          </label>
+                      </div>
+                      <div class="row" style="margin-top: 8px;">
+                          <button id="btnToggleYtSound" class="btn small" style="flex:0 1 auto;">▶️</button>
+                          <input type="range" id="ytSoundVolume" min="0" max="100" step="1" value="80" style="flex:1;">
+                      </div>
+                      <div class="tiny" style="text-align:center; margin-top:4px;">Âm lượng</div>
+                  </div>
+                  <div>
+                      <h4>🛡️ Cài đặt sao lưu</h4>
+                      <div class="row">
+                          <label>Số ngày sao lưu cần giữ lại
+                               <input type="number" id="set_backupDays" min="1" max="30" />
+                          </label>
+                      </div>
+                  </div>
+                  <div>
+                      <h4>🛡️ Phục hồi dữ liệu</h4>
+                      <p class="tiny">Phục hồi dữ liệu từ một bản sao lưu tự động hàng ngày. Hành động này sẽ ghi đè lên dữ liệu hiện tại của bạn.</p>
+                      <div class="row">
+                          <select id="backupList" style="flex: 3;"></select>
+                          <button id="btnRestoreBackup" class="btn warn small" style="flex: 1;">Phục hồi</button>
+                      </div>
+                  </div>
+              </div>
           </div>
           <div class="row" style="margin-top:16px; justify-content:flex-end">
               <button class="btn ghost" id="btnDefaults">Mặc định</button>
