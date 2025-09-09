@@ -4,37 +4,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="Ứng dụng Pomodoro hỗ trợ học tập với tích hợp Gemini AI và giao diện hiện đại." />
     <title>Pomodoro Study App — Tích hợp Gemini AI (Giao diện mới)</title>
-    <style>
+<style>
     /*
     =============================================
-    POMODORO STUDY APP â€” PHIÃŠN Báº¢N GIAO DIá»†N Táº¬P TRUNG (v11.2)
+    POMODORO STUDY APP — PHIÊN BẢN GIAO DIỆN MỜ ĐỤC (v11.2 MODIFIED)
     =============================================
     */
 
     :root {
-      /* Theme Dark (Máº·c Ä‘á»‹nh) - Cáº­p nháº­t tá»« file 2 */
+      /* Theme Dark (Mặc định) - Áp dụng phong cách từ file 1.html */
       --bg: #0f1222;
-      --panel: #171a2e;
-      --panel-rgb: 23, 26, 46; /* ThÃªm biáº¿n RGB cho panel */
+      --panel: #171a2e; /* Màu nền gốc */
+      --panel-rgb: 23, 26, 46; /* RGB của màu nền gốc */
       --muted: #212646;
       --text: #f4f6ff;
       --sub: #b7c1ff;
       --acc: #6c8cff;
-      --acc-2: #27d3a2;
-      --warn: #ffb020;
-      --danger: #ff5c7a;
+      --acc-2: #27d3a2; /* Màu làm việc mới */
+      --warn: #ffb020; /* Màu nghỉ ngắn mới */
+      --danger: #ff5c7a; /* Màu nghỉ dài mới */
       --shadow: 0px 1.8px 2.2px rgba(0, 0, 0, 0.054), 0px 4.3px 5.3px rgba(0, 0, 0, 0.077), 0px 8.1px 10px rgba(0, 0, 0, 0.095), 0px 14.5px 17.9px rgba(0, 0, 0, 0.113), 0px 27.2px 33.4px rgba(0, 0, 0, 0.136), 0px 65px 80px rgba(0, 0, 0, 0.19);
       --radius: 16px;
-      --panel-opacity: 0.85;
+      --panel-opacity: 0.85; /* Độ mờ đục chính */
       --gradient-border: linear-gradient(135deg, var(--acc), var(--acc-2));
     }
     
-    /* === START: THÃŠM CÃC THEME Má»šI === */
     [data-theme='light'] {
       --bg: #f5f0e8; --panel: #ffffff; --panel-rgb: 255, 255, 255; --muted: #eaddcf; --text: #4a4a4a; --sub: #8a817c; --acc: #d4a373; --acc-2: #a3b18a; --warn: #e76f51; --danger: #d00000;
       --shadow: 0px 1.8px 2.2px rgba(0, 0, 0, 0.024), 0px 4.3px 5.3px rgba(0, 0, 0, 0.037), 0px 8.1px 10px rgba(0, 0, 0, 0.045), 0px 14.5px 17.9px rgba(0, 0, 0, 0.053), 0px 27.2px 33.4px rgba(0, 0, 0, 0.066), 0px 65px 80px rgba(0, 0, 0, 0.09);
       --panel-opacity: 0.9;
-      /* NgÄƒn ná»n tá»‘i máº·c Ä‘á»‹nh khi khÃ´ng cÃ³ áº£nh */
       --bg-image: none;
     }
 
@@ -42,7 +40,6 @@
       --bg: #fde2e4; --panel: #fff1f2; --panel-rgb: 255, 241, 242; --muted: #fad2e1; --text: #595260; --sub: #8c7a8a; --acc: #c78283; --acc-2: #7ec4cf; --warn: #f9bf45; --danger: #d7263d;
       --shadow: 0 5px 20px rgba(200,150,150,0.2);
       --panel-opacity: 0.9;
-      /* NgÄƒn ná»n tá»‘i máº·c Ä‘á»‹nh khi khÃ´ng cÃ³ áº£nh */
       --bg-image: none;
     }
     
@@ -57,7 +54,6 @@
         --bg-image: url('https://i.gifer.com/origin/a2/a2322310816930a8094f8263e6a7150a_w200.gif');
         --panel-opacity: 0.75;
     }
-    /* === END: THÃŠM CÃC THEME Má»šI === */
 
     *:focus-visible {
       outline: 2px solid var(--acc); outline-offset: 2px; border-radius: 4px;
@@ -67,23 +63,40 @@
     body {
       margin:0; 
       font-family: system-ui, -apple-system, 'Segoe UI Variable', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Inter', sans-serif; 
-      
       background-color: var(--bg);
       background-image: var(--bg-image, radial-gradient(1200px 800px at 10% -10%, #20285b 0%, #0f1222 50%, #0b0e1a 100%));
-      
       background-size: cover; 
       background-position: center; 
       color:var(--text); 
-      transition: background 0.5s ease, color 0.5s ease, filter 0.5s ease;
+      transition: background 0.5s ease, color 0.5s ease;
       text-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      text-rendering: optimizeLegibility;
     }
     a{color:var(--acc)}
+    body[data-theme='light'], body[data-theme='pastel'] { text-shadow: none; }
+    body[data-theme='light'] .draggable-timer, body[data-theme='pastel'] .draggable-timer { text-shadow: none; }
 
     .app{display:flex; min-height:100vh}
-    
+    .app-content { flex: 1; padding: 24px; overflow-y: auto; max-height: 100vh; }
+    .view { display: none; }
+    .view.active { display: grid; gap: 24px; animation: fadeIn .3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ========================================================= */
+    /* START: CORE STYLES FOR BLURRED BACKGROUNDS (KIỂU MỜ ĐỤC) */
+    /* ========================================================= */
+    .app-nav, .panel-bg, .modal-card, .actions-menu, .draggable-timer, 
+    .sound-permission-bar, .nav-btn .tooltip, .toast {
+        background: rgba(var(--panel-rgb), var(--panel-opacity));
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    [data-theme='light'] .app-nav, [data-theme='light'] .panel-bg, [data-theme='light'] .modal-card,
+    [data-theme='pastel'] .app-nav, [data-theme='pastel'] .panel-bg, [data-theme='pastel'] .modal-card {
+        border-color: rgba(0,0,0,0.1);
+    }
+
     .app-nav {
         width: 60px;
         padding: 16px 0;
@@ -92,87 +105,45 @@
         align-items: center;
         gap: 16px;
         z-index: 100;
+        border-right: 1px solid rgba(255,255,255,.08);
     }
+
+    header.app-header{
+        display:flex; align-items:center; justify-content:space-between; 
+        padding:10px 14px; border-radius:var(--radius); 
+        box-shadow:var(--shadow); margin-bottom: 24px;
+    }
+    /* ========================================================= */
+    /* END: CORE STYLES FOR BLURRED BACKGROUNDS                  */
+    /* ========================================================= */
+
     .nav-btn {
-        background: transparent;
-        border: none;
-        color: var(--sub);
-        width: 44px;
-        height: 44px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all .2s ease;
-        position: relative;
+        background: transparent; border: none; color: var(--sub);
+        width: 44px; height: 44px; border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer; transition: all .2s ease; position: relative;
     }
     .nav-btn:hover { background: var(--muted); color: var(--text); }
     .nav-btn.active { background: var(--acc); color: white; }
     .nav-btn svg { width: 24px; height: 24px; }
     .nav-btn .tooltip {
-        position: absolute;
-        left: 110%;
-        top: 50%;
+        position: absolute; left: 110%; top: 50%;
         transform: translateY(-50%);
-        color: var(--text);
-        padding: 4px 8px;
-        border-radius: 6px;
-        font-size: 12px;
-        box-shadow: var(--shadow);
-        white-space: nowrap;
-        opacity: 0;
-        visibility: hidden;
+        padding: 4px 8px; border-radius: 6px;
+        font-size: 12px; box-shadow: var(--shadow);
+        white-space: nowrap; opacity: 0; visibility: hidden;
         transition: opacity .2s ease, visibility .2s ease;
-        pointer-events: none;
-        z-index: 200;
+        pointer-events: none; z-index: 200;
     }
     .nav-btn:hover .tooltip { opacity: 1; visibility: visible; }
-
-    .app-content {
-        flex: 1;
-        padding: 24px;
-        overflow-y: auto;
-        max-height: 100vh;
-    }
-
-    .view { display: none; }
-    .view.active { display: grid; gap: 24px; animation: fadeIn .3s ease; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-    .main.reloading { opacity: 0; transition: opacity 0.2s ease-out; }
-
-    .panel-bg{
-        background: rgba(23, 26, 46, var(--panel-opacity));
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border:1px solid rgba(255,255,255,.08);
-    }
-    /* ThÃªm cÃ¡c quy táº¯c border cho theme light/pastel */
-    [data-theme='light'] .panel-bg, [data-theme='pastel'] .panel-bg { border:1px solid rgba(0,0,0,0.05); }
-    [data-theme='lofi'] .panel-bg { border:1px solid rgba(255,255,255,0.1); }
-    [data-theme='space'] .panel-bg { border:1px solid rgba(255,255,255,0.12); }
-
-
-    header.app-header{display:flex; align-items:center; justify-content:space-between; padding:10px 14px; border-radius:var(--radius); box-shadow:var(--shadow); margin-bottom: 24px;}
-    header .actions{display:flex; gap:8px; align-items:center}
     
     .btn {
-      background: rgba(255, 255, 255, 0.08);
-      color: var(--text);
-      border: none; /* Sá»­a Ä‘á»•i: bá» border máº·c Ä‘á»‹nh */
-      padding: 10px 14px;
-      border-radius: 12px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      box-shadow: inset 0 -2px 0 rgba(0,0,0,0.08);
-      font-weight: 600;
-      transition: all .15s ease;
-      position: relative;
-      overflow: hidden;
+      background: rgba(255, 255, 255, 0.08); color: var(--text); border: none;
+      padding: 10px 14px; border-radius: 12px; cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 8px; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.08);
+      font-weight: 600; transition: all .15s ease;
+      position: relative; overflow: hidden;
     }
     .btn::before {
         content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
@@ -182,7 +153,7 @@
     }
     .btn:hover::before { opacity: 1; }
     .btn:hover { background: rgba(255, 255, 255, 0.12); }
-    .btn:active { transform: translateY(1px) scale(0.98); filter: brightness(1); }
+    .btn:active { transform: translateY(1px) scale(0.98); }
     .btn:disabled { cursor: not-allowed; filter: brightness(0.8) saturate(0.5); }
     .btn.ghost { background: transparent; border: 1px solid rgba(255, 255, 255, 0.2); }
     .btn.ghost:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.3); }
@@ -193,9 +164,88 @@
     .btn.small::before { border-radius: 9px; }
     .btn > svg { width: 16px; height: 16px; stroke-width: 2.5px; }
 
-    /* === START: Cáº¬P NHáº¬T GIAO DIá»†N QUáº¢N LÃ CHá»¦ Äá»€ === */
-    #view-topics { grid-template-columns: 1fr; }
-    .topic-item { background:rgba(255,255,255,.04); border:1px solid var(--muted); border-radius:12px; padding:8px; margin-bottom:8px; } /* Sá»­a Ä‘á»•i */
+    /* ========================================================= */
+    /* START: SECONDARY PANELS STYLING (KIỂU MỜ ĐỤC)            */
+    /* ========================================================= */
+    .topic-item, .stat-card, .hist-item, .note-item, .subtopic-btn {
+        background: rgba(255, 255, 255, 0.05); /* Nền tối mờ hơn, không trong suốt */
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        transition: background-color .2s ease, border-color .2s ease;
+    }
+    .topic-item:hover, .stat-card:hover, .hist-item:hover, .note-item:hover, .subtopic-btn:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.15);
+    }
+    /* Override for Light/Pastel themes */
+    [data-theme='light'] .topic-item, [data-theme='light'] .stat-card, [data-theme='light'] .hist-item, [data-theme='light'] .note-item, [data-theme='light'] .subtopic-btn,
+    [data-theme='pastel'] .topic-item, [data-theme='pastel'] .stat-card, [data-theme='pastel'] .hist-item, [data-theme='pastel'] .note-item, [data-theme='pastel'] .subtopic-btn {
+        background: rgba(0, 0, 0, 0.03);
+        border-color: rgba(0, 0, 0, 0.08);
+    }
+    [data-theme='light'] .topic-item:hover, [data-theme='light'] .stat-card:hover, [data-theme='light'] .hist-item:hover, [data-theme='light'] .note-item:hover, [data-theme='light'] .subtopic-btn:hover,
+    [data-theme='pastel'] .topic-item:hover, [data-theme='pastel'] .stat-card:hover, [data-theme='pastel'] .hist-item:hover, [data-theme='pastel'] .note-item:hover, [data-theme='pastel'] .subtopic-btn:hover {
+        background-color: rgba(0, 0, 0, 0.06);
+    }
+
+    .topic-item { padding:8px; margin-bottom:8px; }
+    .stat-card { padding:12px; text-align:center; border-radius: 14px; }
+    .hist-item { padding:10px; border-radius: 10px; }
+    .note-item { padding: 10px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; cursor: pointer; }
+    .subtopic-btn { flex:1; text-align:left; padding: 10px 14px; }
+    .subtopic-btn.active{ outline:2px solid var(--acc); background-color: rgba(108, 140, 255, 0.2); }
+    .subtopic-btn.active:hover { background-color: rgba(108, 140, 255, 0.25); }
+
+    input[type="text"], input[type="password"], input[type="number"], select, textarea {
+        background: rgba(0,0,0,0.2) !important; 
+        color: var(--text);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius:10px; padding:10px; outline:none;
+        transition: background .2s ease, border-color .2s ease;
+    }
+    input[type="text"]:focus, input[type="password"]:focus, input[type="number"]:focus, select:focus, textarea:focus {
+        background: rgba(0,0,0,0.3) !important; 
+        border-color: var(--acc);
+    }
+    [data-theme='light'] input, [data-theme='light'] select, [data-theme='light'] textarea,
+    [data-theme='pastel'] input, [data-theme='pastel'] select, [data-theme='pastel'] textarea {
+        background: rgba(0, 0, 0, 0.05) !important;
+        border-color: rgba(0, 0, 0, 0.1);
+    }
+    [data-theme='light'] input:focus, [data-theme='light'] select:focus, [data-theme='light'] textarea:focus,
+    [data-theme='pastel'] input:focus, [data-theme='pastel'] select:focus, [data-theme='pastel'] textarea:focus {
+        background: rgba(0, 0, 0, 0.07) !important;
+    }
+    ::placeholder { color: var(--sub); opacity: 0.7; }
+    /* ========================================================= */
+    /* END: SECONDARY PANELS STYLING                             */
+    /* ========================================================= */
+
+    /* === START: ĐỒNG BỘ GIAO DIỆN CÁC PANEL PHỤ (override) === */
+    .topic-item, .stat-card {
+        background: rgba(255, 255, 255, .04);
+        border: 1px solid rgba(255, 255, 255, .08);
+    }
+    .hist-item {
+        background: rgba(255, 255, 255, .03);
+        border: 1px solid rgba(255, 255, 255, .08);
+    }
+    .subtopic-btn {
+        background-color: transparent;
+    }
+
+    /* Áp dụng nền và viền riêng cho theme sáng để dễ nhìn hơn */
+    [data-theme='light'] .topic-item,
+    [data-theme='light'] .stat-card,
+    [data-theme='light'] .hist-item,
+    [data-theme='pastel'] .topic-item,
+    [data-theme='pastel'] .stat-card,
+    [data-theme='pastel'] .hist-item {
+        background: rgba(0, 0, 0, 0.02);
+        border: 1px solid rgba(0, 0, 0, 0.06);
+    }
+    /* === END: ĐỒNG BỘ GIAO DIỆN CÁC PANEL PHỤ (override) === */
+
     .topic-header, .sub-row { display:flex; align-items:center; gap:8px; position: relative; }
     .topic-title { flex:1; font-weight:600; }
     .chev { width:28px; height:28px; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; flex-shrink: 0; }
@@ -203,38 +253,18 @@
     .chev[aria-expanded="false"] .ico { transform: rotate(-90deg); }
     .subtopics { margin-top:8px; display:flex; flex-direction:column; gap:6px; }
     .subtopics.hidden { display:none; }
-    
     .topic-actions, .sub-row .actions {
-        opacity: 0;
-        visibility: hidden;
+        opacity: 0; visibility: hidden;
         transition: opacity .2s ease, visibility .2s ease;
-        display: flex;
-        gap: 6px;
-        align-items: center;
+        display: flex; gap: 6px; align-items: center;
     }
-    .topic-item:hover .topic-actions, .sub-row:hover .actions {
-        opacity: 1;
-        visibility: visible;
-    }
-    .actions-menu-btn {
-        padding: 0;
-        width: 28px;
-        height: 28px;
-        font-size: 1.2em;
-        line-height: 1;
-    }
+    .topic-item:hover .topic-actions, .sub-row:hover .actions { opacity: 1; visibility: visible; }
+    .actions-menu-btn { padding: 0; width: 28px; height: 28px; font-size: 1.2em; line-height: 1; }
     .actions-menu {
-        position: absolute;
-        top: 100%;
-        right: 0;
-        border-radius: 8px;
-        padding: 6px;
-        box-shadow: var(--shadow);
-        z-index: 10;
-        min-width: 150px;
-        display: none;
-        flex-direction: column;
-        gap: 4px;
+        position: absolute; top: 100%; right: 0;
+        border-radius: 8px; padding: 6px; box-shadow: var(--shadow);
+        z-index: 10; min-width: 150px; display: none;
+        flex-direction: column; gap: 4px;
     }
     .actions-menu.show { display: flex; }
     .menu-item {
@@ -245,81 +275,46 @@
     }
     .menu-item:hover { background: var(--acc); color: white; }
     .menu-item.danger:hover { background: var(--danger); }
-    /* === END: Cáº¬P NHáº¬T GIAO DIá»†N QUáº¢N LÃ CHá»¦ Äá»€ === */
-
-    .subtopic-btn{
-        flex:1; 
-        text-align:left;
-        background-color: rgba(0,0,0,0.02); /* Sá»­a Ä‘á»•i */
-    }
-    .subtopic-btn:hover {
-        background-color: var(--muted); /* Sá»­a Ä‘á»•i */
-    }
-    .subtopic-btn.active{
-        outline:2px solid var(--acc); 
-    }
-    .subtopic-btn.active:hover {
-        background: transparent; /* Giá»¯ ná»n trong suá»‘t khi di chuá»™t qua */
-    }
     
     .panel{border-radius:var(--radius); padding:24px; box-shadow:var(--shadow)}
 
     .timer-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
-    .timer{display:grid; gap:16px; grid-template-columns: 1fr; align-items:center; text-align:center}
-    .big-time{font-size: clamp(60px, 12vw, 96px); letter-spacing:1px; font-weight:700; color: var(--text)}
+    .timer{display:grid; gap:16px; align-items:center; text-align:center}
+    .big-time{font-size: clamp(60px, 12vw, 96px); letter-spacing:1px; font-weight:700;}
     .state{font-weight:700; letter-spacing:.6px}
-    .state.work{color:var(--acc-2)} /* Sá»­a Ä‘á»•i mÃ u */
+    .state.work{color:var(--acc-2)}
     .state.break{color:var(--warn)}
-    .state.long{color:var(--danger)} /* Sá»­a Ä‘á»•i mÃ u */
+    .state.long{color:var(--danger)}
     .controls{display:flex; flex-wrap:wrap; gap:12px; justify-content:center}    
     #btnStart { padding: 14px 28px; font-size: 1.2em; }
-    #btnPause, #btnResume { padding: 12px 24px; font-size: 1.1em; }
-
-    /* === START: TÃ™Y CHá»ˆNH Dáº¢I PHÃ‚N CÃCH Má»€M Máº I HÆ N === */
-    #view-timer .panel-bg hr {
-        border: none; /* Bá» Ä‘Æ°á»ng viá»n máº·c Ä‘á»‹nh */
-        height: 1px;  /* Äáº·t chiá»u cao cho Ä‘Æ°á»ng káº» */
-        background-color: var(--muted); /* Sá»­ dá»¥ng mÃ u phá»¥ cá»§a theme */
-        opacity: 0.3; /* LÃ m cho nÃ³ má» Ä‘i, hÃ²a vÃ o ná»n */
-        margin-top: 0; /* Äiá»u chá»‰nh láº¡i khoáº£ng cÃ¡ch */
+    hr {
+        border: none; height: 1px;
+        background-color: var(--muted);
+        opacity: 0.3; margin-top: 0;
     }
-    /* === END: TÃ™Y CHá»ˆNH Dáº¢I PHÃ‚N CÃCH Má»€M Máº I HÆ N === */
-
+    
     .stats-grid{display:grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap:12px}
-    .stat-card{background:rgba(255,255,255,0.04); border:1px solid var(--muted); border-radius:14px; padding:12px; text-align:center} /* Sá»­a Ä‘á»•i */
     .stat-card h4{margin:4px 0 8px; color:var(--sub); font-weight:600; font-size: 14px;}
     .stat-value{font-size: 20px; font-weight: 600;}
     .tiny{font-size:12px; color:var(--sub)}
     .history{display:grid; gap:8px; max-height:300px; overflow:auto; padding-right:6px}
-    .hist-item{display:grid; grid-template-columns: 1fr auto; gap:10px; align-items:start; background:rgba(255,255,255,0.04); border:1px solid var(--muted); border-radius:10px; padding:10px} /* Sá»­a Ä‘á»•i */
+    .hist-item{display:grid; grid-template-columns: 1fr auto; gap:10px; align-items:start;}
 
     .row{display:flex; gap:8px; align-items:center}
     .row > * {flex:1}
-    input[type="text"], input[type="password"], input[type="number"], select, textarea{width:100%; background:rgba(255,255,255,0.04); color:var(--text); border:1px solid var(--muted); border-radius:10px; padding:10px; outline:none}
     textarea{min-height:80px; resize: vertical;}
 
     .toasts{position:fixed; right:16px; bottom:16px; display:flex; flex-direction:column; gap:8px; z-index:9999}
-    .toast{
-        background: var(--panel); /* Sá»­a Ä‘á»•i */
-        border:1px solid var(--muted);
-        color:var(--text);
-        padding:10px 12px; border-radius:12px; box-shadow:var(--shadow);
-        animation: toast-in .3s ease; transform-origin: bottom right;
-    }
+    .toast{padding:10px 12px; border-radius:12px; box-shadow:var(--shadow); animation: toast-in .3s ease; transform-origin: bottom right;}
     @keyframes toast-in { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
 
-    .modal{position:fixed; inset:0; display:none; align-items:center; justify-content:center; background: rgba(0,0,0,var(--panel-opacity)); z-index:1000; backdrop-filter: blur(5px);} /* Sá»­a Ä‘á»•i: Ä‘á»“ng bá»™ vá»›i file 1.html vÃ  thÃªm blur */
+    .modal{position:fixed; inset:0; display:none; align-items:center; justify-content:center; background: rgba(0,0,0,var(--panel-opacity)); z-index:1000; backdrop-filter: blur(5px);}
     .modal.show{display:flex}
     .modal-card{
         width:min(720px, 94vw);
-        border-radius:16px;
-        padding:16px;
-        box-shadow:var(--shadow);
-        animation: modal-in .25s ease-out;
-        max-height: 90vh;
-        overflow-y: auto;
-        display: flex;
-        flex-direction: column;
+        border-radius:16px; padding:16px; box-shadow:var(--shadow);
+        animation: modal-in .25s ease-out; max-height: 90vh;
+        overflow-y: auto; display: flex; flex-direction: column;
     }
     @keyframes modal-in { from { opacity: 0; transform: scale(0.92) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
     .modal-card h3{margin-top:0}
@@ -327,100 +322,40 @@
     .dashboard-table th, .dashboard-table td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--muted); }
     .dashboard-table th { color: var(--sub); }
 
-    .footer-note{font-size:12px; color:var(--sub)}
-    .hidden{display:none !important}
-
     .notes-list { display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto; padding-right: 6px; }
-    .note-item { background: rgba(255,255,255,0.04); border-radius: 10px; padding: 10px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; cursor: pointer; } /* Sá»­a Ä‘á»•i */
     .note-content-wrapper { flex: 1; min-width: 0; }
     .note-content { white-space: pre-wrap; word-break: break-word; max-height: 60px; overflow: hidden; position: relative; transition: max-height 0.35s ease-in-out; }
     .note-content:not(.expanded)::after {
-        content: ''; position: absolute; bottom: 0; right: 0; width: 100%; height: 20px; background: linear-gradient(to top, var(--panel) 20%, transparent);
+        content: ''; position: absolute; bottom: 0; right: 0; width: 100%; height: 20px; 
+        background: linear-gradient(to top, rgba(var(--panel-rgb), 1) 20%, transparent);
     }
     .note-content.expanded { max-height: 500px; }
     .note-meta { font-size: 11px; color: var(--sub); margin-top: 4px; }
     
-    .spinner { border: 2px solid var(--muted); border-top-color: var(--text); border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; } /* Sá»­a Ä‘á»•i */
+    .spinner { border: 2px solid var(--muted); border-top-color: var(--text); border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
     .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .panel-header h3 { margin: 0; }
-    .panel-header .actions { display: flex; gap: 8px; }
     
-    .aux-panel { margin-top: 24px; }
     .tab-nav { display: flex; gap: 4px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 16px; }
     .tab-btn { background: transparent; border: none; color: var(--sub); padding: 8px 16px; cursor: pointer; border-bottom: 2px solid transparent; transition: all .2s ease; font-weight: 600; }
     .tab-btn:hover { color: var(--text); }
     .tab-btn.active { color: var(--acc); border-bottom-color: var(--acc); }
-    .tab-content {
-      display: none;
-      padding-top: 8px;
-    }
-    .tab-content.active {
-      animation: fadeIn 0.25s ease-out;
-    }
-    #tasks.tab-content.active,
-    #notes.tab-content.active,
-    #ai.tab-content.active {
-        display: block;
-    }
+    .tab-content { display: none; padding-top: 8px; }
+    .tab-content.active { animation: fadeIn 0.25s ease-out; }
+    #tasks.tab-content.active, #notes.tab-content.active, #ai.tab-content.active { display: block; }
+    #settings-timer.tab-content.active, #settings-ui.tab-content.active, #settings-integrations.tab-content.active { display: flex; }
+    [data-theme='light'] .tab-nav, [data-theme='pastel'] .tab-nav { border-bottom-color: rgba(0, 0, 0, 0.1); }
 
-    #settings-timer.tab-content.active,
-    #settings-ui.tab-content.active,
-    #settings-integrations.tab-content.active {
-        display: flex;
-    }
-
-    .settings-row-toggle {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 16px;
-    }
-    .settings-row-toggle span {
-      flex: 1;
-      cursor: pointer;
-    }
-    .toggle-switch {
-      position: relative;
-      display: inline-block;
-      width: 44px;
-      height: 24px;
-      flex-shrink: 0;
-    }
-    .toggle-switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-    .toggle-switch .slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: var(--muted);
-      transition: .3s;
-      border-radius: 24px;
-    }
-    .toggle-switch .slider:before {
-      position: absolute;
-      content: "";
-      height: 18px;
-      width: 18px;
-      left: 3px;
-      bottom: 3px;
-      background-color: white;
-      transition: .3s;
-      border-radius: 50%;
-    }
-    .toggle-switch input:checked + .slider {
-      background-color: var(--acc-2);
-    }
-    .toggle-switch input:checked + .slider:before {
-      transform: translateX(20px);
-    }
+    .settings-row-toggle { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; }
+    .settings-row-toggle span { flex: 1; cursor: pointer; }
+    .toggle-switch { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-switch .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--muted); transition: .3s; border-radius: 24px; }
+    .toggle-switch .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+    .toggle-switch input:checked + .slider { background-color: var(--acc-2); }
+    .toggle-switch input:checked + .slider:before { transform: translateX(20px); }
     
     .chat-messages { max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; padding: 4px; }
     .chat-msg { padding: 8px 12px; border-radius: 12px; max-width: 85%; word-break: break-word; }
@@ -428,145 +363,47 @@
     .chat-msg.model { background: var(--muted); align-self: flex-start; border-bottom-left-radius: 4px; }
     .chat-input-area { display: flex; gap: 8px; }
 
-    .methods-list { list-style: none; padding: 0; }
-    .method-item { align-items: flex-start; padding: 12px; display: flex; gap: 10px; border-radius: 8px; }
-    .method-item:hover { background: rgba(0,0,0,0.03); } /* Sá»­a Ä‘á»•i */
-    .method-item input[type="checkbox"] { width: 18px; height: 18px; margin-top: 2px; flex-shrink: 0;}
-    .method-item label { flex: 1; }
-    .method-item label.completed { text-decoration: line-through; color: var(--sub); }
-    .method-item .content-wrapper { flex: 1; cursor: pointer; }
-    .method-item .concept { font-size: 14px; color: var(--sub); margin-top: 8px; border-left: 2px solid var(--muted); padding-left: 12px; white-space: pre-wrap; word-break: break-word; }
     .subtopic-todo-list { list-style: none; padding: 0; margin: 0; max-height: 100px; overflow-y: auto; text-align: left; }
     .subtopic-todo-list li { display: flex; align-items: center; gap: 8px; padding: 4px; transition: all 0.2s ease-out; }
     .subtopic-todo-list li.removing { transform: translateX(100%); opacity: 0; }
-    .subtopic-todo-list label { flex: 1; }
-
+    
     #youtube-player-container { position: absolute; top: -9999px; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 
-    ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.1); border-radius: 10px; } /* Sá»­a Ä‘á»•i */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.1); border-radius: 10px; }
     ::-webkit-scrollbar-thumb { background: var(--muted); border-radius: 10px; border: 2px solid transparent; background-clip: content-box; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--sub); background-clip: content-box; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--sub); }
     
     .timer-circle-container {
-        position: relative; width: clamp(250px, 40vw, 320px); height: clamp(250px, 40vw, 320px); margin: 24px auto; display: flex; align-items: center; justify-content: center;
+        position: relative; width: clamp(250px, 40vw, 320px); height: clamp(250px, 40vw, 320px); 
+        margin: 24px auto; display: flex; align-items: center; justify-content: center;
     }
     .timer-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
     .timer-circle-bg, .timer-circle-progress { fill: none; stroke-width: 8; }
-    .timer-circle-bg { stroke: var(--muted); } /* Sá»­a Ä‘á»•i */
+    .timer-circle-bg { stroke: var(--muted); }
     .timer-circle-progress { stroke: var(--acc); stroke-linecap: round; transition: stroke-dashoffset 0.3s linear, stroke 0.5s ease; }
-    @keyframes flash { 0%, 100% { box-shadow: 0 0 10px 2px transparent; } 50% { box-shadow: 0 0 20px 8px currentColor; } }
-    .timer-circle-container.finished { color: var(--acc-2); animation: flash 1s ease-out; }
-    @keyframes breathing-effect { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
     .timer-circle-container.breathing { animation: breathing-effect 3s ease-in-out infinite; }
-    
-    @media (max-width: 1024px) {
-      .app-content { padding: 20px; }
-      .panel { padding: 20px; }
-      .timer-circle-container { width: clamp(220px, 50vw, 300px); height: clamp(220px, 50vw, 300px); }
-    }
-
-    @media (max-width: 768px) {
-      .app { flex-direction: column; }
-      .app-nav { width: 100%; height: 60px; flex-direction: row; justify-content: center; border-right: none; border-top: 1px solid rgba(255,255,255,.08); order: 2; padding: 0 16px; }
-      .app-content { padding: 16px; order: 1; }
-      .panel { padding: 16px; }
-      .modal-card .tab-nav { overflow-x: auto; }
-    }
-
-    @media (max-width: 480px) {
-      .app-nav { height: 50px; }
-      .nav-btn { flex: 1; }
-      header.app-header { flex-direction: column; align-items: stretch; gap: 8px; }
-      .btn { padding: 8px 12px; }
-      .timer-circle-container { width: clamp(180px, 80vw, 220px); height: clamp(180px, 80vw, 220px); margin: 16px auto; }
-      .panel { padding: 12px; }
-      .app-content { padding: 12px; }
-    }
-
-    #view-timer.no-subtopic-selected > .panel-bg:not(:first-child) { display: none; }
-    #view-timer.no-subtopic-selected .timer-header > .presets { display: none; }
-    #view-timer.no-subtopic-selected .timer { display: none; }
-
-    header.app-header .actions #btnFullscreen { background: transparent; border: none; box-shadow: none; }
-    header.app-header .actions #btnFullscreen:hover { background: var(--muted); filter: none; }
-    header.app-header .actions #btnFullscreen:hover::before { opacity: 0; }
-
-    input[type="text"], input[type="password"], input[type="number"], select, textarea {
-        background: rgba(255,255,255,0.04) !important; /* Sá»­a Ä‘á»•i: chuyá»ƒn sang ná»n tráº¯ng trong suá»‘t */
-        color: var(--text);
-        border: 1px solid rgba(255, 255, 255, 0.1); /* Viá»n tráº¯ng má» */
-        transition: background .2s ease, border-color .2s ease;
-    }
-    input[type="text"]:focus, input[type="password"]:focus, input[type="number"]:focus, select:focus, textarea:focus {
-        background: rgba(255,255,255,0.06) !important; /* Tinh chá»‰nh: sÃ¡t máº«u hÆ¡n */
-        border-color: var(--acc);
-    }
-    /* === START: Sá»¬A Lá»–I Ná»€N INPUT/SELECT TRÃŠN THEME SÃNG === */
-    [data-theme='light'] input, [data-theme='light'] select, [data-theme='light'] textarea,
-    [data-theme='pastel'] input, [data-theme='pastel'] select, [data-theme='pastel'] textarea {
-        background: rgba(0, 0, 0, 0.05) !important; /* DÃ¹ng ná»n Ä‘en má» thay vÃ¬ tráº¯ng má» */
-        border-color: rgba(0, 0, 0, 0.1); /* Viá»n Ä‘en má» trÃªn theme sÃ¡ng */
-    }
-
-    [data-theme='light'] input:focus, [data-theme='light'] select:focus, [data-theme='light'] textarea:focus,
-    [data-theme='pastel'] input:focus, [data-theme='pastel'] select:focus, [data-theme='pastel'] textarea:focus {
-        background: rgba(0, 0, 0, 0.07) !important; /* TÄƒng Ä‘á»™ Ä‘áº­m khi focus */
-    }
-    /* === END: Sá»¬A Lá»–I Ná»€N INPUT/SELECT TRÃŠN THEME SÃNG === */
-    
-    ::placeholder { color: var(--sub); opacity: 0.7; } /* Sá»­a Ä‘á»•i */
-    ::-ms-input-placeholder { color: var(--sub); }
-    :-ms-input-placeholder { color: var(--sub); }
-
-    
+    @keyframes breathing-effect { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
     
     .draggable-timer {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        color: var(--text);
-        padding: 8px 16px;
-        border-radius: 12px;
-        box-shadow: var(--shadow);
-        font-size: 2em;
-        font-weight: 600;
-        cursor: move;
-        user-select: none;
-        z-index: 9998;
-        opacity: 0;
-        transform: scale(0.9);
-        pointer-events: none;
+        position: fixed; bottom: 20px; right: 20px;
+        padding: 8px 16px; font-size: 2em; font-weight: 600;
+        cursor: move; user-select: none; z-index: 9998;
+        opacity: 0; transform: scale(0.9); pointer-events: none;
         transition: opacity 0.35s ease, transform 0.35s ease;
+        text-shadow: 0px 0px 8px rgba(0, 0, 0, 0.9);
     }
-    body.bg-view-mode .draggable-timer {
-        opacity: 1;
-        transform: scale(1);
-        pointer-events: auto;
-    }
+    body.bg-view-mode .draggable-timer { opacity: 1; transform: scale(1); pointer-events: auto; }
+    
     .app-nav, .panel-bg, .app-header .actions > *, .app-header > .row {
         transition: opacity 0.35s ease, transform 0.35s ease, background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
     }
     body.bg-view-mode .app-nav,
-    body.bg-view-mode .view.active > .panel-bg {
-        opacity: 0;
-        pointer-events: none;
-        transform: scale(0.98);
-    }
-    body.bg-view-mode .app-header {
-        background: transparent !important;
-        border-color: transparent !important;
-        box-shadow: none !important;
-    }
+    body.bg-view-mode .view.active > .panel-bg { opacity: 0; pointer-events: none; transform: scale(0.98); }
+    body.bg-view-mode .app-header { background: transparent !important; border-color: transparent !important; box-shadow: none !important; }
     body.bg-view-mode .app-header .actions > *:not(#btnToggleBg),
-    body.bg-view-mode .app-header > .row {
-        opacity: 0;
-        pointer-events: none;
-    }
-    body.bg-view-mode #btnToggleBg {
-        opacity: 1;
-        pointer-events: auto;
-    }
+    body.bg-view-mode .app-header > .row { opacity: 0; pointer-events: none; }
+    
     .sound-permission-bar {
       position: fixed; left: 50%; transform: translateX(-50%);
       bottom: 48px; z-index: 9999;
@@ -575,109 +412,66 @@
       box-shadow: var(--shadow);
     }
     .sound-permission-bar.show { display: flex; }
-    .sound-permission-bar .msg { font-size: 14px; color: var(--text); }
-    .draggable-timer { text-shadow: 0px 0px 8px rgba(0, 0, 0, 0.9); }
 
-    /* Giáº£m/loáº¡i bá» bÃ³ng chá»¯ cho theme sÃ¡ng Ä‘á»ƒ trÃ¡nh nhÃ²e/lÃ³a */
-    body[data-theme='light'],
-    body[data-theme='pastel'] { text-shadow: none; }
-    body[data-theme='light'] .draggable-timer,
-    body[data-theme='pastel'] .draggable-timer { text-shadow: none; }
-
-    /* ============================================= */
-/* ========================================================= */
-/* START: THIẾT LẬP PANEL KIỂU MỜ ĐỤC (FROSTED GLASS)        */
-/* ========================================================= */
-
-/* --- 1. Áp dụng hiệu ứng nền mờ chung cho tất cả các panel --- */
-.app-nav,
-.panel-bg,
-.modal-card,
-.actions-menu,
-.nav-btn .tooltip,
-.draggable-timer, 
-.sound-permission-bar,
-.toast,
-.topic-item,
-.stat-card,
-.hist-item,
-.method-item {
-    background: rgba(var(--panel-rgb), var(--panel-opacity));
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    .methods-container { display: flex; flex-direction: column; gap: 12px; }
+    .method-item { border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; transition: all 0.2s ease-in-out; }
+    .method-item[open] { border: 2px solid var(--acc); }
+    .method-item summary { font-size: 1.1em; font-weight: 600; padding: 16px; cursor: pointer; }
+    .method-item summary:hover { background-color: rgba(255, 255, 255, 0.04); }
+    .method-item[open] summary { border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+    .method-content { padding: 0px 16px 16px 16px; line-height: 1.7; animation: fadeIn .3s ease; }
+    .method-content h4 { margin-top: 20px; margin-bottom: 8px; color: var(--acc-2); }
+    [data-theme='light'] .method-item, [data-theme='pastel'] .method-item { border-color: rgba(0, 0, 0, 0.1); }
+    [data-theme='light'] .method-item summary:hover, [data-theme='pastel'] .method-item summary:hover { background-color: rgba(0, 0, 0, 0.03); }
+    
+    @media (max-width: 768px) {
+      .app { flex-direction: column; }
+      .app-nav { width: 100%; height: 60px; flex-direction: row; justify-content: center; border-right: none; border-top: 1px solid rgba(255,255,255,.08); order: 2; padding: 0 16px; }
+      .app-content { padding: 16px; order: 1; }
+    }
+/* === BỔ SUNG CSS CHO GIAO DIỆN CÀI ĐẶT MỚI === */
+.settings-group {
+  width: 100%;
+  margin-bottom: 28px;
 }
-
-/* --- 2. Định nghĩa viền cho từng loại panel --- */
-.app-nav {
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
+.settings-group h4 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  color: var(--sub);
+  font-weight: 600;
+  border-bottom: 1px solid var(--muted);
+  padding-bottom: 8px;
+  opacity: 0.7;
 }
-.panel-bg,
-.modal-card,
-.actions-menu,
-.nav-btn .tooltip,
-.draggable-timer, 
-.sound-permission-bar,
-.toast,
-.topic-item,
-.stat-card,
-.hist-item,
-.method-item {
-    border: 1px solid rgba(255, 255, 255, 0.1);
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr); /* Tạo lưới 6 cột */
+  gap: 16px;
+  align-items: center;
 }
-
-/* --- 3. Tinh chỉnh viền cho các theme SÁNG (Light/Pastel) --- */
-[data-theme='light'] .app-nav,
-[data-theme='light'] .panel-bg,
-[data-theme='light'] .modal-card,
-[data-theme='light'] .actions-menu,
-[data-theme='light'] .nav-btn .tooltip,
-[data-theme='light'] .draggable-timer,
-[data-theme='light'] .sound-permission-bar,
-[data-theme='light'] .toast,
-[data-theme='light'] .topic-item,
-[data-theme='light'] .stat-card,
-[data-theme='light'] .hist-item,
-[data-theme='light'] .method-item,
-[data-theme='pastel'] .app-nav,
-[data-theme='pastel'] .panel-bg,
-[data-theme='pastel'] .modal-card,
-[data-theme='pastel'] .actions-menu,
-[data-theme='pastel'] .nav-btn .tooltip,
-[data-theme='pastel'] .draggable-timer,
-[data-theme='pastel'] .sound-permission-bar,
-[data-theme='pastel'] .toast,
-[data-theme='pastel'] .topic-item,
-[data-theme='pastel'] .stat-card,
-[data-theme='pastel'] .hist-item,
-[data-theme='pastel'] .method-item {
-    border-color: rgba(0, 0, 0, 0.1);
+.settings-grid .col-span-2 { grid-column: span 2; }
+.settings-grid .col-span-3 { grid-column: span 3; }
+.settings-grid .col-span-4 { grid-column: span 4; }
+.settings-grid .col-span-6 { grid-column: span 6; }
+.settings-grid label, .settings-grid .label-text {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 14px;
+  font-weight: 500;
 }
-
-/* --- 4. Sửa lại hiệu ứng fade-out của ghi chú cho phù hợp --- */
-.note-content:not(.expanded)::after {
-    background: linear-gradient(to top, rgba(var(--panel-rgb), 1) 20%, transparent);
+.settings-grid input, .settings-grid select {
+  width: 100%;
 }
-
-/* --- Các quy tắc còn lại giữ nguyên từ file gốc --- */
-[data-theme='light'] .tab-nav,
-[data-theme='pastel'] .tab-nav {
-    border-bottom-color: rgba(0, 0, 0, 0.1);
+.settings-toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0,0,0,0.1);
+  padding: 10px;
+  border-radius: 10px;
 }
-.subtopic-btn {
-    background-color: transparent;
-}
-.subtopic-btn:hover {
-    background-color: var(--muted);
-}
-.method-item[open] summary {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-[data-theme='light'] .method-item[open] summary,
-[data-theme='pastel'] .method-item[open] summary {
-    border-bottom-color: rgba(0, 0, 0, 0.1);
-}
-
-    </style>
+/* === KẾT THÚC BỔ SUNG CSS === */
+</style>
 </head>
 <body data-theme="default"> <div class="app" id="app">
     <nav class="app-nav">
@@ -721,7 +515,7 @@
           <button class="btn small" id="btnToggleBg" title="Ẩn/Hiện giao diện">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
           </button>
-          <button class="btn small" id="btnFullscreen" title="Toàn màn hình">⟰</button>
+          <button class="btn small" id="btnFullscreen" title="Toàn màn hình">↗️</button>
         </div>
       </header>
       
@@ -859,72 +653,72 @@
                 </details>
 
                 <details class="method-item">
-                    <summary>PhÆ°Æ¡ng PhÃ¡p Viáº¿t cá»§a Benjamin Franklin: Há»c Viáº¿t Báº±ng CÃ¡ch TÃ¡i Táº¡o</summary>
+                    <summary>Phương Pháp Viết của Benjamin Franklin: Học Viết Bằng Cách Tái Tạo</summary>
                     <div class="method-content">
-                        <p>Benjamin Franklin Ä‘Ã£ tá»± rÃ¨n luyá»‡n ká»¹ nÄƒng viáº¿t tá»« kÃ©m cá»i trá»Ÿ nÃªn báº­c tháº§y báº±ng má»™t phÆ°Æ¡ng phÃ¡p chá»§ Ä‘á»™ng, thay vÃ¬ chá»‰ Ä‘á»c má»™t cÃ¡ch thá»¥ Ä‘á»™ng. Cá»‘t lÃµi cá»§a phÆ°Æ¡ng phÃ¡p nÃ y lÃ  phÃ¢n tÃ­ch, tÃ¡i táº¡o, vÃ  so sÃ¡nh vá»›i má»™t bÃ i viáº¿t cháº¥t lÆ°á»£ng cao.</p>
-                        <p>ÄÃ¢y lÃ  má»™t vÃ­ dá»¥ kinh Ä‘iá»ƒn cá»§a "Luyá»‡n táº­p cÃ³ Chá»§ Ä‘Ã­ch": táº­p trung vÃ o Ä‘iá»ƒm yáº¿u, cÃ³ má»¥c tiÃªu rÃµ rÃ ng vÃ  nháº­n pháº£n há»“i ngay láº­p tá»©c.</p>
-                        <h4>Quy TrÃ¬nh 3 BÆ°á»›c Cá»‘t LÃµi</h4>
+                        <p>Benjamin Franklin đã tự rèn luyện kỹ năng viết từ kém cỏi trở nên bậc thầy bằng một phương pháp chủ động, thay vì chỉ đọc một cách thụ động. Cốt lõi của phương pháp này là phân tích, tái tạo, và so sánh với một bài viết chất lượng cao.</p>
+                        <p>Đây là một ví dụ kinh điển của "Luyện tập có Chủ đích": tập trung vào điểm yếu, có mục tiêu rõ ràng và nhận phản hồi ngay lập tức.</p>
+                        <h4>Quy Trình 3 Bước Cốt Lõi</h4>
                         <ol>
-                            <li><strong>PhÃ¢n TÃ­ch (Deconstruct):</strong> Äá»c má»™t bÃ i viáº¿t máº«u xuáº¥t sáº¯c. Sau Ä‘Ã³, chá»‰ ghi láº¡i nhá»¯ng Ã½ chÃ­nh cá»§a tá»«ng Ä‘oáº¡n hoáº·c tá»«ng cÃ¢u ra má»™t tá» giáº¥y riÃªng.</li>
-                            <li><strong>TÃ¡i Táº¡o (Reconstruct):</strong> VÃ i ngÃ y sau, khi Ä‘Ã£ quÃªn Ä‘i vÄƒn phong cá»§a báº£n gá»‘c, hÃ£y dÃ¹ng nhá»¯ng ghi chÃº Ã½ chÃ­nh Ä‘Ã³ Ä‘á»ƒ viáº¿t láº¡i toÃ n bá»™ bÃ i viáº¿t báº±ng ngÃ´n ngá»¯ vÃ  cÃ¡ch diá»…n Ä‘áº¡t cá»§a chÃ­nh báº¡n.</li>
-                            <li><strong>So SÃ¡nh & Sá»­a Lá»—i (Compare & Correct):</strong> Äá»‘i chiáº¿u trá»±c tiáº¿p bÃ i viáº¿t cá»§a báº¡n vá»›i báº£n gá»‘c. ÄÃ¢y lÃ  bÆ°á»›c quan trá»ng nháº¥t. NÃ³ giÃºp báº¡n phÃ¡t hiá»‡n ngay láº­p tá»©c nhá»¯ng lá»—i sai vá» tá»« vá»±ng, cáº¥u trÃºc cÃ¢u, vÃ  cÃ¡ch sáº¯p xáº¿p Ã½ tÆ°á»Ÿng Ä‘á»ƒ sá»­a chá»¯a.</li>
+                            <li><strong>Phân Tích (Deconstruct):</strong> Đọc một bài viết mẫu xuất sắc. Sau đó, chỉ ghi lại những ý chính của từng đoạn hoặc từng câu ra một tờ giấy riêng.</li>
+                            <li><strong>Tái Tạo (Reconstruct):</strong> Vài ngày sau, khi đã quên đi văn phong của bản gốc, hãy dùng những ghi chú ý chính đó để viết lại toàn bộ bài viết bằng ngôn ngữ và cách diễn đạt của chính bạn.</li>
+                            <li><strong>So Sánh & Sửa Lỗi (Compare & Correct):</strong> Đối chiếu trực tiếp bài viết của bạn với bản gốc. Đây là bước quan trọng nhất. Nó giúp bạn phát hiện ngay lập tức những lỗi sai về từ vựng, cấu trúc câu, và cách sắp xếp ý tưởng để sửa chữa.</li>
                         </ol>
-                        <p>Franklin cÃ²n thá»±c hÃ nh cÃ¡c biáº¿n thá»ƒ nÃ¢ng cao nhÆ° xÃ¡o trá»™n thá»© tá»± cÃ¡c Ã½ chÃ­nh Ä‘á»ƒ rÃ¨n luyá»‡n tÆ° duy logic, hoáº·c chuyá»ƒn vÄƒn xuÃ´i thÃ nh thÆ¡ Ä‘á»ƒ lÃ m giÃ u vá»‘n tá»«.</p>
-                        <h4>NguyÃªn Táº¯c VÃ ng</h4>
-                        <p>ThÃ nh cÃ´ng cá»§a phÆ°Æ¡ng phÃ¡p nÃ y khÃ´ng Ä‘áº¿n tá»« viá»‡c láº·p láº¡i vÃ´ thá»©c, mÃ  Ä‘áº¿n tá»« vÃ²ng láº·p pháº£n há»“i trá»±c tiáº¿p. Viá»‡c so sÃ¡nh vá»›i báº£n gá»‘c buá»™c báº¡n pháº£i Ä‘á»‘i máº·t vÃ  sá»­a chá»¯a nhá»¯ng Ä‘iá»ƒm yáº¿u cá»¥ thá»ƒ cá»§a mÃ¬nh, biáº¿n viá»‡c há»c tá»« má»™t quÃ¡ trÃ¬nh mÆ¡ há»“ thÃ nh má»™t bÃ i táº­p cÃ³ thá»ƒ Ä‘o lÆ°á»ng Ä‘Æ°á»£c.</p>
-                        <p><i>Äá»ƒ viáº¿t giá»i hÆ¡n, Ä‘á»«ng chá»‰ Ä‘á»c. HÃ£y chá»n má»™t bÃ i viáº¿t hay, phÃ¢n tÃ­ch nÃ³, cá»‘ gáº¯ng viáº¿t láº¡i, vÃ  so sÃ¡nh Ä‘á»ƒ tÃ¬m ra lá»—i sai.</i></p>
+                        <p>Franklin còn thực hành các biến thể nâng cao như xáo trộn thứ tự các ý chính để rèn luyện tư duy logic, hoặc chuyển văn xuôi thành thơ để làm giàu vốn từ.</p>
+                        <h4>Nguyên Tắc Vàng</h4>
+                        <p>Thành công của phương pháp này không đến từ việc lặp lại vô thức, mà đến từ vòng lặp phản hồi trực tiếp. Việc so sánh với bản gốc buộc bạn phải đối mặt và sửa chữa những điểm yếu cụ thể của mình, biến việc học từ một quá trình mơ hồ thành một bài tập có thể đo lường được.</p>
+                        <p><i>Để viết giỏi hơn, đừng chỉ đọc. Hãy chọn một bài viết hay, phân tích nó, cố gắng viết lại, và so sánh để tìm ra lỗi sai.</i></p>
                     </div>
                 </details>
 
                 <details class="method-item">
-                    <summary>NguyÃªn Táº¯c 80/20 Äá»ƒ Chinh Phá»¥c LÄ©nh Vá»±c Má»›i</summary>
+                    <summary>Nguyên Tắc 80/20 Để Chinh Phục Lĩnh Vực Mới</summary>
                     <div class="method-content">
-                        <p>Äá»ƒ khÃ´ng bá»‹ choÃ¡ng ngá»£p khi há»c má»™t lÄ©nh vá»±c má»›i, hÃ£y táº­p trung vÃ o 20% kiáº¿n thá»©c cá»‘t lÃµi mang láº¡i 80% káº¿t quáº£ (Liá»u lÆ°á»£ng Hiá»‡u quáº£ Tá»‘i thiá»ƒu).</p>
-                        <h4>20% cá»‘t lÃµi: Ãp dá»¥ng Khung PhÃ¢n tÃ­ch 5 BÆ°á»›c Ä‘á»ƒ xÃ¡c Ä‘á»‹nh 20% quan trá»ng nháº¥t:</h4>
+                        <p>Để không bị choáng ngợp khi học một lĩnh vực mới, hãy tập trung vào 20% kiến thức cốt lõi mang lại 80% kết quả (Liều lượng Hiệu quả Tối thiểu).</p>
+                        <h4>20% cốt lõi: Áp dụng Khung Phân tích 5 Bước để xác định 20% quan trọng nhất:</h4>
                         <ol>
-                            <li><strong>XÃ¡c Ä‘á»‹nh Káº¿t quáº£:</strong> Má»¥c tiÃªu cuá»‘i cÃ¹ng cá»§a báº¡n lÃ  gÃ¬? (vÃ­ dá»¥: xÃ¢y dá»±ng Ä‘Æ°á»£c má»™t trang web).</li>
-                            <li><strong>PhÃ¢n tÃ­ch Ná»n táº£ng:</strong> TÃ¬m 3-5 nguyÃªn lÃ½ báº¥t biáº¿n cá»§a ngÃ nh.</li>
-                            <li><strong>Nháº­n diá»‡n Lá»—i sai Phá»• biáº¿n:</strong> Há»c cÃ¡ch trÃ¡nh nhá»¯ng lá»—i mÃ  ngÆ°á»i má»›i hay máº¯c pháº£i.</li>
-                            <li><strong>TÃ¬m "Yáº¿u tá»‘ NhÃ¢n":</strong> Ká»¹ nÄƒng nÃ o sáº½ giÃºp há»c má»i thá»© khÃ¡c dá»… dÃ ng hÆ¡n? (vÃ­ dá»¥: nháº¡c lÃ½ trong Ã¢m nháº¡c).</li>
-                            <li><strong>Láº­p báº£n Ä‘á»“ á»¨ng dá»¥ng Thá»±c tiá»…n:</strong> Táº­p trung vÃ o 20% cÃ´ng viá»‡c chiáº¿m 80% thá»i gian thá»±c táº¿ cá»§a ngÃ nh.</li>
+                            <li><strong>Xác định Kết quả:</strong> Mục tiêu cuối cùng của bạn là gì? (ví dụ: xây dựng được một trang web).</li>
+                            <li><strong>Phân tích Nền tảng:</strong> Tìm 3-5 nguyên lý bất biến của ngành.</li>
+                            <li><strong>Nhận diện Lỗi sai Phổ biến:</strong> Học cách tránh những lỗi mà người mới hay mắc phải.</li>
+                            <li><strong>Tìm "Yếu tố Nhân":</strong> Kỹ năng nào sẽ giúp học mọi thứ khác dễ dàng hơn? (ví dụ: nhạc lý trong âm nhạc).</li>
+                            <li><strong>Lập bản đồ Ứng dụng Thực tiễn:</strong> Tập trung vào 20% công việc chiếm 80% thời gian thực tế của ngành.</li>
                         </ol>
                     </div>
                 </details>
 
                 <details class="method-item">
-                    <summary>Gá»£i Nhá»› Chá»§ Äá»™ng (Active Recall): NguyÃªn Táº¯c Cá»‘t LÃµi Äá»ƒ Há»c SÃ¢u</summary>
+                    <summary>Gợi Nhớ Chủ Động (Active Recall): Nguyên Tắc Cốt Lõi Để Học Sâu</summary>
                     <div class="method-content">
-                        <p>Gá»£i nhá»› chá»§ Ä‘á»™ng lÃ  hÃ nh Ä‘á»™ng ná»— lá»±c truy xuáº¥t thÃ´ng tin tá»« nÃ£o bá»™ mÃ  khÃ´ng nhÃ¬n vÃ o tÃ i liá»‡u. ÄÃ¢y lÃ  phÆ°Æ¡ng phÃ¡p há»c hiá»‡u quáº£ vÆ°á»£t trá»™i so vá»›i viá»‡c Ä‘á»c láº¡i, highlight hay tÃ³m táº¯t má»™t cÃ¡ch thá»¥ Ä‘á»™ng.</p>
-                        <h4>NguyÃªn Táº¯c 20/80</h4>
-                        <p><strong>20% Cá»‘t lÃµi:</strong> HÃ nh Ä‘á»™ng "váº¯t Ã³c" Ä‘á»ƒ nhá»› láº¡i thÃ´ng tin sáº½ cá»§ng cá»‘ cÃ¡c liÃªn káº¿t tháº§n kinh, giÃºp chuyá»ƒn kiáº¿n thá»©c vÃ o bá»™ nhá»› dÃ i háº¡n. Cáº£m giÃ¡c khÃ³ khÄƒn khi cá»‘ gáº¯ng nhá»› chÃ­nh lÃ  dáº¥u hiá»‡u cá»§a viá»‡c há»c táº­p hiá»‡u quáº£ Ä‘ang diá»…n ra.</p>
-                        <p><strong>80% Káº¿t quáº£:</strong> Báº¡n sáº½ ghi nhá»› kiáº¿n thá»©c sÃ¢u vÃ  lÃ¢u hÆ¡n, Ä‘á»“ng thá»i biáº¿t chÃ­nh xÃ¡c mÃ¬nh Ä‘ang yáº¿u á»Ÿ Ä‘Ã¢u.</p>
-                        <h4>CÃ¡c PhÆ°Æ¡ng PhÃ¡p Quan Trá»ng Nháº¥t</h4>
+                        <p>Gợi nhớ chủ động là hành động nỗ lực truy xuất thông tin từ não bộ mà không nhìn vào tài liệu. Đây là phương pháp học hiệu quả vượt trội so với việc đọc lại, highlight hay tóm tắt một cách thụ động.</p>
+                        <h4>Nguyên Tắc 20/80</h4>
+                        <p><strong>20% Cốt lõi:</strong> Hành động "vắt óc" để nhớ lại thông tin sẽ củng cố các liên kết thần kinh, giúp chuyển kiến thức vào bộ nhớ dài hạn. Cảm giác khó khăn khi cố gắng nhớ chính là dấu hiệu của việc học tập hiệu quả đang diễn ra.</p>
+                        <p><strong>80% Kết quả:</strong> Bạn sẽ ghi nhớ kiến thức sâu và lâu hơn, đồng thời biết chính xác mình đang yếu ở đâu.</p>
+                        <h4>Các Phương Pháp Quan Trọng Nhất</h4>
                         <ul>
-                            <li><strong>Tá»± Kiá»ƒm Tra (Self-testing):</strong> Thay vÃ¬ Ä‘á»c láº¡i ghi chÃº, hÃ£y che chÃºng Ä‘i vÃ  tá»± Ä‘áº·t cÃ¢u há»i cho mÃ¬nh. VÃ­ dá»¥: DÃ¹ng flashcards (tháº» ghi nhá»›) vÃ  luÃ´n tráº£ lá»i trÆ°á»›c khi láº­t xem Ä‘Ã¡p Ã¡n.</li>
-                            <li><strong>Ká»¹ thuáº­t "Blurting":</strong> Sau khi há»c má»™t chá»§ Ä‘á», hÃ£y Ä‘Ã³ng sÃ¡ch láº¡i vÃ  viáº¿t ra giáº¥y má»i thá»© báº¡n cÃ³ thá»ƒ nhá»›. Sau Ä‘Ã³, so sÃ¡nh vá»›i tÃ i liá»‡u gá»‘c Ä‘á»ƒ láº¥p Ä‘áº§y nhá»¯ng lá»— há»•ng kiáº¿n thá»©c.</li>
-                            <li><strong>Dáº¡y láº¡i cho ngÆ°á»i khÃ¡c:</strong> Giáº£i thÃ­ch má»™t khÃ¡i niá»‡m cho ngÆ°á»i khÃ¡c buá»™c báº¡n pháº£i truy xuáº¥t, Ä‘Æ¡n giáº£n hÃ³a vÃ  sáº¯p xáº¿p láº¡i thÃ´ng tin má»™t cÃ¡ch máº¡ch láº¡c.</li>
+                            <li><strong>Tự Kiểm Tra (Self-testing):</strong> Thay vì đọc lại ghi chú, hãy che chúng đi và tự đặt câu hỏi cho mình. Ví dụ: Dùng flashcards (thẻ ghi nhớ) và luôn trả lời trước khi lật xem đáp án.</li>
+                            <li><strong>Kỹ thuật "Blurting":</strong> Sau khi học một chủ đề, hãy đóng sách lại và viết ra giấy mọi thứ bạn có thể nhớ. Sau đó, so sánh với tài liệu gốc để lấp đầy những lỗ hổng kiến thức.</li>
+                            <li><strong>Dạy lại cho người khác:</strong> Giải thích một khái niệm cho người khác buộc bạn phải truy xuất, đơn giản hóa và sắp xếp lại thông tin một cách mạch lạc.</li>
                         </ul>
-                        <h4>Lá»£i Ãch VÆ°á»£t Trá»™i: PhÃ¡ Vá»¡ "áº¢o GiÃ¡c ThÃ nh Tháº¡o"</h4>
-                        <p>Sai láº§m lá»›n nháº¥t cá»§a viá»‡c há»c thá»¥ Ä‘á»™ng lÃ  nÃ³ táº¡o ra "áº£o giÃ¡c vá» sá»± thÃ nh tháº¡o" â€“ cáº£m giÃ¡c quen thuá»™c vá»›i tÃ i liá»‡u nhÆ°ng thá»±c cháº¥t khÃ´ng thá»ƒ nhá»› láº¡i hay giáº£i thÃ­ch Ä‘Æ°á»£c.</p>
-                        <p>Gá»£i nhá»› chá»§ Ä‘á»™ng Ä‘Ã³ng vai trÃ² nhÆ° má»™t cÃ´ng cá»¥ cháº©n Ä‘oÃ¡n. Má»—i láº§n báº¡n khÃ´ng thá»ƒ nhá»› ra Ä‘iá»u gÃ¬, báº¡n Ä‘Ã£ phÃ¡t hiá»‡n chÃ­nh xÃ¡c má»™t lá»— há»•ng kiáº¿n thá»©c. Äiá»u nÃ y cho phÃ©p báº¡n táº­p trung Ã´n táº­p vÃ o Ä‘Ãºng Ä‘iá»ƒm yáº¿u, thay vÃ¬ lÃ£ng phÃ­ thá»i gian xem láº¡i nhá»¯ng gÃ¬ Ä‘Ã£ biáº¿t.</p>
-                        <p><i>TÃ³m láº¡i: Äá»«ng chá»‰ Ä‘á»c láº¡i. HÃ£y dá»«ng láº¡i, che tÃ i liá»‡u Ä‘i, vÃ  tá»± há»i: "MÃ¬nh thá»±c sá»± nhá»› Ä‘Æ°á»£c gÃ¬?"</i></p>
+                        <h4>Lợi Ích Vượt Trội: Phá Vỡ "Ảo Giác Thành Thạo"</h4>
+                        <p>Sai lầm lớn nhất của việc học thụ động là nó tạo ra "ảo giác về sự thành thạo" – cảm giác quen thuộc với tài liệu nhưng thực chất không thể nhớ lại hay giải thích được.</p>
+                        <p>Gợi nhớ chủ động đóng vai trò như một công cụ chẩn đoán. Mỗi lần bạn không thể nhớ ra điều gì, bạn đã phát hiện chính xác một lỗ hổng kiến thức. Điều này cho phép bạn tập trung ôn tập vào đúng điểm yếu, thay vì lãng phí thời gian xem lại những gì đã biết.</p>
+                        <p><i>Tóm lại: Đừng chỉ đọc lại. Hãy dừng lại, che tài liệu đi, và tự hỏi: "Mình thực sự nhớ được gì?"</i></p>
                     </div>
                 </details>
 
                 <details class="method-item">
-                    <summary>Láº·p Láº¡i Ngáº¯t QuÃ£ng (Spaced Repetition): Há»c ÄÃºng Thá»i Äiá»ƒm</summary>
+                    <summary>Lặp Lại Ngắt Quãng (Spaced Repetition): Học Đúng Thời Điểm</summary>
                     <div class="method-content">
-                        <p>Náº¿u Gá»£i nhá»› chá»§ Ä‘á»™ng lÃ  vá» cÃ¡ch há»c, thÃ¬ Láº·p láº¡i ngáº¯t quÃ£ng lÃ  vá» thá»i Ä‘iá»ƒm há»c. ÄÃ¢y lÃ  má»™t há»‡ thá»‘ng lÃªn lá»‹ch Ã´n táº­p Ä‘á»ƒ Ä‘Æ°a thÃ´ng tin vÃ o trÃ­ nhá»› dÃ i háº¡n má»™t cÃ¡ch hiá»‡u quáº£ nháº¥t.</p>
-                        <h4>NguyÃªn Táº¯c Cá»‘t LÃµi: Chá»‘ng Láº¡i Sá»± LÃ£ng QuÃªn ðŸ§ </h4>
-                        <p>PhÆ°Æ¡ng phÃ¡p nÃ y dá»±a trÃªn "ÄÆ°á»ng cong LÃ£ng quÃªn", cho tháº¥y chÃºng ta quÃªn thÃ´ng tin nhanh nháº¥t ngay sau khi há»c. Láº·p láº¡i ngáº¯t quÃ£ng hoáº¡t Ä‘á»™ng báº±ng cÃ¡ch yÃªu cáº§u báº¡n Ã´n táº­p láº¡i má»™t thÃ´ng tin ngay trÆ°á»›c khi báº¡n sáº¯p quÃªn nÃ³.</p>
-                        <p>Má»—i láº§n Ã´n táº­p thÃ nh cÃ´ng sáº½ lÃ m cho khoáº£ng thá»i gian báº¡n nhá»› thÃ´ng tin Ä‘Ã³ dÃ i ra. Láº§n Ä‘áº§u báº¡n cÃ³ thá»ƒ quÃªn sau 1 ngÃ y, nhÆ°ng sau khi Ã´n táº­p, báº¡n sáº½ nhá»› Ä‘Æ°á»£c trong 3 ngÃ y, rá»“i 1 tuáº§n, 1 thÃ¡ng, vÃ  cá»© tháº¿ xa dáº§n.</p>
-                        <h4>CÃ´ng Cá»¥ Hiá»‡u Quáº£ Nháº¥t: Pháº§n Má»m SRS ðŸ“±</h4>
-                        <p>Thay vÃ¬ tá»± lÃªn lá»‹ch thá»§ cÃ´ng, cÃ¡ch hiá»‡u quáº£ nháº¥t lÃ  sá»­ dá»¥ng cÃ¡c pháº§n má»m Láº·p láº¡i ngáº¯t quÃ£ng (Spaced Repetition Software - SRS). Anki Ä‘Æ°á»£c xem lÃ  tiÃªu chuáº©n vÃ ng. NÃ³ tá»± Ä‘á»™ng hÃ³a hoÃ n toÃ n viá»‡c lÃªn lá»‹ch Ã´n táº­p cho hÃ ng ngÃ n tháº» ghi nhá»› dá»±a trÃªn Ä‘á»™ khÃ³ mÃ  báº¡n tá»± Ä‘Ã¡nh giÃ¡, Ä‘áº£m báº£o báº¡n luÃ´n Ã´n táº­p vÃ o thá»i Ä‘iá»ƒm tá»‘i Æ°u nháº¥t.</p>
-                        <h4>Sai Láº§m Lá»›n Nháº¥t Cáº§n TrÃ¡nh âŒ</h4>
-                        <p>LÃ½ do sá»‘ má»™t khiáº¿n má»i ngÆ°á»i tháº¥t báº¡i vá»›i phÆ°Æ¡ng phÃ¡p nÃ y lÃ  "QuÃ¡ táº£i Lá»‹ch Ã´n táº­p" (Review Overload). Äiá»u nÃ y xáº£y ra khi báº¡n táº¡o quÃ¡ nhiá»u tháº» má»›i má»—i ngÃ y hoáº·c bá» lá»¡ vÃ i ngÃ y Ã´n táº­p, dáº«n Ä‘áº¿n má»™t lÆ°á»£ng tháº» tá»“n Ä‘á»ng khá»•ng lá»“ gÃ¢y náº£n chÃ­.</p>
-                        <p><strong>Giáº£i phÃ¡p (20% hÃ nh Ä‘á»™ng, 80% káº¿t quáº£):</strong> HÃ£y nháº¥t quÃ¡n. Äáº·t ra giá»›i háº¡n thá»±c táº¿ vá» sá»‘ lÆ°á»£ng tháº» má»›i má»—i ngÃ y (vÃ­ dá»¥: 10-20 tháº») vÃ  duy trÃ¬ viá»‡c Ã´n táº­p hÃ ng ngÃ y. ThÃ  há»c Ã­t mÃ  Ä‘á»u cÃ²n hÆ¡n há»c dá»“n.</p>
-                        <h4>Sá»± Káº¿t Há»£p Sá»‘ng CÃ²n: AR + SR</h4>
-                        <p>Láº·p láº¡i ngáº¯t quÃ£ng (SR) vÃ  Gá»£i nhá»› chá»§ Ä‘á»™ng (AR) lÃ  hai máº·t cá»§a cÃ¹ng má»™t Ä‘á»“ng xu vÃ  khÃ´ng thá»ƒ tÃ¡ch rá»i. SR cung cáº¥p lá»‹ch trÃ¬nh KHI NÃ€O nÃªn Ã´n táº­p. AR lÃ  hÃ nh Ä‘á»™ng báº¡n thá»±c hiá»‡n KHI Ã´n táº­p. Sá»± káº¿t há»£p nÃ y Ä‘áº£m báº£o ná»— lá»±c gá»£i nhá»› cá»§a báº¡n xáº£y ra vÃ o "Ä‘iá»ƒm ngá»t" cá»§a trÃ­ nhá»›. Sá»­ dá»¥ng Anki chÃ­nh lÃ  cÃ¡ch triá»ƒn khai ká»¹ thuáº­t káº¿t há»£p nÃ y má»™t cÃ¡ch hiá»‡u quáº£ nháº¥t.</p>
+                        <p>Nếu Gợi nhớ chủ động là về cách học, thì Lặp lại ngắt quãng là về thời điểm học. Đây là một hệ thống lên lịch ôn tập để đưa thông tin vào trí nhớ dài hạn một cách hiệu quả nhất.</p>
+                        <h4>Nguyên Tắc Cốt Lõi: Chống Lại Sự Lãng Quên 🧠</h4>
+                        <p>Phương pháp này dựa trên "Đường cong Lãng quên", cho thấy chúng ta quên thông tin nhanh nhất ngay sau khi học. Lặp lại ngắt quãng hoạt động bằng cách yêu cầu bạn ôn tập lại một thông tin ngay trước khi bạn sắp quên nó.</p>
+                        <p>Mỗi lần ôn tập thành công sẽ làm cho khoảng thời gian bạn nhớ thông tin đó dài ra. Lần đầu bạn có thể quên sau 1 ngày, nhưng sau khi ôn tập, bạn sẽ nhớ được trong 3 ngày, rồi 1 tuần, 1 tháng, và cứ thế xa dần.</p>
+                        <h4>Công Cụ Hiệu Quả Nhất: Phần Mềm SRS 📱</h4>
+                        <p>Thay vì tự lên lịch thủ công, cách hiệu quả nhất là sử dụng các phần mềm Lặp lại ngắt quãng (Spaced Repetition Software - SRS). Anki được xem là tiêu chuẩn vàng. Nó tự động hóa hoàn toàn việc lên lịch ôn tập cho hàng ngàn thẻ ghi nhớ dựa trên độ khó mà bạn tự đánh giá, đảm bảo bạn luôn ôn tập vào thời điểm tối ưu nhất.</p>
+                        <h4>Sai Lầm Lớn Nhất Cần Tránh ❌</h4>
+                        <p>Lý do số một khiến mọi người thất bại với phương pháp này là "Quá tải Lịch ôn tập" (Review Overload). Điều này xảy ra khi bạn tạo quá nhiều thẻ mới mỗi ngày hoặc bỏ lỡ vài ngày ôn tập, dẫn đến một lượng thẻ tồn đọng khổng lồ gây nản chí.</p>
+                        <p><strong>Giải pháp (20% hành động, 80% kết quả):</strong> Hãy nhất quán. Đặt ra giới hạn thực tế về số lượng thẻ mới mỗi ngày (ví dụ: 10-20 thẻ) và duy trì việc ôn tập hàng ngày. Thà học ít mà đều còn hơn học dồn.</p>
+                        <h4>Sự Kết Hợp Sống Còn: AR + SR</h4>
+                        <p>Lặp lại ngắt quãng (SR) và Gợi nhớ chủ động (AR) là hai mặt của cùng một đồng xu và không thể tách rời. SR cung cấp lịch trình KHI NÀO nên ôn tập. AR là hành động bạn thực hiện KHI ôn tập. Sự kết hợp này đảm bảo nỗ lực gợi nhớ của bạn xảy ra vào "điểm ngọt" của trí nhớ. Sử dụng Anki chính là cách triển khai kỹ thuật kết hợp này một cách hiệu quả nhất.</p>
                     </div>
                 </details>
             </div>
@@ -933,68 +727,68 @@
 
       <div id="view-guide" class="view">
         <div class="panel panel-bg">
-            <h3 style="margin-top: 0;">ðŸ“– KhÃ¡m PhÃ¡ Pomodoro Study App</h3>
+            <h3 style="margin-top: 0;">📖 Khám Phá Pomodoro Study App</h3>
             <p>
-                ChÃ o má»«ng báº¡n Ä‘áº¿n vá»›i khÃ´ng gian há»c táº­p Ä‘Æ°á»£c thiáº¿t káº¿ dÃ nh riÃªng cho sá»± táº­p trung vÃ  hiá»‡u quáº£. HÃ£y cÃ¹ng khÃ¡m phÃ¡ nhá»¯ng tÃ­nh nÄƒng sáº½ Ä‘á»“ng hÃ nh cÃ¹ng báº¡n trÃªn hÃ nh trÃ¬nh chinh phá»¥c tri thá»©c.
+                Chào mừng bạn đến với không gian học tập được thiết kế dành riêng cho sự tập trung và hiệu quả. Hãy cùng khám phá những tính năng sẽ đồng hành cùng bạn trên hành trình chinh phục tri thức.
             </p>
 
-            <h4>ðŸš€ Khá»Ÿi Äáº§u Nhanh Chá»‰ Trong 4 BÆ°á»›c</h4>
-            <p>Äá»ƒ hÃ nh trÃ¬nh cá»§a báº¡n luÃ´n máº¡ch láº¡c, má»i thá»© trong á»©ng dá»¥ng Ä‘Æ°á»£c sáº¯p xáº¿p theo cáº¥u trÃºc <strong>Chá»§ Ä‘á» Lá»›n â†’ Chá»§ Ä‘á» con</strong>.</p>
+            <h4>🚀 Khởi Đầu Nhanh Chỉ Trong 4 Bước</h4>
+            <p>Để hành trình của bạn luôn mạch lạc, mọi thứ trong ứng dụng được sắp xếp theo cấu trúc <strong>Chủ đề Lớn → Chủ đề con</strong>.</p>
             <ol>
-                <li>Má»Ÿ má»¥c <strong>ðŸ“š Chá»§ Ä‘á»</strong> tá»« thanh Ä‘iá»u hÆ°á»›ng bÃªn cáº¡nh.</li>
-                <li>Nháº¥n <strong>ï¼‹ ThÃªm Chá»§ Ä‘á»</strong> Ä‘á»ƒ táº¡o má»™t lÄ©nh vá»±c lá»›n (vÃ­ dá»¥: "Tiáº¿ng Anh Giao Tiáº¿p").</li>
-                <li>BÃªn cáº¡nh chá»§ Ä‘á» vá»«a táº¡o, nháº¥n <strong>ï¼‹ ThÃªm</strong> Ä‘á»ƒ táº¡o má»™t chá»§ Ä‘á» con, chi tiáº¿t hÆ¡n (vÃ­ dá»¥: "BÃ i 1: Luyá»‡n phÃ¡t Ã¢m IPA").</li>
-                <li>Chá»n chá»§ Ä‘á» con Ä‘Ã³. Giá» Ä‘Ã¢y, báº¡n Ä‘Ã£ sáºµn sÃ ng Ä‘á»ƒ báº¯t Ä‘áº§u phiÃªn há»c Ä‘áº§u tiÃªn cá»§a mÃ¬nh!</li>
+                <li>Mở mục <strong>📚 Chủ đề</strong> từ thanh điều hướng bên cạnh.</li>
+                <li>Nhấn <strong>＋ Thêm Chủ đề</strong> để tạo một lĩnh vực lớn (ví dụ: "Tiếng Anh Giao Tiếp").</li>
+                <li>Bên cạnh chủ đề vừa tạo, nhấn <strong>＋ Thêm</strong> để tạo một chủ đề con, chi tiết hơn (ví dụ: "Bài 1: Luyện phát âm IPA").</li>
+                <li>Chọn chủ đề con đó. Giờ đây, bạn đã sẵn sàng để bắt đầu phiên học đầu tiên của mình!</li>
             </ol>
 
             <hr />
-            <h4>âœ¨ Nhá»¯ng TÃ­nh NÄƒng ÄÃ¡ng ChÃº Ã</h4>
+            <h4>✨ Những Tính Năng Đáng Chú Ý</h4>
 
-            <h4>PhÆ°Æ¡ng PhÃ¡p Há»c Táº­p ðŸ’¡</h4>
-            <p>KhÃ´ng chá»‰ lÃ  má»™t chiáº¿c Ä‘á»“ng há»“, á»©ng dá»¥ng cÃ²n lÃ  má»™t ngÆ°á»i cá»‘ váº¥n. KhÃ¡m phÃ¡ cÃ¡c phÆ°Æ¡ng phÃ¡p há»c táº­p kinh Ä‘iá»ƒn nhÆ° Feynman, Gá»£i Nhá»› Chá»§ Äá»™ng (Active Recall)... Ä‘á»ƒ tá»‘i Æ°u hÃ³a kháº£ nÄƒng tiáº¿p thu cá»§a báº¡n.</p>
+            <h4>Phương Pháp Học Tập 💡</h4>
+            <p>Không chỉ là một chiếc đồng hồ, ứng dụng còn là một người cố vấn. Khám phá các phương pháp học tập kinh điển như Feynman, Gợi Nhớ Chủ Động (Active Recall)... để tối ưu hóa khả năng tiếp thu của bạn.</p>
 
-            <h4>Quáº£n LÃ½ Chá»§ Äá» Linh Hoáº¡t (Organizer)</h4>
-            <p>Dá»… dÃ ng sáº¯p xáº¿p cÃ¡c má»¥c tiÃªu há»c táº­p cá»§a báº¡n. KÃ©o vÃ  tháº£ Ä‘á»ƒ thay Ä‘á»•i thá»© tá»± cÃ¡c chá»§ Ä‘á» lá»›n hoáº·c di chuyá»ƒn má»™t chá»§ Ä‘á» con sang má»™t lÄ©nh vá»±c má»›i.</p>
+            <h4>Quản Lý Chủ Đề Linh Hoạt (Organizer)</h4>
+            <p>Dễ dàng sắp xếp các mục tiêu học tập của bạn. Kéo và thả để thay đổi thứ tự các chủ đề lớn hoặc di chuyển một chủ đề con sang một lĩnh vực mới.</p>
 
-            <h4>Nhiá»‡m Vá»¥ & Ghi ChÃº TÃ­ch Há»£p ðŸ“</h4>
-            <p>Ngay trong mÃ n hÃ¬nh Ä‘á»“ng há»“, báº¡n cÃ³ thá»ƒ táº¡o danh sÃ¡ch viá»‡c cáº§n lÃ m (to-do) cho tá»«ng chá»§ Ä‘á» con hoáº·c ghi láº¡i nhá»¯ng Ã½ tÆ°á»Ÿng chá»£t náº£y ra mÃ  khÃ´ng lÃ m giÃ¡n Ä‘oáº¡n dÃ²ng cháº£y cÃ´ng viá»‡c.</p>
+            <h4>Nhiệm Vụ & Ghi Chú Tích Hợp 📝</h4>
+            <p>Ngay trong màn hình đồng hồ, bạn có thể tạo danh sách việc cần làm (to-do) cho từng chủ đề con hoặc ghi lại những ý tưởng chợt nảy ra mà không làm gián đoạn dòng chảy công việc.</p>
 
-            <h4>Cháº¿ Äá»™ Zen ðŸ§˜</h4>
-            <p>Khi cáº§n táº­p trung tuyá»‡t Ä‘á»‘i, hÃ£y nháº¥n vÃ o biá»ƒu tÆ°á»£ng con máº¯t (ðŸ‘ï¸) á»Ÿ gÃ³c trÃªn bÃªn pháº£i. Giao diá»‡n sáº½ áº©n Ä‘i, chá»‰ Ä‘á»ƒ láº¡i hÃ¬nh ná»n vÃ  chiáº¿c Ä‘á»“ng há»“ tinh gá»n, giÃºp báº¡n hoÃ n toÃ n Ä‘áº¯m mÃ¬nh vÃ o khÃ´ng gian há»c táº­p.</p>
+            <h4>Chế Độ Zen 🧘</h4>
+            <p>Khi cần tập trung tuyệt đối, hãy nhấn vào biểu tượng con mắt (👁️) ở góc trên bên phải. Giao diện sẽ ẩn đi, chỉ để lại hình nền và chiếc đồng hồ tinh gọn, giúp bạn hoàn toàn đắm mình vào không gian học tập.</p>
 
-            <h4>Thá»‘ng KÃª & Cá»™t Má»‘c ðŸ†</h4>
-            <p>Theo dÃµi hÃ nh trÃ¬nh cá»§a báº¡n qua nhá»¯ng con sá»‘ biáº¿t nÃ³i. á»¨ng dá»¥ng sáº½ tá»± Ä‘á»™ng ghi nháº­n vÃ  chÃºc má»«ng khi báº¡n Ä‘áº¡t Ä‘Æ°á»£c nhá»¯ng cá»™t má»‘c quan trá»ng (20 giá», 100 giá» há»c...), biáº¿n má»—i ná»— lá»±c thÃ nh má»™t thÃ nh tá»±u Ä‘Ã¡ng tá»± hÃ o.</p>
+            <h4>Thống Kê & Cột Mốc 🏆</h4>
+            <p>Theo dõi hành trình của bạn qua những con số biết nói. Ứng dụng sẽ tự động ghi nhận và chúc mừng khi bạn đạt được những cột mốc quan trọng (20 giờ, 100 giờ học...), biến mỗi nỗ lực thành một thành tựu đáng tự hào.</p>
 
             <hr />
-            <h4>âŒ¨ï¸ PhÃ­m Táº¯t ThÃ´ng Minh</h4>
+            <h4>⌨️ Phím Tắt Thông Minh</h4>
             <ul>
-                <li><kbd>Space</kbd>: Báº¯t Ä‘áº§u / Táº¡m dá»«ng / Tiáº¿p tá»¥c phiÃªn há»c.</li>
-                <li><kbd>N</kbd>: Bá» qua phiÃªn lÃ m viá»‡c hoáº·c nghá»‰ hiá»‡n táº¡i.</li>
-                <li><kbd>Esc</kbd>: ÄÃ³ng cÃ¡c cá»­a sá»• Ä‘ang má»Ÿ (nhÆ° CÃ i Ä‘áº·t).</li>
+                <li><kbd>Space</kbd>: Bắt đầu / Tạm dừng / Tiếp tục phiên học.</li>
+                <li><kbd>N</kbd>: Bỏ qua phiên làm việc hoặc nghỉ hiện tại.</li>
+                <li><kbd>Esc</kbd>: Đóng các cửa sổ đang mở (như Cài đặt).</li>
             </ul>
 
             <hr />
-            <h4>ðŸ› ï¸ CÃ i Äáº·t NÃ¢ng Cao & TÃ­ch Há»£p</h4>
+            <h4>🛠️ Cài Đặt Nâng Cao & Tích Hợp</h4>
 
-            <h4>Trá»£ LÃ½ Gemini AI ðŸ§ </h4>
-            <p>Biáº¿n á»©ng dá»¥ng thÃ nh má»™t ngÆ°á»i báº¡n Ä‘á»“ng hÃ nh thÃ´ng minh. Há»i Ä‘Ã¡p, giáº£i thÃ­ch khÃ¡i niá»‡m, hoáº·c táº¡o dÃ n Ã½ cho chá»§ Ä‘á» há»c ngay trong tab "Gemini AI".</p>
-            <p><strong>Thiáº¿t láº­p:</strong></p>
+            <h4>Trợ Lý Gemini AI 🧠</h4>
+            <p>Biến ứng dụng thành một người bạn đồng hành thông minh. Hỏi đáp, giải thích khái niệm, hoặc tạo dàn ý cho chủ đề học ngay trong tab "Gemini AI".</p>
+            <p><strong>Thiết lập:</strong></p>
             <ol>
-                <li>Truy cáº­p Google AI Studio vÃ  táº¡o má»™t API Key má»›i (miá»…n phÃ­).</li>
-                <li>Sao chÃ©p chuá»—i kÃ½ tá»± API Key Ä‘Ã³.</li>
-                <li>DÃ¡n vÃ o Ã´ "Gemini API Key" trong CÃ i Ä‘áº·t cá»§a á»©ng dá»¥ng vÃ  LÆ°u láº¡i.</li>
+                <li>Truy cập Google AI Studio và tạo một API Key mới (miễn phí).</li>
+                <li>Sao chép chuỗi ký tự API Key đó.</li>
+                <li>Dán vào ô "Gemini API Key" trong Cài đặt của ứng dụng và Lưu lại.</li>
             </ol>
 
-            <h4>Nháº¡c Ná»n YouTube ðŸŽ¶</h4>
-            <p>Táº¡o khÃ´ng gian há»c táº­p hoÃ n háº£o báº±ng cÃ¡ch phÃ¡t má»™t video hoáº·c danh sÃ¡ch phÃ¡t YouTube (nhÆ° nháº¡c lofi, Ã¢m thanh thiÃªn nhiÃªn) lÃ m nháº¡c ná»n.</p>
-            <p><strong>Sá»­ dá»¥ng:</strong> DÃ¡n Ä‘Æ°á»ng dáº«n (URL) video/playlist vÃ o Ã´ "Nháº¡c ná»n YouTube".</p>
-            <p><strong>TÃ¹y chá»n:</strong> TÃ­ch vÃ o Ã´ "DÃ¹ng áº£nh bÃ¬a video lÃ m ná»n" Ä‘á»ƒ tá»± Ä‘á»™ng biáº¿n khÃ´ng gian há»c táº­p cá»§a báº¡n trá»Ÿ nÃªn sá»‘ng Ä‘á»™ng hÆ¡n.</p>
+            <h4>Nhạc Nền YouTube 🎶</h4>
+            <p>Tạo không gian học tập hoàn hảo bằng cách phát một video hoặc danh sách phát YouTube (như nhạc lofi, âm thanh thiên nhiên) làm nhạc nền.</p>
+            <p><strong>Sử dụng:</strong> Dán đường dẫn (URL) video/playlist vào ô "Nhạc nền YouTube".</p>
+            <p><strong>Tùy chọn:</strong> Tích vào ô "Dùng ảnh bìa video làm nền" để tự động biến không gian học tập của bạn trở nên sống động hơn.</p>
 
-            <h4>An ToÃ n Dá»¯ Liá»‡u: Sao LÆ°u & Phá»¥c Há»“i ðŸ›¡ï¸</h4>
-            <p>ChÃºng tÃ´i hiá»ƒu ráº±ng dá»¯ liá»‡u há»c táº­p cá»§a báº¡n lÃ  vÃ´ giÃ¡. á»¨ng dá»¥ng tá»± Ä‘á»™ng táº¡o má»™t báº£n sao lÆ°u tiáº¿n trÃ¬nh cá»§a báº¡n má»—i ngÃ y Ä‘á»ƒ Ä‘áº£m báº£o khÃ´ng cÃ³ gÃ¬ bá»‹ máº¥t.</p>
-            <p><strong>TÃ¹y Chá»‰nh Sao LÆ°u:</strong> Äá»ƒ báº¡n cÃ³ toÃ n quyá»n kiá»ƒm soÃ¡t, á»©ng dá»¥ng cho phÃ©p tÃ¹y chá»‰nh sá»‘ ngÃ y lÆ°u giá»¯ cÃ¡c báº£n sao lÆ°u. Báº¡n cÃ³ thá»ƒ thay Ä‘á»•i thiáº¿t láº­p nÃ y (tá»« 1 Ä‘áº¿n 30 ngÃ y) trong má»¥c "CÃ i Ä‘áº·t sao lÆ°u". Máº·c Ä‘á»‹nh lÃ  7 ngÃ y, má»™t sá»± cÃ¢n báº±ng há»£p lÃ½ giá»¯a an toÃ n vÃ  dung lÆ°á»£ng.</p>
-            <p><strong>Phá»¥c Há»“i Dá»¯ Liá»‡u:</strong> Náº¿u báº¡n vÃ´ tÃ¬nh xÃ³a nháº§m, hÃ£y vÃ o má»¥c "Phá»¥c há»“i dá»¯ liá»‡u", chá»n má»™t ngÃ y trong quÃ¡ khá»© vÃ  nháº¥n "Phá»¥c há»“i".</p>
-            <p>âš ï¸ <strong>Cáº£nh bÃ¡o quan trá»ng:</strong> HÃ nh Ä‘á»™ng nÃ y sáº½ ghi Ä‘Ã¨ toÃ n bá»™ dá»¯ liá»‡u hiá»‡n táº¡i cá»§a báº¡n báº±ng dá»¯ liá»‡u tá»« báº£n sao lÆ°u. HÃ£y cháº¯c cháº¯n trÆ°á»›c khi thá»±c hiá»‡n.</p>
+            <h4>An Toàn Dữ Liệu: Sao Lưu & Phục Hồi 🛡️</h4>
+            <p>Chúng tôi hiểu rằng dữ liệu học tập của bạn là vô giá. Ứng dụng tự động tạo một bản sao lưu tiến trình của bạn mỗi ngày để đảm bảo không có gì bị mất.</p>
+            <p><strong>Tùy Chỉnh Sao Lưu:</strong> Để bạn có toàn quyền kiểm soát, ứng dụng cho phép tùy chỉnh số ngày lưu giữ các bản sao lưu. Bạn có thể thay đổi thiết lập này (từ 1 đến 30 ngày) trong mục "Cài đặt sao lưu". Mặc định là 7 ngày, một sự cân bằng hợp lý giữa an toàn và dung lượng.</p>
+            <p><strong>Phục Hồi Dữ Liệu:</strong> Nếu bạn vô tình xóa nhầm, hãy vào mục "Phục hồi dữ liệu", chọn một ngày trong quá khứ và nhấn "Phục hồi".</p>
+            <p>⚠️ <strong>Cảnh báo quan trọng:</strong> Hành động này sẽ ghi đè toàn bộ dữ liệu hiện tại của bạn bằng dữ liệu từ bản sao lưu. Hãy chắc chắn trước khi thực hiện.</p>
 
             
         </div>
@@ -1004,10 +798,10 @@
 
   <div class="modal" id="modalMilestone" role="dialog" aria-modal="true" aria-labelledby="milestoneTitle">
     <div class="modal-card" style="width: min(600px, 94vw);">
-        <h3 id="milestoneTitle">ðŸŽ‰ ChÃºc má»«ng Báº¡n!</h3>
+        <h3 id="milestoneTitle">🎉 Chúc mừng Bạn!</h3>
         <p id="milestoneMessage" style="white-space: pre-wrap; line-height: 1.6;"></p>
         <div class="row" style="justify-content:flex-end; margin-top:12px">
-            <button class="btn acc" id="btnMilestoneClose">Tiáº¿p tá»¥c hÃ nh trÃ¬nh!</button>
+            <button class="btn acc" id="btnMilestoneClose">Tiếp tục hành trình!</button>
         </div>
     </div>
   </div>
@@ -1021,138 +815,161 @@
           </nav>
           <div class="settings-content">
               <div id="settings-timer" class="tab-content active" style="flex-direction:column; gap:20px;">
-                  <div>
-                      <h4>Thời lượng Pomodoro</h4>
-                      <div class="row" id="timerPresetSelector" style="margin-bottom:16px;">
-                          <button class="btn acc" data-preset-target="A"> Kiểu A </button>
-                          <button class="btn ghost" data-preset-target="B"> Kiểu B </button>
-                      </div>
-                      <div class="row">
-                          <label>LÃ€M VIá»†C (phÃºt)<input type="number" id="set_work" min="1" /></label>
-                          <label>NGHá»ˆ NGáº®N (phÃºt)<input type="number" id="set_short" min="1" /></label>
-                          <label>NGHá»ˆ DÃ€I (phÃºt)<input type="number" id="set_long" min="1" /></label>
-                      </div>
-                      <div class="row">
-                          <label>Chu kỳ Pomodoro<input type="number" id="set_cycles" min="1" /></label>
-                          <label>Chu kỳ nghỉ dài<input type="number" id="set_interval" min="2" /></label>
-                      </div>
-                  </div>
-                      <div class="settings-row-toggle">
-                          <label for="set_autoStartNext">Tá»± Ä‘á»™ng báº¯t Ä‘áº§u phiÃªn tiáº¿p theo</label>
-                          <label class="toggle-switch">
-                              <input type="checkbox" id="set_autoStartNext">
-                              <span class="slider"></span>
-                          </label>
-                      </div>
-              </div>
+    <div class="settings-group">
+        <h4>Thời lượng Pomodoro</h4>
+        <div class="settings-grid">
+            <div class="col-span-3">
+                <button class="btn acc" data-preset-target="A" style="width: 100%;"> Kiểu A </button>
+            </div>
+            <div class="col-span-3">
+                <button class="btn ghost" data-preset-target="B" style="width: 100%;"> Kiểu B </button>
+            </div>
+            <div class="col-span-2">
+                <label>LÀM VIỆC (phút)</label>
+                <input type="number" id="set_work" min="1" />
+            </div>
+            <div class="col-span-2">
+                <label>NGHỈ NGẮN (phút)</label>
+                <input type="number" id="set_short" min="1" />
+            </div>
+            <div class="col-span-2">
+                <label>NGHỈ DÀI (phút)</label>
+                <input type="number" id="set_long" min="1" />
+            </div>
+            <div class="col-span-3">
+                <label>Chu kỳ Pomodoro</label>
+                <input type="number" id="set_cycles" min="1" />
+            </div>
+            <div class="col-span-3">
+                <label>Chu kỳ nghỉ dài</label>
+                <input type="number" id="set_interval" min="2" />
+            </div>
+            <div class="col-span-6 settings-toggle">
+                <label for="set_autoStartNext" style="margin: 0; cursor: pointer;">Tự động bắt đầu phiên tiếp theo</label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="set_autoStartNext">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+</div>
               <div id="settings-ui" class="tab-content" style="flex-direction: column; gap: 20px;">
-                  <div>
-                      <h4>Giao diện</h4>
-                      <div class="row">
-                          <label>Theme Giao Diện
-                                <select id="set_theme_color">
-                                    <option value="default">Mặc định (Dark Blue)</option>
-                                    <option value="light">Light - Trà Sữa</option>
-                                    <option value="pastel">Pastel - Dễ thương</option>
-                                    <option value="lofi">Lofi Study Room</option>
-                                    <option value="space">Space Station</option>
-                                </select>
-                          </label>
-                      </div>
-                      <div class="row">
-                          <label>Hình nền
-                              <label class="btn small ghost" for="uploadBg">Tải ảnh mới</label>
-                              <input type="file" id="uploadBg" accept="image/*" class="hidden" />
-                          </label>
-                          <button class="btn small danger" id="btnClearBg">Xóa nền</button>
-                      </div>
-                      <div class="row">
-                          <label style="flex: 1;">Độ trong suốt của nền</label>
-                          <input type="range" id="set_panelOpacity" min="0.1" max="1" step="0.05" style="flex: 2;">
-                      </div>
-                      
-                   </div>
-                  
-                   <div>
-                       <h4>Âm thanh</h4>
-                      <div class="row">
-                          <label>Âm lượng (0–1)<input type="number" id="set_volume" step="0.05" min="0" max="1"/></label>
-                          <label>Kiểu âm báo
-                              <select id="set_theme">
-                                  <option value="beep">Beep</option>
-                                  <option value="chime">Chime</option>
-                              </select>
-                          </label>
-                           <button class="btn" id="btnTestSound" style="flex: 0 1 auto; align-self: center;">Test</button>
-                      </div>
-                      <div style="text-align: right; margin-top: 12px;">
-                          <button class="btn ghost small" id="btnToggleCustomSounds">TÃ¹y chá»‰nh Ã¢m bÃ¡o</button>
-                      </div>
+    <div class="settings-group">
+        <h4>Giao diện</h4>
+        <div class="settings-grid">
+            <div class="col-span-6">
+                <label>Theme Giao Diện</label>
+                <select id="set_theme_color">
+                    <option value="default">Mặc định (Dark Blue)</option>
+                    <option value="light">Light - Trà Sữa</option>
+                    <option value="pastel">Pastel - Dễ thương</option>
+                    <option value="lofi">Lofi Study Room</option>
+                    <option value="space">Space Station</option>
+                </select>
+            </div>
+            <div class="col-span-6" style="display: flex; justify-content: space-between; align-items: center;">
+                <span class="label-text">Hình nền</span>
+                <div>
+                    <label class="btn small ghost" for="uploadBg">Tải ảnh mới</label>
+                    <input type="file" id="uploadBg" accept="image/*" style="display:none" />
+                    <button class="btn small danger" id="btnClearBg">Xóa nền</button>
+                </div>
+            </div>
+            <div class="col-span-6" style="display: flex; justify-content: space-between; align-items: center;">
+                <label style="flex: 1;">Độ trong suốt của nền</label>
+                <input type="range" id="set_panelOpacity" min="0.1" max="1" step="0.05" style="flex: 2;">
+            </div>
+        </div>
+    </div>
 
-                      <div id="customSoundsContainer" class="hidden" style="margin-top: 8px;">
-                      <div class="row" style="display: flex; gap: 8px; justify-content: flex-end;">
-                          <div>
-                              <small>Ã‚m bÃ¡o háº¿t LÃ€M VIá»†C</small>
-                              <label title="Ã‚m bÃ¡o háº¿t LÃ€M VIá»†C" class="btn small ghost" for="uploadSoundWork">LÃ€M VIá»†C</label>
-                              <input type="file" id="uploadSoundWork" accept="audio/*" class="hidden" />
-                          </div>
-                          <div>
-                              <small>Ã‚m bÃ¡o háº¿t NGHá»ˆ NGáº®N</small>
-                              <label title="Ã‚m bÃ¡o háº¿t NGHá»ˆ NGáº®N" class="btn small ghost" for="uploadSoundBreak">NGHá»ˆ NGáº®N</label>
-                              <input type="file" id="uploadSoundBreak" accept="audio/*" class="hidden" />
-                          </div>
-                          <div>
-                              <small>Ã‚m bÃ¡o háº¿t NGHá»ˆ DÃ€I</small>
-                              <label title="Ã‚m bÃ¡o háº¿t NGHá»ˆ DÃ€I" class="btn small ghost" for="uploadSoundLong">NGHá»ˆ DÃ€I</label>
-                              <input type="file" id="uploadSoundLong" accept="audio/*" class="hidden" />
-                          </div>
-                      </div>
-                      </div>
-                  </div>
-              </div>
+    <div class="settings-group">
+        <h4>Âm thanh</h4>
+        <div class="settings-grid">
+            <div class="col-span-2">
+                <label>Âm lượng (0–1)</label>
+                <input type="number" id="set_volume" step="0.05" min="0" max="1"/>
+            </div>
+            <div class="col-span-2">
+                <label>Kiểu âm báo</label>
+                <select id="set_theme">
+                    <option value="beep">Beep</option>
+                    <option value="chime">Chime</option>
+                </select>
+            </div>
+            <div class="col-span-2">
+                <label>&nbsp;</label>
+                <button class="btn" id="btnTestSound" style="width: 100%;">Test</button>
+            </div>
+            <div class="col-span-6" style="text-align: right;">
+                 <button class="btn ghost small" id="btnToggleCustomSounds">Tùy chỉnh âm báo</button>
+            </div>
+            <div id="customSoundsContainer" class="hidden col-span-6">
+                 <div class="row" style="display: flex; gap: 8px; justify-content: flex-end;">
+                    <div><small>Hết LÀM VIỆC</small><label class="btn small ghost" for="uploadSoundWork">Chọn File</label><input type="file" id="uploadSoundWork" accept="audio/*" class="hidden" /></div>
+                    <div><small>Hết NGHỈ NGẮN</small><label class="btn small ghost" for="uploadSoundBreak">Chọn File</label><input type="file" id="uploadSoundBreak" accept="audio/*" class="hidden" /></div>
+                    <div><small>Hết NGHỈ DÀI</small><label class="btn small ghost" for="uploadSoundLong">Chọn File</label><input type="file" id="uploadSoundLong" accept="audio/*" class="hidden" /></div>
+                 </div>
+            </div>
+        </div>
+    </div>
+</div>
               <div id="settings-integrations" class="tab-content" style="flex-direction: column; gap: 20px;">
-                  <div>
-                      <h4>Tích hợp AI</h4>
-                      <label>Gemini API Key
-                          <input type="password" id="set_apiKey" placeholder="Dán API Key của bạn vào đây..." />
-                      </label>
-                      <div class="tiny">Cần có để sử dụng các tính năng AI. Lấy key miễn phí tại <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer">Google AI Studio</a>.</div>
-                  </div>
-                  <div>
-                      <h4>🎵 Nhạc nền YouTube</h4>
-                      <div class="row" style="gap:8px; align-items:center;">
-                          <input type="text" id="set_youtubeUrl" placeholder="Dán link YouTube vào đây..." style="flex:1;">
-                          </div>
-                      <div id="ytUrlFeedback" class="tiny" style="min-height: 1.2em; padding: 4px 0;"></div>
-                      <div class="row" style="margin-top: 4px;">
-                          <label style="flex: 0 1 auto; display: flex; align-items: center; gap: 8px; font-size: 14px;">
-                              <input type="checkbox" id="set_ytThumbAsBg">
-                              <span>Dùng ảnh bìa video làm nền</span>
-                          </label>
-                      </div>
-                      <div class="row" style="margin-top: 8px;">
-                          <button id="btnToggleYtSound" class="btn small" style="flex:0 1 auto;">â–¶ï¸</button>
-                          <input type="range" id="ytSoundVolume" min="0" max="100" step="1" value="80" style="flex:1;">
-                      </div>
-                      <div class="tiny" style="text-align:center; margin-top:4px;">Âm lượng</div>
-                  </div>
-                  <div>
-                      <h4>🛡️ Cài đặt sao lưu</h4>
-                      <div class="row">
-                          <label>Số ngày sao lưu cần giữ lại
-                               <input type="number" id="set_backupDays" min="1" max="30" />
-                          </label>
-                      </div>
-                  </div>
-                  <div>
-                      <h4>🛡️ Phục hồi dữ liệu</h4>
-                      <p class="tiny">Phục hồi dữ liệu từ một bản sao lưu tự động hằng ngày. Hành động này sẽ ghi đè lên dữ liệu hiện tại của bạn.</p>
-                      <div class="row">
-                          <select id="backupList" style="flex: 3;"></select>
-                          <button id="btnRestoreBackup" class="btn warn small" style="flex: 1;">Phục hồi</button>
-                      </div>
-                  </div>
-              </div>
+    <div class="settings-group">
+        <h4>Tích hợp AI</h4>
+        <div class="settings-grid">
+            <div class="col-span-6">
+                <label>Gemini API Key</label>
+                <input type="password" id="set_apiKey" placeholder="Dán API Key của bạn vào đây..." />
+                <div class="tiny" style="margin-top: 4px;">Cần có để sử dụng các tính năng AI. Lấy key miễn phí tại <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer">Google AI Studio</a>.</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="settings-group">
+        <h4>🎵 Nhạc nền YouTube</h4>
+        <div class="settings-grid">
+            <div class="col-span-6">
+                <label>Link Video/Playlist YouTube</label>
+                <input type="text" id="set_youtubeUrl" placeholder="Dán link YouTube vào đây...">
+                <div id="ytUrlFeedback" class="tiny" style="min-height: 1.2em; padding: 4px 0;"></div>
+            </div>
+            <div class="col-span-6">
+                 <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500;">
+                    <input type="checkbox" id="set_ytThumbAsBg">
+                    <span>Dùng ảnh bìa video làm nền</span>
+                </label>
+            </div>
+             <div class="col-span-6" style="display: flex; align-items: center; gap: 12px;">
+                <button id="btnToggleYtSound" class="btn small" style="flex:0 1 auto;">▶️</button>
+                <input type="range" id="ytSoundVolume" min="0" max="100" step="1" value="80" style="flex:1;">
+            </div>
+        </div>
+    </div>
+
+    <div class="settings-group">
+        <h4>🛡️ Cài đặt sao lưu</h4>
+        <div class="settings-grid">
+            <div class="col-span-6">
+                <label>Số ngày sao lưu cần giữ lại</label>
+                <input type="number" id="set_backupDays" min="1" max="30" />
+            </div>
+        </div>
+    </div>
+
+    <div class="settings-group">
+        <h4>🛡️ Phục hồi dữ liệu</h4>
+        <p class="tiny" style="margin-top: -12px; margin-bottom: 12px;">Hành động này sẽ ghi đè lên dữ liệu hiện tại của bạn.</p>
+        <div class="settings-grid">
+            <div class="col-span-4">
+                <select id="backupList"></select>
+            </div>
+            <div class="col-span-2">
+                <button id="btnRestoreBackup" class="btn warn" style="width: 100%;">Phục hồi</button>
+            </div>
+        </div>
+    </div>
+</div>
           </div>
           <div class="row" style="margin-top:16px; justify-content:flex-end">
               <button class="btn ghost" id="btnDefaults">Mặc định</button>
@@ -1211,11 +1028,11 @@
 <script src="https://www.youtube.com/iframe_api"></script>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
   <script>
-    // ÄÃ£ bá» fixVietnameseUI: dÃ¹ng trá»±c tiáº¿p tiáº¿ng Viá»‡t (UTF-8) trong HTML/JS
-    // NÃºt toÃ n mÃ n hÃ¬nh: dÃ¹ng biá»ƒu tÆ°á»£ng â†—ï¸/â†™ï¸ thay vÃ¬ chá»¯
+    // Đã bỏ fixVietnameseUI: dùng trực tiếp tiếng Việt (UTF-8) trong HTML/JS
+    // Nút toàn màn hình: dùng biểu tượng ↗️/↙️ thay vì chữ
     window.addEventListener('load', ()=>{ try { updateFullscreenButton(); } catch(_) {} });
     const IS_FILE_PROTOCOL = (window.location.protocol === 'file:');
-    // Watchdog: thÃ´ng bÃ¡o náº¿u API YouTube táº£i cháº­m hoáº·c tháº¥t báº¡i
+    // Watchdog: thông báo nếu API YouTube tải chậm hoặc thất bại
     function startYtApiWatchdog(){
       const fb = document.getElementById('ytUrlFeedback');
       if (!fb) return;
@@ -1249,7 +1066,7 @@
     })();
     // storageManager will manage persistence
     // =============================
-    // STORAGE MANAGER - Quáº£n lÃ½ Dá»¯ liá»‡u vÃ  Sao lÆ°u
+    // STORAGE MANAGER - Quản lý Dữ liệu và Sao lưu
     // =============================
     const storageManager = {
         DB_NAME: 'PomodoroAppDB',
@@ -1418,7 +1235,7 @@
                         localStorage.setItem('pomodoroData_v11', JSON.stringify(request.result.data));
                         resolve(request.result.data);
                     } else {
-                        reject(new Error('KhÃ´ng tÃ¬m tháº¥y báº£n sao lÆ°u.'));
+                        reject(new Error('Không tìm thấy bản sao lưu.'));
                     }
                 };
                 request.onerror = (event) => reject(event.target.error);
@@ -1514,7 +1331,7 @@
         const videoId = extractYouTubeID(url);
 
         if (videoId) {
-            feedbackEl.textContent = "OK. Link há»£p lá»‡. Äang chuáº©n bá»‹ phÃ¡t...";
+            feedbackEl.textContent = "OK. Link hợp lệ. Đang chuẩn bị phát...";
             feedbackEl.style.color = 'var(--acc-2)';
             toggleBtn.disabled = false;
             sessionYoutubeUrl = url;
@@ -1531,7 +1348,7 @@
                     fallbackLoadVideo(videoId, { autoplay: 1, mute: isMuted });
                     try { setTimeout(() => { try { fallbackPostMessage('playVideo'); } catch(_) {} }, 250); } catch(_) {}
                     if (!_ytUnlocked) { showSoundPermission(); }
-                try { setTimeout(() => { const fb = document.getElementById('ytUrlFeedback'); if (fb) fb.textContent = 'Äang phÃ¡t'; }, 500); } catch(_) {}
+                try { setTimeout(() => { const fb = document.getElementById('ytUrlFeedback'); if (fb) fb.textContent = 'Đang phát'; }, 500); } catch(_) {}
                 } else {
                     updateYouTubePlayer();
                 }
@@ -1542,13 +1359,13 @@
             if (IS_FILE_PROTOCOL) { try { fallbackStop(); } catch(_) {} }
             else if (ytPlayer && ytPlayer.stopVideo) { ytPlayer.stopVideo(); }
         } else {
-            feedbackEl.textContent = "âŒ Link khÃ´ng há»£p lá»‡ hoáº·c khÃ´ng Ä‘Æ°á»£c há»— trá»£.";
+            feedbackEl.textContent = "❌ Link không hợp lệ hoặc không được hỗ trợ.";
             feedbackEl.style.color = 'var(--danger)';
             toggleBtn.disabled = true;
         }
     }
     
-    // THAY Äá»”I: HÃ m applyTheme Ä‘Æ°á»£c cáº­p nháº­t hoÃ n toÃ n
+    // THAY ĐỔI: Hàm applyTheme được cập nhật hoàn toàn
     function applyTheme(previewTheme) {
         const theme = previewTheme || data.settings.theme || 'default';
         document.body.dataset.theme = theme;
@@ -1613,10 +1430,10 @@
         },
         topics: [{
             id: uid('t'),
-            name: 'Chá»§ Ä‘á» máº«u',
+            name: 'Chủ đề mẫu',
             subtopics: [{
                 id: uid('s'),
-                name: 'Chá»§ Ä‘á» con máº«u',
+                name: 'Chủ đề con mẫu',
                 tasks: [],
                 generalNotes: [],
                 summaries: [],
@@ -1630,13 +1447,13 @@
     let data;
     let editingPreset = 'A';
 
-    // (CÃ¡c hÃ m cÃ²n láº¡i giá»¯ nguyÃªn)
+    // (Các hàm còn lại giữ nguyên)
     // ...
     // ...
     async function callGeminiAPI(prompt, retries = 3, delay = 1000) {
         const apiKey = data.settings.apiKey || "";
         if (!apiKey) {
-            toast("Vui lÃ²ng nháº­p Gemini API Key trong pháº§n CÃ i Ä‘áº·t.");
+            toast("Vui lòng nhập Gemini API Key trong phần Cài đặt.");
             return null;
         }
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
@@ -1656,16 +1473,16 @@
                 return formatGeminiResponse(result.candidates[0].content.parts[0].text);
             } else {
                 console.error("API response structure is unexpected:", result);
-                if (result.promptFeedback?.blockReason) { return `Ná»™i dung bá»‹ cháº·n vÃ¬: ${result.promptFeedback.blockReason}. Vui lÃ²ng thá»­ láº¡i vá»›i ná»™i dung khÃ¡c.`; }
-                return "KhÃ´ng nháº­n Ä‘Æ°á»£c ná»™i dung há»£p lá»‡ tá»« AI.";
+                if (result.promptFeedback?.blockReason) { return `Nội dung bị chặn vì: ${result.promptFeedback.blockReason}. Vui lòng thử lại với nội dung khác.`; }
+                return "Không nhận được nội dung hợp lệ từ AI.";
             }
         } catch (error) {
-            console.error("Lá»—i khi gá»i Gemini API:", error);
+            console.error("Lỗi khi gọi Gemini API:", error);
             if (retries > 0) {
                 await new Promise(resolve => setTimeout(resolve, delay));
                 return callGeminiAPI(prompt, retries - 1, delay * 2);
             }
-            return "ÄÃ£ xáº£y ra lá»—i khi káº¿t ná»‘i vá»›i AI. Vui lÃ²ng kiá»ƒm tra káº¿t ná»‘i máº¡ng vÃ  thá»­ láº¡i.";
+            return "Đã xảy ra lỗi khi kết nối với AI. Vui lòng kiểm tra kết nối mạng và thử lại.";
         }
     }
     let AUDIO_CTX = null;
@@ -1681,13 +1498,13 @@
         if (ref.startsWith('data:') || ref.startsWith('http') || ref.startsWith('blob:')) {
             audioEl.src = ref;
             audioEl.volume = vol;
-            audioEl.play().catch(e => console.error("Lá»—i phÃ¡t Ã¢m thanh:", e));
+            audioEl.play().catch(e => console.error("Lỗi phát âm thanh:", e));
         } else {
             getStoredFileUrl(ref).then(url => {
                 if (url) {
                     audioEl.src = url;
                     audioEl.volume = vol;
-                    audioEl.play().catch(e => console.error("Lá»—i phÃ¡t Ã¢m thanh:", e));
+                    audioEl.play().catch(e => console.error("Lỗi phát âm thanh:", e));
                 }
             });
         }
@@ -1705,7 +1522,7 @@
           await storageManager.save(data);
         } catch (err) {
           console.error('Failed to save data:', err);
-          toast(`Lá»—i lÆ°u dá»¯ liá»‡u: ${err.message}`);
+          toast(`Lỗi lưu dữ liệu: ${err.message}`);
         }
       }
         async function ensureValidSelection(){
@@ -1770,9 +1587,9 @@
         const isCollapsed = !!collapsedMap[topic.id];
         const chev = document.createElement('button');
         chev.className='btn small ghost chev';
-        chev.setAttribute('title','Má»Ÿ/Ä‘Ã³ng subtopics');
+        chev.setAttribute('title','Mở/đóng subtopics');
         chev.setAttribute('aria-expanded', String(!isCollapsed));
-        chev.innerHTML = '<span class="ico">â–¼</span>';
+        chev.innerHTML = '<span class="ico">▼</span>';
         const title = document.createElement('div');
         title.className='topic-title';
         title.textContent = topic.name;
@@ -1780,22 +1597,22 @@
         act.className='topic-actions';
         const bAdd = document.createElement('button');
         bAdd.className='btn small';
-        bAdd.innerHTML = 'ï¼‹ ThÃªm';
-        bAdd.title = 'ThÃªm Chá»§ Ä‘á» con';
+        bAdd.innerHTML = '＋ Thêm';
+        bAdd.title = 'Thêm Chủ đề con';
         const menuContainer = document.createElement('div');
         menuContainer.style.position = 'relative';
         const bMore = document.createElement('button');
         bMore.className = 'btn small ghost actions-menu-btn';
         bMore.innerHTML = '...';
-        bMore.title = 'ThÃªm tÃ¹y chá»n';
+        bMore.title = 'Thêm tùy chọn';
         const menu = document.createElement('div');
         menu.className = 'actions-menu';
         const bEdit = document.createElement('button');
         bEdit.className = 'menu-item';
-        bEdit.innerHTML = 'Sá»­a tÃªn Chá»§ Ä‘á»';
+        bEdit.innerHTML = 'Sửa tên Chủ đề';
         const bDel = document.createElement('button');
         bDel.className = 'menu-item danger';
-        bDel.innerHTML = 'XÃ³a Chá»§ Ä‘á»';
+        bDel.innerHTML = 'Xóa Chủ đề';
         menu.append(bEdit, bDel);
         menuContainer.append(bMore, menu);
         act.append(bAdd, menuContainer);
@@ -1809,7 +1626,7 @@
           row.dataset.sid = st.id;
           const btn = document.createElement('button');
           btn.className='btn subtopic-btn';
-          btn.textContent = 'â€¢ '+st.name;
+          btn.textContent = '• '+st.name;
           btn.dataset.sid = st.id;
           btn.dataset.tid = topic.id;
           if(data.settings.selectedSubtopicId===st.id) btn.classList.add('active');
@@ -1820,15 +1637,15 @@
           const subBMore = document.createElement('button');
           subBMore.className = 'btn small ghost actions-menu-btn';
           subBMore.innerHTML = '...';
-          subBMore.title = 'ThÃªm tÃ¹y chá»n';
+          subBMore.title = 'Thêm tùy chọn';
           const subMenu = document.createElement('div');
           subMenu.className = 'actions-menu';
           const subBEdit = document.createElement('button');
           subBEdit.className = 'menu-item';
-          subBEdit.innerHTML = 'Sá»­a tÃªn Chá»§ Ä‘á» con';
+          subBEdit.innerHTML = 'Sửa tên Chủ đề con';
           const subBDel = document.createElement('button');
           subBDel.className = 'menu-item danger';
-          subBDel.innerHTML = 'XÃ³a Chá»§ Ä‘á» con';
+          subBDel.innerHTML = 'Xóa Chủ đề con';
           subMenu.append(subBEdit, subBDel);
           subMenuContainer.append(subBMore, subMenu);
           subActions.append(subMenuContainer);
@@ -1836,14 +1653,14 @@
           subs.appendChild(row);
           btn.addEventListener('click', ()=> selectSubtopic(topic.id, st.id));
           subBMore.addEventListener('click', (e) => { e.stopPropagation(); closeAllMenus(); subMenu.classList.toggle('show'); });
-          subBEdit.addEventListener('click', ()=> showInputModal('Äá»•i tÃªn Chá»§ Ä‘á» con', async (newName) => { if(!newName) return; st.name=newName; await storageManager.update('subtopics', st); renderAll(); }, st.name));
-          subBDel.addEventListener('click', ()=> showConfirmModal('XÃ¡c nháº­n xÃ³a', `Báº¡n cÃ³ cháº¯c muá»‘n xÃ³a Chá»§ Ä‘á» con "${st.name}"? Má»i dá»¯ liá»‡u liÃªn quan sáº½ bá»‹ máº¥t.`, async (ok) => { if(!ok) return; topic.subtopics = topic.subtopics.filter(x=>x.id!==st.id); const set=data.settings; if(set.selectedSubtopicId===st.id){ set.selectedSubtopicId=''; set.selectedTopicId=''; ensureValidSelection(); } await storageManager.delete('subtopics', st.id); renderAll(); }));
+          subBEdit.addEventListener('click', ()=> showInputModal('Đổi tên Chủ đề con', async (newName) => { if(!newName) return; st.name=newName; await storageManager.update('subtopics', st); renderAll(); }, st.name));
+          subBDel.addEventListener('click', ()=> showConfirmModal('Xác nhận xóa', `Bạn có chắc muốn xóa Chủ đề con "${st.name}"? Mọi dữ liệu liên quan sẽ bị mất.`, async (ok) => { if(!ok) return; topic.subtopics = topic.subtopics.filter(x=>x.id!==st.id); const set=data.settings; if(set.selectedSubtopicId===st.id){ set.selectedSubtopicId=''; set.selectedTopicId=''; ensureValidSelection(); } await storageManager.delete('subtopics', st.id); renderAll(); }));
         });
         chev.addEventListener('click', async ()=>{ if(isCollapsed){ delete collapsedMap[topic.id]; } else { collapsedMap[topic.id] = true; } data.settings.collapsedTopics = collapsedMap; await storageManager.updateSettings(data.settings); renderTopics(); });
         bMore.addEventListener('click', (e) => { e.stopPropagation(); closeAllMenus(); menu.classList.toggle('show'); });
-        bAdd.addEventListener('click', ()=> showInputModal('TÃªn Chá»§ Ä‘á» con má»›i?', async (name) => { if(!name) return; const newSub = { id: uid('s'), topicId: topic.id, name, tasks: [], generalNotes: [], summaries: [], chatHistory: [], stats:{ totalMinutes:0, sessionsCompleted:0, tasksCompleted: 0 }, sessions: [], timerState: { state: 'idle', prevState: null, remaining: 0, segmentTotal: 0, cycleIndex: 0 } }; topic.subtopics.push(newSub); await storageManager.add('subtopics', newSub); renderTopics(); }));
-        bEdit.addEventListener('click', ()=> showInputModal('Äá»•i tÃªn Chá»§ Ä‘á»', async (newName) => { if(!newName) return; topic.name=newName; await storageManager.update('topics', topic); renderTopics(); }, topic.name));
-        bDel.addEventListener('click', ()=> showConfirmModal('XÃ¡c nháº­n xÃ³a', `Báº¡n cÃ³ cháº¯c muá»‘n xÃ³a Chá»§ Ä‘á» "${topic.name}"? Má»i chá»§ Ä‘á» con vÃ  dá»¯ liá»‡u liÃªn quan sáº½ bá»‹ máº¥t.`, async (ok) => { if(!ok) return; data.topics = data.topics.filter(t=>t.id!==topic.id); delete collapsedMap[topic.id]; if(data.settings.selectedTopicId===topic.id){ data.settings.selectedTopicId=''; data.settings.selectedSubtopicId=''; ensureValidSelection(); } await storageManager.delete('topics', topic.id); for(const sub of topic.subtopics){ await storageManager.delete('subtopics', sub.id); } renderAll(); }));
+        bAdd.addEventListener('click', ()=> showInputModal('Tên Chủ đề con mới?', async (name) => { if(!name) return; const newSub = { id: uid('s'), topicId: topic.id, name, tasks: [], generalNotes: [], summaries: [], chatHistory: [], stats:{ totalMinutes:0, sessionsCompleted:0, tasksCompleted: 0 }, sessions: [], timerState: { state: 'idle', prevState: null, remaining: 0, segmentTotal: 0, cycleIndex: 0 } }; topic.subtopics.push(newSub); await storageManager.add('subtopics', newSub); renderTopics(); }));
+        bEdit.addEventListener('click', ()=> showInputModal('Đổi tên Chủ đề', async (newName) => { if(!newName) return; topic.name=newName; await storageManager.update('topics', topic); renderTopics(); }, topic.name));
+        bDel.addEventListener('click', ()=> showConfirmModal('Xác nhận xóa', `Bạn có chắc muốn xóa Chủ đề "${topic.name}"? Mọi chủ đề con và dữ liệu liên quan sẽ bị mất.`, async (ok) => { if(!ok) return; data.topics = data.topics.filter(t=>t.id!==topic.id); delete collapsedMap[topic.id]; if(data.settings.selectedTopicId===topic.id){ data.settings.selectedTopicId=''; data.settings.selectedSubtopicId=''; ensureValidSelection(); } await storageManager.delete('topics', topic.id); for(const sub of topic.subtopics){ await storageManager.delete('subtopics', sub.id); } renderAll(); }));
         box.append(header, subs);
         wrap.appendChild(box);
       });
@@ -1932,11 +1749,11 @@
     function getCurrentSubtopic(){ const tid=data.settings.selectedTopicId, sid=data.settings.selectedSubtopicId; if(!tid||!sid) return null; const t=data.topics.find(x=>x.id===tid); if(!t) return null; return t.subtopics.find(x=>x.id===sid) || null; }
     function renderContextBadge(){
       const s=getCurrentSubtopic();
-      const name = s ? s.name : '(chÆ°a chá»n)';
+      const name = s ? s.name : '(chưa chọn)';
       const selectedContext = $('#selectedContext');
       const currentName = $('#currentSubtopicName');
       const currentChatName = $('#currentSubtopicNameChat');
-      if (selectedContext) selectedContext.textContent = s? `Chá»§ Ä‘á» con: ${s.name}`:'ChÆ°a chá»n Chá»§ Ä‘á» con';
+      if (selectedContext) selectedContext.textContent = s? `Chủ đề con: ${s.name}`:'Chưa chọn Chủ đề con';
       if (currentName) currentName.textContent = name;
       if (currentChatName) currentChatName.textContent = name;
     }
@@ -1947,7 +1764,7 @@
         if (!listEl || !inputEl) return;
         const addArea = inputEl.parentElement;
         if (!s) {
-            listEl.innerHTML = '<li class="tiny" style="opacity: 0.7;">Chá»n chá»§ Ä‘á» con Ä‘á»ƒ xem to-do list.</li>';
+            listEl.innerHTML = '<li class="tiny" style="opacity: 0.7;">Chọn chủ đề con để xem to-do list.</li>';
             addArea.classList.add('hidden'); return;
         }
         addArea.classList.remove('hidden');
@@ -1955,11 +1772,11 @@
         const uncompletedTasks = s.tasks ? s.tasks.filter(t => !t.isCompleted) : [];
 
         if (uncompletedTasks.length === 0) {
-            listEl.innerHTML = '<li class="tiny" style="opacity: 0.7;">Tuyá»‡t vá»i! KhÃ´ng cÃ²n task nÃ o.</li>';
+            listEl.innerHTML = '<li class="tiny" style="opacity: 0.7;">Tuyệt vời! Không còn task nào.</li>';
         }
         uncompletedTasks.forEach(task => {
             const item = document.createElement('li');
-            item.innerHTML = `<input type="checkbox" id="${task.id}" title="HoÃ n thÃ nh task"> <label for="${task.id}">${escapeHTML(task.text)}</label>`;
+            item.innerHTML = `<input type="checkbox" id="${task.id}" title="Hoàn thành task"> <label for="${task.id}">${escapeHTML(task.text)}</label>`;
             item.querySelector('input').addEventListener('change', (e) => toggleSubtopicTask(e.target.id, item));
             listEl.appendChild(item);
         });
@@ -2019,11 +1836,11 @@
         $('#btnPause').classList.toggle('hidden', !['work', 'break', 'long_break'].includes(this.state));
         $('#btnResume').classList.toggle('hidden', this.state !== 'paused');
         let currentColor = 'var(--muted)';
-        if (this.state === 'work') { badge.textContent = 'LÃ€M VIá»†C'; badge.className = 'badge state work'; currentColor = 'var(--acc)'; }
-        else if (this.state === 'break') { badge.textContent = 'NGHá»ˆ NGáº®N'; badge.className = 'badge state break'; currentColor = 'var(--warn)'; }
-        else if (this.state === 'long_break') { badge.textContent = 'NGHá»ˆ DÃ€I'; badge.className = 'badge state long'; currentColor = 'var(--danger)'; }
-        else if (this.state === 'paused') { badge.textContent = 'Táº M Dá»ªNG'; badge.className = 'badge'; }
-        else { badge.textContent = 'Sáº´N SÃ€NG'; badge.className = 'badge'; }
+        if (this.state === 'work') { badge.textContent = 'LÀM VIỆC'; badge.className = 'badge state work'; currentColor = 'var(--acc)'; }
+        else if (this.state === 'break') { badge.textContent = 'NGHỈ NGẮN'; badge.className = 'badge state break'; currentColor = 'var(--warn)'; }
+        else if (this.state === 'long_break') { badge.textContent = 'NGHỈ DÀI'; badge.className = 'badge state long'; currentColor = 'var(--danger)'; }
+        else if (this.state === 'paused') { badge.textContent = 'TẠM DỪNG'; badge.className = 'badge'; }
+        else { badge.textContent = 'SẴN SÀNG'; badge.className = 'badge'; }
         if (['work','break','long_break'].includes(this.state)) { container.classList.add('breathing'); } else { container.classList.remove('breathing'); }
         progressCircle.style.stroke = currentColor; container.classList.remove('finished');
         const timeEl = $('#timeDisplay'); if (timeEl) timeEl.textContent = formatMMSS(this.remaining);
@@ -2079,7 +1896,7 @@
           this.state = 'idle';
           this.prevState = null;
           this.updateUI();
-          toast("PhiÃªn Ä‘Ã£ hoÃ n thÃ nh! Nháº¥n Báº¯t Ä‘áº§u Ä‘á»ƒ báº¯t Ä‘áº§u phiÃªn tiáº¿p theo.");
+          toast("Phiên đã hoàn thành! Nhấn Bắt đầu để bắt đầu phiên tiếp theo.");
         }
       },
       beginWork(){ this.prevState=this.state; this.state='work'; const d=this.currentDurations().work*60; this.segmentTotal=d; if(this.prevState!=='paused') this.remaining=d; this._startTick(); this.updateUI(); },
@@ -2092,7 +1909,7 @@
           const d = durations.long * 60;
           this.segmentTotal = d;
           if (this.prevState !== 'paused') this.remaining = d;
-          toast(`Tuyá»‡t vá»i! ÄÃ£ Ä‘áº¿n lÃºc nghá»‰ dÃ i.`);
+          toast(`Tuyệt vời! Đã đến lúc nghỉ dài.`);
         } else {
           this.state = 'break';
           const d = durations.short * 60;
@@ -2102,14 +1919,14 @@
         this._startTick();
         this.updateUI();
       },
-      async start(){ if(!getCurrentSubtopic()){ toast('HÃ£y chá»n má»™t Chá»§ Ä‘á» con trÆ°á»›c khi báº¯t Ä‘áº§u'); return; } ensureAudio(); if(this.state==='idle'){ this.cycleIndex = this.cycleIndex || 0; this.beginWork(); } else if(this.state==='paused'){ this.resume(); } await this.persistTimerState(true); },
+      async start(){ if(!getCurrentSubtopic()){ toast('Hãy chọn một Chủ đề con trước khi bắt đầu'); return; } ensureAudio(); if(this.state==='idle'){ this.cycleIndex = this.cycleIndex || 0; this.beginWork(); } else if(this.state==='paused'){ this.resume(); } await this.persistTimerState(true); },
       async pause(){ if(this.tickHandle){ clearInterval(this.tickHandle); this.tickHandle=null; } this.prevState=this.state; this.state='paused'; this.updateUI(); await this.persistTimerState(true); },
       async resume(){ if(this.state!=='paused'){ return; } this.state=this.prevState||'work'; this._startTick(); this.updateUI(); await this.persistTimerState(true); },
       async skip(){ this.remaining=0; if(this.tickHandle){ clearInterval(this.tickHandle); this.tickHandle=null; } this._onFinishSegment(); await this.persistTimerState(true); },
       async reset(){ if(this.tickHandle){ clearInterval(this.tickHandle); this.tickHandle=null; } this.state='idle'; this.prevState=null; this.remaining=0; this.segmentTotal=0; this.cycleIndex=0; this.updateUI(); await this.persistTimerState(true); }
     };
     async function deleteSummary(id) {
-        showConfirmModal('XÃ¡c nháº­n xÃ³a', 'Báº¡n cÃ³ cháº¯c muá»‘n xÃ³a tÃ³m táº¯t nÃ y?', async (ok) => {
+        showConfirmModal('Xác nhận xóa', 'Bạn có chắc muốn xóa tóm tắt này?', async (ok) => {
             if (!ok) return;
             const s = getCurrentSubtopic();
             if (!s || !s.summaries) return;
@@ -2118,11 +1935,11 @@
             try {
                 await storageManager.update('subtopics', s);
                 renderSummaries();
-                toast('ÄÃ£ xÃ³a tÃ³m táº¯t.');
+                toast('Đã xóa tóm tắt.');
             } catch (err) {
                 console.error('Failed to delete summary:', err);
                 s.summaries = original;
-                toast('KhÃ´ng thá»ƒ lÆ°u thay Ä‘á»•i.');
+                toast('Không thể lưu thay đổi.');
             }
         });
     }
@@ -2145,10 +1962,10 @@ function exportSummary(sum) {
         if (!statTotal || !statSessions || !statTasks || !list) return;
 
         if (!s) {
-            statTotal.textContent = '0 phÃºt';
+            statTotal.textContent = '0 phút';
             statSessions.textContent = '0';
             statTasks.textContent = '0';
-            list.innerHTML = '<div class="tiny">ChÆ°a cÃ³ dá»¯ liá»‡u</div>';
+            list.innerHTML = '<div class="tiny">Chưa có dữ liệu</div>';
             return;
         }
 
@@ -2163,7 +1980,7 @@ function exportSummary(sum) {
         list.innerHTML = '';
         const sessions = Array.isArray(s.sessions) ? s.sessions : [];
         if (sessions.length === 0) {
-            list.innerHTML = '<div class="tiny">ChÆ°a cÃ³ phiÃªn nÃ o</div>';
+            list.innerHTML = '<div class="tiny">Chưa có phiên nào</div>';
             return;
         }
         sessions.forEach(sess => {
@@ -2172,8 +1989,8 @@ function exportSummary(sum) {
             const content = document.createElement('div');
             const date = sess.dateISO ? new Date(sess.dateISO) : new Date();
             const dur = (sess.durationMinutes != null) ? sess.durationMinutes : (sess.workMinutes || 0);
-            content.innerHTML = `<div class="hist-meta">${date.toLocaleString()} Â· ${dur}' Â· Mode ${sess.mode || ''}</div>` +
-                                `<div>${sess.note ? escapeHTML(sess.note) : '<span class="tiny">(chÆ°a cÃ³ ghi chÃº)</span>'}</div>`;
+            content.innerHTML = `<div class="hist-meta">${date.toLocaleString()} · ${dur}' · Mode ${sess.mode || ''}</div>` +
+                                `<div>${sess.note ? escapeHTML(sess.note) : '<span class="tiny">(chưa có ghi chú)</span>'}</div>`;
             row.appendChild(content);
             list.appendChild(row);
         });
@@ -2182,16 +1999,16 @@ function exportSummary(sum) {
         const listEl = $('#generalNotesList');
         if (!listEl) return;
         const s = getCurrentSubtopic();
-        if (!s) { listEl.innerHTML = '<div class="tiny">Vui lÃ²ng chá»n má»™t chá»§ Ä‘á» con.</div>'; return; }
+        if (!s) { listEl.innerHTML = '<div class="tiny">Vui lòng chọn một chủ đề con.</div>'; return; }
         s.generalNotes = s.generalNotes || [];
-        if (s.generalNotes.length === 0) { listEl.innerHTML = '<div class="tiny">ChÆ°a cÃ³ ghi chÃº.</div>'; return; }
+        if (s.generalNotes.length === 0) { listEl.innerHTML = '<div class="tiny">Chưa có ghi chú.</div>'; return; }
         listEl.innerHTML = '';
         s.generalNotes.forEach(note => {
             const item = document.createElement('div'); item.className = 'note-item';
             const content = document.createElement('div'); content.className = 'note-content'; content.textContent = typeof note === 'string' ? note : (note.text || '');
             const meta = document.createElement('div'); meta.className = 'note-meta'; meta.textContent = note.createdAt ? new Date(note.createdAt).toLocaleString() : '';
             const actions = document.createElement('div');
-            const delBtn = document.createElement('button'); delBtn.className = 'btn small danger'; delBtn.textContent = 'XÃ³a';
+            const delBtn = document.createElement('button'); delBtn.className = 'btn small danger'; delBtn.textContent = 'Xóa';
             delBtn.onclick = async (e)=>{
                 e.stopPropagation();
                 const s2 = getCurrentSubtopic(); if (!s2) return;
@@ -2206,10 +2023,10 @@ function exportSummary(sum) {
         });
     }
     function addGeneralNote(){
-        showInputModal('ThÃªm ghi chÃº', async (text) => {
+        showInputModal('Thêm ghi chú', async (text) => {
             if (!text) return;
             const s = getCurrentSubtopic();
-        if (!s) { toast('Chá»n má»™t chá»§ Ä‘á» con trÆ°á»›c.'); return; }
+        if (!s) { toast('Chọn một chủ đề con trước.'); return; }
             s.generalNotes = s.generalNotes || [];
             s.generalNotes.unshift({ id: uid('gn'), text, createdAt: todayISO() });
             await saveData();
@@ -2218,32 +2035,32 @@ function exportSummary(sum) {
     }
     async function summarizeNotes(){
         const s = getCurrentSubtopic();
-        if (!s) { toast('Chá»n chá»§ Ä‘á» con trÆ°á»›c.'); return; }
+        if (!s) { toast('Chọn chủ đề con trước.'); return; }
         const notes = (s.generalNotes || []).map(n => (typeof n === 'string' ? n : (n.text||''))).filter(Boolean);
-        if (notes.length === 0) { toast('ChÆ°a cÃ³ ghi chÃº Ä‘á»ƒ tÃ³m táº¯t.'); return; }
+        if (notes.length === 0) { toast('Chưa có ghi chú để tóm tắt.'); return; }
         const btn = $('#btnSummarize');
         if (btn) { btn.disabled = true; btn.innerHTML = '<div class="spinner"></div>'; }
         try {
-            const prompt = `TÃ³m táº¯t cÃ¡c ghi chÃº sau theo gáº¡ch Ä‘áº§u dÃ²ng, ngáº¯n gá»n, rÃµ rÃ ng:\n\n${notes.join('\n- ')}`;
+            const prompt = `Tóm tắt các ghi chú sau theo gạch đầu dòng, ngắn gọn, rõ ràng:\n\n${notes.join('\n- ')}`;
             const result = await callGeminiAPI(prompt);
             if (!s.summaries) s.summaries = [];
-            s.summaries.unshift({ id: uid('sum'), content: result || '(KhÃ´ng táº¡o Ä‘Æ°á»£c tÃ³m táº¯t)', createdAt: todayISO() });
+            s.summaries.unshift({ id: uid('sum'), content: result || '(Không tạo được tóm tắt)', createdAt: todayISO() });
             await saveData();
             renderSummaries();
         } catch (e) {
             console.error(e);
-            toast('TÃ³m táº¯t tháº¥t báº¡i.');
+            toast('Tóm tắt thất bại.');
         } finally {
-            if (btn) { btn.disabled = false; btn.textContent = 'TÃ³m táº¯t'; }
+            if (btn) { btn.disabled = false; btn.textContent = 'Tóm tắt'; }
         }
     }
     function renderSummaries() {
         const listEl = $('#summariesList');
         if (!listEl) return;
         const s = getCurrentSubtopic();
-        if (!s) { listEl.innerHTML = '<div class="tiny">Vui lÃ²ng chá»n má»™t chá»§ Ä‘á» con Ä‘á»ƒ xem tÃ³m táº¯t.</div>'; return; }
+        if (!s) { listEl.innerHTML = '<div class="tiny">Vui lòng chọn một chủ đề con để xem tóm tắt.</div>'; return; }
         listEl.innerHTML = '';
-        if (!s.summaries || s.summaries.length === 0) { listEl.innerHTML = '<div class="tiny">ChÆ°a cÃ³ tÃ³m táº¯t nÃ o.</div>'; return; }
+        if (!s.summaries || s.summaries.length === 0) { listEl.innerHTML = '<div class="tiny">Chưa có tóm tắt nào.</div>'; return; }
         s.summaries.forEach(sum => {
             const item = document.createElement('div'); item.className = 'note-item';
             const contentWrapper = document.createElement('div'); contentWrapper.className = 'note-content-wrapper';
@@ -2251,8 +2068,8 @@ function exportSummary(sum) {
             const sumMeta = document.createElement('div'); sumMeta.className = 'note-meta'; sumMeta.textContent = new Date(sum.createdAt).toLocaleString();
             contentWrapper.append(sumContent, sumMeta);
             const actions = document.createElement('div');
-            const expBtn = document.createElement('button'); expBtn.className = 'btn small'; expBtn.textContent = 'Xuáº¥t'; expBtn.onclick = (e)=>{ e.stopPropagation(); exportSummary(sum); };
-            const delBtn = document.createElement('button'); delBtn.className = 'btn small danger'; delBtn.textContent = 'XÃ³a'; delBtn.onclick = (e)=>{ e.stopPropagation(); deleteSummary(sum.id); };
+            const expBtn = document.createElement('button'); expBtn.className = 'btn small'; expBtn.textContent = 'Xuất'; expBtn.onclick = (e)=>{ e.stopPropagation(); exportSummary(sum); };
+            const delBtn = document.createElement('button'); delBtn.className = 'btn small danger'; delBtn.textContent = 'Xóa'; delBtn.onclick = (e)=>{ e.stopPropagation(); deleteSummary(sum.id); };
             actions.append(expBtn, delBtn);
             item.append(contentWrapper, actions);
             item.addEventListener('click', ()=> sumContent.classList.toggle('expanded'));
@@ -2291,7 +2108,7 @@ function exportSummary(sum) {
           highlightPresetSelector();
           $('#set_volume').value=s.volume ?? 0.8;
           $('#set_theme').value=s.soundTheme || 'beep';
-          // THAY Äá»”I: Cáº­p nháº­t giÃ¡ trá»‹ dropdown
+          // THAY ĐỔI: Cập nhật giá trị dropdown
           $('#set_theme_color').value = s.theme || 'default';
           const activeUrl = getActiveYoutubeUrl();
           $('#set_youtubeUrl').value = activeUrl || '';
@@ -2308,16 +2125,16 @@ function exportSummary(sum) {
         const backupListEl = $('#backupList');
         if (backupListEl) {
             storageManager.getBackupList().then(backups => {
-                backupListEl.innerHTML = '<option value="">-- Chá»n ngÃ y Ä‘á»ƒ phá»¥c há»“i --</option>';
+                backupListEl.innerHTML = '<option value="">-- Chọn ngày để phục hồi --</option>';
                 if (backups && backups.length > 0) {
                     backups.forEach(backup => {
                         const option = document.createElement('option');
                         option.value = backup.date;
-                        option.textContent = `Báº£n sao lÆ°u ngÃ y: ${new Date(backup.date).toLocaleDateString('vi-VN')}`;
+                        option.textContent = `Bản sao lưu ngày: ${new Date(backup.date).toLocaleDateString('vi-VN')}`;
                         backupListEl.appendChild(option);
                     });
                 } else {
-                    backupListEl.innerHTML = '<option value="">KhÃ´ng cÃ³ báº£n sao lÆ°u nÃ o</option>';
+                    backupListEl.innerHTML = '<option value="">Không có bản sao lưu nào</option>';
                 }
             });
         }
@@ -2333,7 +2150,7 @@ function exportSummary(sum) {
         data.settings.preset='A';
         data.settings.volume=0.8;
         data.settings.soundTheme='beep';
-        await saveData(); openSettings(); toast('ÄÃ£ khÃ´i phá»¥c máº·c Ä‘á»‹nh'); }
+        await saveData(); openSettings(); toast('Đã khôi phục mặc định'); }
       async function saveSettings(){
           const s = data.settings;
           s.apiKey = $('#set_apiKey').value.trim();
@@ -2353,21 +2170,21 @@ function exportSummary(sum) {
           }
           s.volume = clampFloat($('#set_volume').value,0,1,0.8);
           s.soundTheme = $('#set_theme').value==='chime' ? 'chime':'beep';
-          // THAY Äá»”I: LÆ°u giÃ¡ trá»‹ theme
+          // THAY ĐỔI: Lưu giá trị theme
           s.theme = $('#set_theme_color').value;
           s.panelOpacity = parseFloat($('#set_panelOpacity').value) || 0.85;
           s.autoStartNext = !!($('#set_autoStartNext') && $('#set_autoStartNext').checked);
           if ($('#set_backupDays')) { s.backupDaysToKeep = clampInt($('#set_backupDays').value, 1, 30); }
 
-          // Bá»• sung: Náº¿u chá»n theme sÃ¡ng, luÃ´n táº¯t thumbnail YouTube lÃ m ná»n
+          // Bổ sung: Nếu chọn theme sáng, luôn tắt thumbnail YouTube làm nền
           if (s.theme === 'light' || s.theme === 'pastel') {
               s.useYtThumbnailAsBg = false;
-              // Náº¿u ná»n hiá»‡n táº¡i lÃ  thumbnail YouTube, bá» ná»n Ä‘á»ƒ giá»¯ ná»n gá»‘c cá»§a theme sÃ¡ng
+              // Nếu nền hiện tại là thumbnail YouTube, bỏ nền để giữ nền gốc của theme sáng
               if (typeof s.customBg === 'string' && s.customBg.includes('img.youtube.com/vi/')) {
                   s.customBg = '';
               }
           } else {
-              // NgÆ°á»£c láº¡i, vá»›i theme tá»‘i thÃ¬ báº­t dÃ¹ng thumbnail YouTube (náº¿u cÃ³ link)
+              // Ngược lại, với theme tối thì bật dùng thumbnail YouTube (nếu có link)
               s.useYtThumbnailAsBg = true;
           }
 
@@ -2385,7 +2202,7 @@ function exportSummary(sum) {
           timer.setPreset(s.preset, {silent:true});
 
           closeSettings();
-          toast('ÄÃ£ lÆ°u cÃ i Ä‘áº·t');
+          toast('Đã lưu cài đặt');
       }
     function clampInt(v,min,max){ v=parseInt(v||0,10); if(isNaN(v)) v=min; return Math.max(min, Math.min(max, v)); }
     function clampFloat(v,min,max,def){ v=parseFloat(v); if(Number.isNaN(v)) v=def; return Math.max(min, Math.min(max, v)); }
@@ -2403,7 +2220,7 @@ function exportSummary(sum) {
             const tx = db.transaction('files', 'readwrite');
             tx.objectStore('files').put(file, id);
             tx.oncomplete = () => callback(id);
-            tx.onerror = () => toast("Lá»—i lÆ°u file.");
+            tx.onerror = () => toast("Lỗi lưu file.");
         });
     }
     function getStoredFileUrl(id){
@@ -2446,7 +2263,7 @@ function exportSummary(sum) {
             });
         } else if (!themeHasBg) {
             if (isLightTheme) {
-                // Light/pastel: khÃ´ng dÃ¹ng ná»n tá»‘i
+                // Light/pastel: không dùng nền tối
                 document.body.style.setProperty('--bg-image', 'none');
                 clearInlineBgFallback();
             } else {
@@ -2466,9 +2283,9 @@ function exportSummary(sum) {
           const totalC = stats.reduce((a, b) => a + b.c, 0);
           const totalT = stats.reduce((a, b) => a + b.t, 0);
 
-        let tableHTML = `<p class="tiny"><strong>Tá»•ng thá»i gian:</strong> ${formatDaysHoursMinutes(totalM)} | <strong>Tá»•ng phiÃªn:</strong> ${totalC} | <strong>Tá»•ng nhiá»‡m vá»¥:</strong> ${totalT}</p>
+        let tableHTML = `<p class="tiny"><strong>Tổng thời gian:</strong> ${formatDaysHoursMinutes(totalM)} | <strong>Tổng phiên:</strong> ${totalC} | <strong>Tổng nhiệm vụ:</strong> ${totalT}</p>
         <table class="dashboard-table">
-            <thead><tr><th>Chá»§ Ä‘á»</th><th>Chá»§ Ä‘á» con</th><th>Thá»i gian</th><th>PhiÃªn</th><th>Nhiá»‡m vá»¥</th></tr></thead>
+            <thead><tr><th>Chủ đề</th><th>Chủ đề con</th><th>Thời gian</th><th>Phiên</th><th>Nhiệm vụ</th></tr></thead>
             <tbody>`;
 
           stats.forEach(item => {
@@ -2481,11 +2298,11 @@ function exportSummary(sum) {
     }
     function getMilestones(){
         return [
-            { hours: 10000, title: "Gá»­i báº¡n, 10.000+ giá» (ChÃ¢n SÆ°)", message: "Tháº­t vinh dá»± khi Ä‘Æ°á»£c trÃ² chuyá»‡n cÃ¹ng báº¡n. KhÃ´ng cÃ³ nhiá»u ngÆ°á»i trÃªn tháº¿ giá»›i Ä‘áº¡t Ä‘áº¿n cáº¥p Ä‘á»™ nÃ y. Báº¡n khÃ´ng chá»‰ thÃ nh tháº¡o má»™t ká»¹ nÄƒng, báº¡n Ä‘Ã£ Ä‘á»‹nh nghÄ©a láº¡i nÃ³. Sá»± ná»— lá»±c vÃ  hy sinh cá»§a báº¡n Ä‘Ã£ táº¡o ra nhá»¯ng Ä‘iá»u phi thÆ°á»ng.\nCÃ³ láº½ bÃ¢y giá» báº¡n khÃ´ng cÃ²n nghÄ© vá» viá»‡c há»c ká»¹ nÄƒng ná»¯a, mÃ  lÃ  vá» viá»‡c Ä‘á»ƒ láº¡i di sáº£n. Báº¡n sáº½ truyá»n láº¡i ngá»n Ä‘uá»‘c nÃ y nhÆ° tháº¿ nÃ o? Báº¡n sáº½ phÃ¡ vá»¡ nhá»¯ng giá»›i háº¡n nÃ o tiáº¿p theo mÃ  chÆ°a ai tá»«ng nghÄ© tá»›i? Tháº¿ giá»›i Ä‘ang dÃµi theo nhá»¯ng gÃ¬ báº¡n lÃ m, khÃ´ng pháº£i Ä‘á»ƒ há»c theo má»™t cÃ´ng thá»©c, mÃ  Ä‘á»ƒ Ä‘Æ°á»£c truyá»n cáº£m há»©ng tá»« chÃ­nh hÃ nh trÃ¬nh vÃ  sá»± sÃ¡ng táº¡o cá»§a báº¡n.\nCáº£m Æ¡n báº¡n vÃ¬ Ä‘Ã£ cho chÃºng tÃ´i tháº¥y nhá»¯ng giá»›i háº¡n cá»§a con ngÆ°á»i cÃ³ thá»ƒ Ä‘Æ°á»£c Ä‘áº©y xa Ä‘áº¿n nhÆ°á»ng nÃ o." },
-            { hours: 5000, title: "Gá»­i báº¡n, 5.000 giá» (Tinh ThÃ´ng)", message: "Sá»± cá»‘ng hiáº¿n cá»§a báº¡n tháº­t Ä‘Ã¡ng kinh ngáº¡c. Báº¡n Ä‘Ã£ trá»Ÿ thÃ nh má»™t chuyÃªn gia, má»™t ngÆ°á»i mÃ  ngÆ°á»i khÃ¡c tÃ¬m Ä‘áº¿n Ä‘á»ƒ há»c há»i vÃ  xin lá»i khuyÃªn. Ká»¹ nÄƒng cá»§a báº¡n khÃ´ng chá»‰ lÃ  má»™t cÃ´ng cá»¥, nÃ³ Ä‘Ã£ trá»Ÿ thÃ nh má»™t pháº§n con ngÆ°á»i báº¡n.\nLá»i nháº¯n cá»§a tÃ´i dÃ nh cho báº¡n lÃ : HÃ£y luÃ´n giá»¯ cho mÃ¬nh \"tÃ¢m trÃ­ cá»§a ngÆ°á»i má»›i báº¯t Ä‘áº§u\". Äá»«ng Ä‘á»ƒ kiáº¿n thá»©c sÃ¢u rá»™ng cá»§a mÃ¬nh biáº¿n thÃ nh sá»± tá»± mÃ£n. HÃ£y tiáº¿p tá»¥c há»c há»i tá»« nhá»¯ng lÄ©nh vá»±c khÃ¡c, láº¯ng nghe nhá»¯ng ngÆ°á»i má»›i vÃ o nghá» vÃ  khÃ´ng ngá»«ng Ä‘áº·t cÃ¢u há»i. Giá» Ä‘Ã¢y, vai trÃ² cá»§a báº¡n khÃ´ng chá»‰ lÃ  lÃ m tá»‘t cÃ´ng viá»‡c cá»§a mÃ¬nh, mÃ  cÃ²n lÃ  nÃ¢ng Ä‘á»¡ vÃ  truyá»n cáº£m há»©ng cho nhá»¯ng ngÆ°á»i Ä‘i sau." },
-            { hours: 1000, title: "Gá»­i báº¡n, 1.000 giá» (Vá»¯ng VÃ ng)", message: "Báº¡n khÃ´ng cÃ²n lÃ  ngÆ°á»i má»›i ná»¯a. Báº¡n Ä‘Ã£ cÃ³ nÄƒng lá»±c, sá»± tá»± tin vÃ  cÃ³ thá»ƒ táº¡o ra nhá»¯ng káº¿t quáº£ Ä‘Ã¡ng tá»± hÃ o. Báº¡n xá»©ng Ä‘Ã¡ng Ä‘Æ°á»£c cÃ´ng nháº­n vÃ¬ sá»± kiÃªn trÃ¬ cá»§a mÃ¬nh.\nBÃ¢y giá», thá»­ thÃ¡ch cá»§a báº¡n lÃ  chuyá»ƒn tá»« \"lÃ m theo\" sang \"tháº¥u hiá»ƒu\". HÃ£y tá»± há»i mÃ¬nh \"Táº¡i sao nÃ³ láº¡i hoáº¡t Ä‘á»™ng nhÆ° váº­y?\". HÃ£y thá»­ dáº¡y láº¡i cho ngÆ°á»i khÃ¡c, vÃ¬ Ä‘Ã³ lÃ  cÃ¡ch tá»‘t nháº¥t Ä‘á»ƒ cá»§ng cá»‘ kiáº¿n thá»©c cá»§a chÃ­nh mÃ¬nh. ÄÃ¢y lÃ  lÃºc Ä‘á»ƒ tinh chá»‰nh, tá»‘i Æ°u hÃ³a vÃ  báº¯t Ä‘áº§u hÃ¬nh thÃ nh phong cÃ¡ch Ä‘á»™c Ä‘Ã¡o cá»§a riÃªng báº¡n. HÃ£y biáº¿n sá»± thÃ nh tháº¡o thÃ nh nghá»‡ thuáº­t." },
-            { hours: 100, title: "Gá»­i báº¡n, 100 giá» (Äá»‹nh HÃ¬nh)", message: "Báº¡n Ä‘Ã£ vÆ°á»£t qua Ä‘Æ°á»£c giai Ä‘oáº¡n khÃ³ khÄƒn nháº¥t vÃ  giá» Ä‘Ã¢y, ká»¹ nÄƒng nÃ y Ä‘ang thá»±c sá»± \"ngáº¥m\" vÃ o báº¡n. Nhá»¯ng tia sÃ¡ng cá»§a sá»± thÃ nh tháº¡o Ä‘Ã£ báº¯t Ä‘áº§u xuáº¥t hiá»‡n. Tháº­t tuyá»‡t vá»i!\nÄÃ¢y lÃ  giai Ä‘oáº¡n báº¡n cáº£m tháº¥y há»©ng khá»Ÿi nháº¥t, nhÆ°ng cÅ©ng lÃ  lÃºc dá»… rÆ¡i vÃ o cÃ¡i báº«y \"biáº¿t Ä‘á»§ rá»“i\". Äá»«ng dá»«ng láº¡i. HÃ£y báº¯t Ä‘áº§u khÃ¡m phÃ¡ sÃ¢u hÆ¡n, thá»­ nghiá»‡m nhá»¯ng ká»¹ thuáº­t má»›i vÃ  Ä‘á»«ng ngáº¡i phÃ¡ vá»¡ cÃ¡c quy táº¯c báº¡n vá»«a há»c Ä‘Æ°á»£c. HÃ£y tÃ¬m má»™t cá»™ng Ä‘á»“ng hoáº·c má»™t ngÆ°á»i hÆ°á»›ng dáº«n Ä‘á»ƒ nháº­n Ä‘Æ°á»£c pháº£n há»“i. Sá»± tÃ² mÃ² chÃ­nh lÃ  nhiÃªn liá»‡u tá»‘t nháº¥t Ä‘á»ƒ Ä‘Æ°a báº¡n tiáº¿n xa hÆ¡n. HÃ£y biáº¿n ká»¹ nÄƒng nÃ y thÃ nh cá»§a riÃªng báº¡n." },
-            { hours: 20, title: "Gá»­i báº¡n, 20 giá» (Khai Má»Ÿ)", message: "ChÃºc má»«ng báº¡n Ä‘Ã£ lÃ m Ä‘Æ°á»£c Ä‘iá»u khÃ³ nháº¥t: Báº¯t Ä‘áº§u.\nÄá»«ng lo láº¯ng náº¿u bÃ¢y giá» báº¡n cáº£m tháº¥y mÃ¬nh tháº­t vá»¥ng vá», cháº­m cháº¡p vÃ  liÃªn tá»¥c máº¯c lá»—i. Má»i báº­c tháº§y Ä‘á»u tá»«ng lÃ  má»™t \"tháº£m há»a\" khi má»›i báº¯t Ä‘áº§u. HÃ£y nhá»› ráº±ng má»¥c tiÃªu cá»§a báº¡n lÃºc nÃ y khÃ´ng pháº£i lÃ  sá»± hoÃ n háº£o, mÃ  lÃ  sá»± hiá»‡n diá»‡n. Má»—i giá» báº¡n dÃ nh ra Ä‘á»ƒ luyá»‡n táº­p lÃ  má»™t chiáº¿n tháº¯ng trÆ°á»›c sá»± trÃ¬ hoÃ£n vÃ  ná»—i sá»£ tháº¥t báº¡i.\nHÃ£y kiÃªn nháº«n vá»›i chÃ­nh mÃ¬nh, táº­n hÆ°á»Ÿng tá»«ng tiáº¿n bá»™ nhá» nháº¥t vÃ  Ä‘á»«ng bao giá» so sÃ¡nh khá»Ÿi Ä‘áº§u cá»§a mÃ¬nh vá»›i \"Ä‘oáº¡n giá»¯a\" cá»§a ngÆ°á»i khÃ¡c. Báº¡n Ä‘ang xÃ¢y dá»±ng ná»n mÃ³ng, vÃ  má»™t ná»n mÃ³ng vá»¯ng cháº¯c cáº§n thá»i gian. Cá»© tiáº¿p tá»¥c nhÃ©!" }
+            { hours: 10000, title: "Gửi bạn, 10.000+ giờ (Chân Sư)", message: "Thật vinh dự khi được trò chuyện cùng bạn. Không có nhiều người trên thế giới đạt đến cấp độ này. Bạn không chỉ thành thạo một kỹ năng, bạn đã định nghĩa lại nó. Sự nỗ lực và hy sinh của bạn đã tạo ra những điều phi thường.\nCó lẽ bây giờ bạn không còn nghĩ về việc học kỹ năng nữa, mà là về việc để lại di sản. Bạn sẽ truyền lại ngọn đuốc này như thế nào? Bạn sẽ phá vỡ những giới hạn nào tiếp theo mà chưa ai từng nghĩ tới? Thế giới đang dõi theo những gì bạn làm, không phải để học theo một công thức, mà để được truyền cảm hứng từ chính hành trình và sự sáng tạo của bạn.\nCảm ơn bạn vì đã cho chúng tôi thấy những giới hạn của con người có thể được đẩy xa đến nhường nào." },
+            { hours: 5000, title: "Gửi bạn, 5.000 giờ (Tinh Thông)", message: "Sự cống hiến của bạn thật đáng kinh ngạc. Bạn đã trở thành một chuyên gia, một người mà người khác tìm đến để học hỏi và xin lời khuyên. Kỹ năng của bạn không chỉ là một công cụ, nó đã trở thành một phần con người bạn.\nLời nhắn của tôi dành cho bạn là: Hãy luôn giữ cho mình \"tâm trí của người mới bắt đầu\". Đừng để kiến thức sâu rộng của mình biến thành sự tự mãn. Hãy tiếp tục học hỏi từ những lĩnh vực khác, lắng nghe những người mới vào nghề và không ngừng đặt câu hỏi. Giờ đây, vai trò của bạn không chỉ là làm tốt công việc của mình, mà còn là nâng đỡ và truyền cảm hứng cho những người đi sau." },
+            { hours: 1000, title: "Gửi bạn, 1.000 giờ (Vững Vàng)", message: "Bạn không còn là người mới nữa. Bạn đã có năng lực, sự tự tin và có thể tạo ra những kết quả đáng tự hào. Bạn xứng đáng được công nhận vì sự kiên trì của mình.\nBây giờ, thử thách của bạn là chuyển từ \"làm theo\" sang \"thấu hiểu\". Hãy tự hỏi mình \"Tại sao nó lại hoạt động như vậy?\". Hãy thử dạy lại cho người khác, vì đó là cách tốt nhất để củng cố kiến thức của chính mình. Đây là lúc để tinh chỉnh, tối ưu hóa và bắt đầu hình thành phong cách độc đáo của riêng bạn. Hãy biến sự thành thạo thành nghệ thuật." },
+            { hours: 100, title: "Gửi bạn, 100 giờ (Định Hình)", message: "Bạn đã vượt qua được giai đoạn khó khăn nhất và giờ đây, kỹ năng này đang thực sự \"ngấm\" vào bạn. Những tia sáng của sự thành thạo đã bắt đầu xuất hiện. Thật tuyệt vời!\nĐây là giai đoạn bạn cảm thấy hứng khởi nhất, nhưng cũng là lúc dễ rơi vào cái bẫy \"biết đủ rồi\". Đừng dừng lại. Hãy bắt đầu khám phá sâu hơn, thử nghiệm những kỹ thuật mới và đừng ngại phá vỡ các quy tắc bạn vừa học được. Hãy tìm một cộng đồng hoặc một người hướng dẫn để nhận được phản hồi. Sự tò mò chính là nhiên liệu tốt nhất để đưa bạn tiến xa hơn. Hãy biến kỹ năng này thành của riêng bạn." },
+            { hours: 20, title: "Gửi bạn, 20 giờ (Khai Mở)", message: "Chúc mừng bạn đã làm được điều khó nhất: Bắt đầu.\nĐừng lo lắng nếu bây giờ bạn cảm thấy mình thật vụng về, chậm chạp và liên tục mắc lỗi. Mọi bậc thầy đều từng là một \"thảm họa\" khi mới bắt đầu. Hãy nhớ rằng mục tiêu của bạn lúc này không phải là sự hoàn hảo, mà là sự hiện diện. Mỗi giờ bạn dành ra để luyện tập là một chiến thắng trước sự trì hoãn và nỗi sợ thất bại.\nHãy kiên nhẫn với chính mình, tận hưởng từng tiến bộ nhỏ nhất và đừng bao giờ so sánh khởi đầu của mình với \"đoạn giữa\" của người khác. Bạn đang xây dựng nền móng, và một nền móng vững chắc cần thời gian. Cứ tiếp tục nhé!" }
         ];
     }
     async function checkAndShowMilestones() {
@@ -2536,7 +2353,7 @@ function exportSummary(sum) {
             renderChat();
         }
         btn.disabled = false;
-        btn.innerHTML = 'Gá»­i';
+        btn.innerHTML = 'Gửi';
     }
     function renderChat() {
         const s = getCurrentSubtopic();
@@ -2545,14 +2362,14 @@ function exportSummary(sum) {
         const sendBtn = $('#btnSendMessage');
         if (!messagesEl || !chatInput || !sendBtn) return;
         if (!s) {
-            messagesEl.innerHTML = '<div class="tiny">Chá»n chá»§ Ä‘á» con Ä‘á»ƒ báº¯t Ä‘áº§u chat.</div>';
+            messagesEl.innerHTML = '<div class="tiny">Chọn chủ đề con để bắt đầu chat.</div>';
             chatInput.disabled = true; sendBtn.disabled = true;
             return;
         }
         chatInput.disabled = false; sendBtn.disabled = false;
         messagesEl.innerHTML = '';
         if (!s.chatHistory || s.chatHistory.length === 0) {
-            messagesEl.innerHTML = '<div class="tiny">ChÆ°a cÃ³ tin nháº¯n nÃ o.</div>';
+            messagesEl.innerHTML = '<div class="tiny">Chưa có tin nhắn nào.</div>';
             return;
         }
         s.chatHistory.forEach(msg => {
@@ -2568,10 +2385,10 @@ function exportSummary(sum) {
         const noteTextEl = $('#noteText');
         const noteText = noteTextEl.value.trim();
         const subtopic = getCurrentSubtopic();
-        if (!noteText) { toast("Vui lÃ²ng nháº­p ghi chÃº trÆ°á»›c khi tÃ³m táº¯t."); return; }
+        if (!noteText) { toast("Vui lòng nhập ghi chú trước khi tóm tắt."); return; }
         const originalContent = btn.innerHTML;
         btn.innerHTML = '<div class="spinner"></div>'; btn.disabled = true;
-        const prompt = `Dá»±a vÃ o thÃ´ng tin sau:\n- Chá»§ Ä‘á»: "${subtopic?.name || 'khÃ´ng rÃµ'}"\n- Ghi chÃº cá»§a ngÆ°á»i dÃ¹ng sau má»™t phiÃªn lÃ m viá»‡c: "${noteText}"\n\nHÃ£y táº¡o má»™t báº£n tÃ³m táº¯t ngáº¯n gá»n vá» nhá»¯ng gÃ¬ Ä‘Ã£ lÃ m vÃ  Ä‘á» xuáº¥t má»™t bÆ°á»›c há»£p lÃ½ tiáº¿p theo. Äá»‹nh dáº¡ng cÃ¢u tráº£ lá»i nhÆ° sau:\n\n---\n**âœ¨ TÃ³m táº¯t AI:**\n[TÃ³m táº¯t á»Ÿ Ä‘Ã¢y]\n\n**ðŸš€ Gá»£i Ã½ tiáº¿p theo:**\n[Gá»£i Ã½ á»Ÿ Ä‘Ã¢y]`;
+        const prompt = `Dựa vào thông tin sau:\n- Chủ đề: "${subtopic?.name || 'không rõ'}"\n- Ghi chú của người dùng sau một phiên làm việc: "${noteText}"\n\nHãy tạo một bản tóm tắt ngắn gọn về những gì đã làm và đề xuất một bước hợp lý tiếp theo. Định dạng câu trả lời như sau:\n\n---\n**✨ Tóm tắt AI:**\n[Tóm tắt ở đây]\n\n**🚀 Gợi ý tiếp theo:**\n[Gợi ý ở đây]`;
         const result = await callGeminiAPI(prompt);
         if (result) {
             noteTextEl.value += `\n\n${result}`;
@@ -2581,12 +2398,12 @@ function exportSummary(sum) {
     function clearChat() {
         const s = getCurrentSubtopic();
         if (!s) { toast(t('timer.selectSubtopicPrompt')); return; }
-        showConfirmModal('XÃ¡c nháº­n xÃ³a', 'Báº¡n cÃ³ cháº¯c muá»‘n xÃ³a toÃ n bá»™ lá»‹ch sá»­ chat cá»§a chá»§ Ä‘á» con nÃ y?', async (ok) => {
+        showConfirmModal('Xác nhận xóa', 'Bạn có chắc muốn xóa toàn bộ lịch sử chat của chủ đề con này?', async (ok) => {
             if (ok) {
                 s.chatHistory = [];
                 await saveData();
                 renderChat();
-                toast("ÄÃ£ xÃ³a lá»‹ch sá»­ chat.");
+                toast("Đã xóa lịch sử chat.");
             }
         });
     }
@@ -2639,7 +2456,7 @@ function exportSummary(sum) {
         ytFallbackIsPlaying = !!autoplay;
         try { 
             const btn = document.getElementById('btnToggleYtSound'); 
-            if (btn) btn.textContent = ytFallbackIsPlaying ? 'â¸ï¸' : 'â–¶ï¸'; 
+            if (btn) btn.textContent = ytFallbackIsPlaying ? '⏸️' : '▶️'; 
         } catch(_) {}
     }
     function fallbackPostMessage(func, args=[]) {
@@ -2707,7 +2524,7 @@ function exportSummary(sum) {
         _ytUnlocked = true;
         try { localStorage.setItem('sound_unlocked','1'); } catch(_) {}
         hideSoundPermission();
-        toast('Ã‚m thanh Ä‘Ã£ Ä‘Æ°á»£c báº­t!');
+        toast('Âm thanh đã được bật!');
     }
     function onPlayerReady(event) {
         try {
@@ -2722,10 +2539,10 @@ function exportSummary(sum) {
     function onPlayerStateChange(event) {
         const btn = $('#btnToggleYtSound');
         if (event.data == YT.PlayerState.PLAYING) {
-            btn.textContent = 'â¸ï¸';
+            btn.textContent = '⏸️';
             hideSoundPermission();
         } else {
-            btn.textContent = 'â–¶ï¸';
+            btn.textContent = '▶️';
         }
         if (event.data === YT.PlayerState.ENDED) {
             if (!ytUserPaused) ytPlayer.playVideo();
@@ -2821,26 +2638,26 @@ function exportSummary(sum) {
         if (IS_FILE_PROTOCOL) {
             const vid = getActiveVideoId();
             if (!ytFallbackFrame || !ytFallbackFrame.isConnected) {
-                if (!vid) { toast('ChÆ°a cÃ³ link há»£p lá»‡. DÃ¡n link rá»“i báº¥m â–¶ï¸.'); return; }
+                if (!vid) { toast('Chưa có link hợp lệ. Dán link rồi bấm ▶️.'); return; }
                 fallbackLoadVideo(vid, { autoplay: 1, mute: 0 });
                 ytFallbackIsPlaying = true;
-                try { const btn = document.getElementById('btnToggleYtSound'); if (btn) btn.textContent = 'â¸ï¸'; } catch(_) {}
-                toast('Äang phÃ¡t nháº¡c ná»n...');
+                try { const btn = document.getElementById('btnToggleYtSound'); if (btn) btn.textContent = '⏸️'; } catch(_) {}
+                toast('Đang phát nhạc nền...');
                 return;
             }
             if (ytFallbackIsPlaying) {
                 fallbackPostMessage('pauseVideo');
                 ytFallbackIsPlaying = false;
-                toast('ÄÃ£ dá»«ng nháº¡c ná»n.');
+                toast('Đã dừng nhạc nền.');
             } else {
-                if (!vid) { toast('ChÆ°a cÃ³ link há»£p lá»‡. DÃ¡n link rá»“i báº¥m â–¶ï¸.'); return; }
+                if (!vid) { toast('Chưa có link hợp lệ. Dán link rồi bấm ▶️.'); return; }
                 fallbackPostMessage('playVideo');
                 ytFallbackIsPlaying = true;
-                toast('Äang phÃ¡t nháº¡c ná»n...');
+                toast('Đang phát nhạc nền...');
             }
             try { 
                 const btn = document.getElementById('btnToggleYtSound'); 
-                if (btn) btn.textContent = ytFallbackIsPlaying ? 'â¸ï¸' : 'â–¶ï¸'; 
+                if (btn) btn.textContent = ytFallbackIsPlaying ? '⏸️' : '▶️'; 
             } catch(_) {}
             return;
         }
@@ -2849,17 +2666,17 @@ function exportSummary(sum) {
         if (playerState === YT.PlayerState.PLAYING || playerState === YT.PlayerState.BUFFERING) {
             ytFadeOutPause();
             ytUserPaused = true;
-            toast('ÄÃ£ dá»«ng nháº¡c ná»n.');
+            toast('Đã dừng nhạc nền.');
         } else {
             ytFadeInPlay();
             ytUserPaused = false;
-            toast('Äang phÃ¡t nháº¡c ná»n...');
+            toast('Đang phát nhạc nền...');
         }
     }
     function bindEvents(){
       on($('#btnToggleBg'), 'click', toggleBackgroundView);
       on($('#btnMilestoneClose'), 'click', () => $('#modalMilestone').classList.remove('show'));
-      on($('#btnAddTopic'), 'click', () => showInputModal('TÃªn Chá»§ Ä‘á» má»›i?', async (name) => { if (!name) return; data.topics.push({ id: uid('t'), name, subtopics: [] }); await saveData(); renderTopics(); }));
+      on($('#btnAddTopic'), 'click', () => showInputModal('Tên Chủ đề mới?', async (name) => { if (!name) return; data.topics.push({ id: uid('t'), name, subtopics: [] }); await saveData(); renderTopics(); }));
       on($('#btnExport'), 'click', ()=> storageManager.exportData(data));
         on($("#importFile"), 'change', (e) => {
           const f = e.target.files[0];
@@ -2869,23 +2686,23 @@ function exportSummary(sum) {
             normalizeDataStructure(data);
             await ensureValidSelection();
             await seedAchievedMilestones();
-            toast('ÄÃ£ nháº­p dá»¯ liá»‡u thÃ nh cÃ´ng!');
+            toast('Đã nhập dữ liệu thành công!');
             renderAll();
-          }).catch(err => toast('Nháº­p tháº¥t báº¡i: ' + err.message));
+          }).catch(err => toast('Nhập thất bại: ' + err.message));
           e.target.value = null;
         });
       on($('#btnRestoreBackup'), 'click', () => {
           const backupListEl = $('#backupList');
           const selectedDate = backupListEl ? backupListEl.value : '';
-          if (!selectedDate) { toast('Vui lÃ²ng chá»n má»™t báº£n sao lÆ°u.'); return; }
-          showConfirmModal('XÃ¡c nháº­n phá»¥c há»“i', `Báº¡n cÃ³ cháº¯c muá»‘n phá»¥c há»“i dá»¯ liá»‡u tá»« ngÃ y ${new Date(selectedDate).toLocaleDateString()}? Dá»¯ liá»‡u hiá»‡n táº¡i sáº½ bá»‹ ghi Ä‘Ã¨.`, (ok) => {
+          if (!selectedDate) { toast('Vui lòng chọn một bản sao lưu.'); return; }
+          showConfirmModal('Xác nhận phục hồi', `Bạn có chắc muốn phục hồi dữ liệu từ ngày ${new Date(selectedDate).toLocaleDateString()}? Dữ liệu hiện tại sẽ bị ghi đè.`, (ok) => {
               if (ok) {
                   storageManager.restoreBackup(selectedDate).then((d) => {
                       data = d;
-                      toast('Phá»¥c há»“i dá»¯ liá»‡u thÃ nh cÃ´ng! Táº£i láº¡i trang...');
+                      toast('Phục hồi dữ liệu thành công! Tải lại trang...');
                       setTimeout(() => window.location.reload(), 1500);
                   }).catch(err => {
-                      toast(`Lá»—i: ${err.message}`);
+                      toast(`Lỗi: ${err.message}`);
                   });
               }
           });
@@ -2897,12 +2714,12 @@ function exportSummary(sum) {
               const ytThumbCheckbox = $('#set_ytThumbAsBg');
               if (ytThumbCheckbox) {
                   ytThumbCheckbox.checked = false;
-                  toast('ÄÃ£ táº¯t ná»n YouTube Ä‘á»ƒ há»£p vá»›i theme sÃ¡ng.', 2000);
+                  toast('Đã tắt nền YouTube để hợp với theme sáng.', 2000);
               }
-              // Äáº£m báº£o xem trÆ°á»›c ná»n gá»‘c cho theme sÃ¡ng
+              // Đảm bảo xem trước nền gốc cho theme sáng
               try { document.body.style.setProperty('--bg-image', 'none'); } catch(_) {}
           } else {
-              // Theme tá»‘i: tá»± báº­t dÃ¹ng thumbnail YouTube náº¿u cÃ³ link
+              // Theme tối: tự bật dùng thumbnail YouTube nếu có link
               const ytThumbCheckbox = $('#set_ytThumbAsBg');
               if (ytThumbCheckbox) {
                   ytThumbCheckbox.checked = true;
@@ -2931,7 +2748,7 @@ function exportSummary(sum) {
           const container = $('#customSoundsContainer');
           if (container) container.classList.toggle('hidden');
       });
-      on($('#btnSaveNote'), 'click', async ()=>{ const s=getCurrentSubtopic(); if(!s) return; const id=pendingNoteSessionId; const sess=s.sessions.find(x=>x.id===id); if(sess){ sess.note=$('#noteText').value.trim(); await saveData(); renderStatsHistory(); toast('ÄÃ£ lÆ°u ghi chÃº'); } closeNoteModal(); });
+      on($('#btnSaveNote'), 'click', async ()=>{ const s=getCurrentSubtopic(); if(!s) return; const id=pendingNoteSessionId; const sess=s.sessions.find(x=>x.id===id); if(sess){ sess.note=$('#noteText').value.trim(); await saveData(); renderStatsHistory(); toast('Đã lưu ghi chú'); } closeNoteModal(); });
       on($('#btnSkipNote'), 'click', ()=> closeNoteModal());
       on($('#btnAddGeneralNote'), 'click', addGeneralNote);
       on($('#btnSummarizeNote'), 'click', handleSummarizeNote);
@@ -2994,14 +2811,14 @@ function exportSummary(sum) {
             }
             if (timer.state !== 'idle') {
               showConfirmModal(
-                'XÃ¡c nháº­n chuyá»ƒn Ä‘á»•i',
-                `Báº¡n cÃ³ cháº¯c muá»‘n chuyá»ƒn sang Kiá»ƒu ${newPreset}? Thao tÃ¡c nÃ y sáº½ dá»«ng vÃ  Ä‘áº·t láº¡i phiÃªn lÃ m viá»‡c hiá»‡n táº¡i.`,
+                'Xác nhận chuyển đổi',
+                `Bạn có chắc muốn chuyển sang Kiểu ${newPreset}? Thao tác này sẽ dừng và đặt lại phiên làm việc hiện tại.`,
                 (confirmed) => {
                   if (confirmed) {
                     timer.reset();
                     timer.setPreset(newPreset);
                     renderAll();
-                    toast(`ÄÃ£ chuyá»ƒn sang Kiá»ƒu ${newPreset}.`);
+                    toast(`Đã chuyển sang Kiểu ${newPreset}.`);
                   }
                 }
               );
@@ -3009,7 +2826,7 @@ function exportSummary(sum) {
             else {
               timer.setPreset(newPreset);
               renderAll();
-              toast(`ÄÃ£ chuyá»ƒn sang Kiá»ƒu ${newPreset}.`);
+              toast(`Đã chuyển sang Kiểu ${newPreset}.`);
             }
           });
         });
@@ -3018,21 +2835,21 @@ function exportSummary(sum) {
       on($('#btnResume'), 'click', ()=> timer.resume());
       on($('#btnSkip'), 'click', ()=> timer.skip());
       on($('#btnReset'), 'click', ()=> timer.reset());
-      on($('#uploadBg'), 'change', (e) => { handleFileUpload(e.target.files[0], async (id) => { data.settings.customBg = id; await saveData(); applyCustomBg(); toast("ÄÃ£ cáº­p nháº­t hÃ¬nh ná»n."); }); e.target.value = null; });
+      on($('#uploadBg'), 'change', (e) => { handleFileUpload(e.target.files[0], async (id) => { data.settings.customBg = id; await saveData(); applyCustomBg(); toast("Đã cập nhật hình nền."); }); e.target.value = null; });
       on($('#btnClearBg'), 'click', async () => {
           data.settings.customBg = '';
           data.settings.useYtThumbnailAsBg = false;
           await saveData();
           applyCustomBg();
-          toast("ÄÃ£ xÃ³a hÃ¬nh ná»n tÃ¹y chá»‰nh.");
+          toast("Đã xóa hình nền tùy chỉnh.");
           if ($('#modalSettings').classList.contains('show')) {
               openSettings();
           }
       });
       
-      on($('#uploadSoundWork'), 'change', (e) => { handleFileUpload(e.target.files[0], async (id) => { data.settings.customSounds.work_end = id; await saveData(); toast("ÄÃ£ lÆ°u Ã¢m bÃ¡o háº¿t LÃ€M VIá»†C."); }); e.target.value = null; });
-      on($('#uploadSoundBreak'), 'change', (e) => { handleFileUpload(e.target.files[0], async (id) => { data.settings.customSounds.break_end = id; await saveData(); toast("ÄÃ£ lÆ°u Ã¢m bÃ¡o háº¿t NGHá»ˆ NGáº®N."); }); e.target.value = null; });
-      on($('#uploadSoundLong'), 'change', (e) => { handleFileUpload(e.target.files[0], async (id) => { data.settings.customSounds.long_end = id; await saveData(); toast("ÄÃ£ lÆ°u Ã¢m bÃ¡o háº¿t NGHá»ˆ DÃ€I."); }); e.target.value = null; });
+      on($('#uploadSoundWork'), 'change', (e) => { handleFileUpload(e.target.files[0], async (id) => { data.settings.customSounds.work_end = id; await saveData(); toast("Đã lưu âm báo hết LÀM VIỆC."); }); e.target.value = null; });
+      on($('#uploadSoundBreak'), 'change', (e) => { handleFileUpload(e.target.files[0], async (id) => { data.settings.customSounds.break_end = id; await saveData(); toast("Đã lưu âm báo hết NGHỈ NGẮN."); }); e.target.value = null; });
+      on($('#uploadSoundLong'), 'change', (e) => { handleFileUpload(e.target.files[0], async (id) => { data.settings.customSounds.long_end = id; await saveData(); toast("Đã lưu âm báo hết NGHỈ DÀI."); }); e.target.value = null; });
       on($('#btnFullscreen'), 'click', toggleFullScreen);
       document.addEventListener('fullscreenchange', updateFullscreenButton);
       window.addEventListener('keydown', (e)=>{ const tag=(e.target.tagName||'').toLowerCase(); const isTyping=['input','textarea','select'].includes(tag); if(e.code==='Space' && !isTyping){ e.preventDefault(); if(timer.state==='idle'||timer.state==='paused') timer.start(); else timer.pause(); } if(e.key==='n'||e.key==='N'){ if(!isTyping){ e.preventDefault(); timer.skip(); } } if(e.key==='Escape'){ $$('.modal').forEach(m => m.classList.remove('show')); } });
@@ -3081,10 +2898,10 @@ function exportSummary(sum) {
         const btn = $('#btnToggleBg');
         if (!btn) return;
         if (isActive) {
-            btn.title = 'Hiá»‡n giao diá»‡n';
+            btn.title = 'Hiện giao diện';
             btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" y1="2" x2="22" y2="22"/></svg>`;
         } else {
-            btn.title = 'áº¨n giao diá»‡n';
+            btn.title = 'Ẩn giao diện';
             btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>`;
         }
     }
@@ -3112,10 +2929,10 @@ function exportSummary(sum) {
         const btnA = $('#btnPresetA');
         const btnB = $('#btnPresetB');
         if (btnA) {
-            btnA.textContent = `${cyclesA}Ã—${workA} (A)`;
+            btnA.textContent = `${cyclesA}×${workA} (A)`;
         }
         if (btnB) {
-            btnB.textContent = `${cyclesB}Ã—${workB} (B)`;
+            btnB.textContent = `${cyclesB}×${workB} (B)`;
         }
     }
     function renderAll(){
@@ -3139,12 +2956,12 @@ function exportSummary(sum) {
         renderSubtopicTasks();
         updateFullscreenButton();
         switchView(data.settings.currentView);
-        // fixVietnameseUI Ä‘Ã£ bá»‹ loáº¡i bá»; ná»™i dung hiá»ƒn thá»‹ trá»±c tiáº¿p báº±ng UTF-8
+        // fixVietnameseUI đã bị loại bỏ; nội dung hiển thị trực tiếp bằng UTF-8
     }
     function toggleFullScreen() {
         if (!document.fullscreenElement) {
             document.documentElement.requestFullscreen().catch(err => {
-                toast(`Lá»—i: KhÃ´ng thá»ƒ báº­t cháº¿ Ä‘á»™ toÃ n mÃ n hÃ¬nh: ${err.message}`);
+                toast(`Lỗi: Không thể bật chế độ toàn màn hình: ${err.message}`);
             });
         } else {
             if (document.exitFullscreen) {
@@ -3155,11 +2972,11 @@ function exportSummary(sum) {
     function updateFullscreenButton() {
         const btn = $('#btnFullscreen');
         if (document.fullscreenElement) {
-            btn.innerHTML = 'â†™ï¸';
-            btn.title = 'ThoÃ¡t toÃ n mÃ n hÃ¬nh';
+            btn.innerHTML = '↙️';
+            btn.title = 'Thoát toàn màn hình';
         } else {
-            btn.innerHTML = 'â†—ï¸';
-            btn.title = 'ToÃ n mÃ n hÃ¬nh';
+            btn.innerHTML = '↗️';
+            btn.title = 'Toàn màn hình';
         }
     }
     async function initializeApp() {
@@ -3198,13 +3015,13 @@ function exportSummary(sum) {
         applyTheme();
       } catch (err) {
         console.error('Initialization error:', err);
-        toast(`Lá»—i khá»Ÿi táº¡o: ${err.message}`);
+        toast(`Lỗi khởi tạo: ${err.message}`);
       }
     }
     callGeminiAPI = async function(prompt, retries = 3, delay = 1000) {
         const apiKey = data?.settings?.apiKey || "";
         if (!apiKey) {
-            toast("Vui lÃ²ng nháº­p Gemini API Key trong pháº§n CÃ i Ä‘áº·t.");
+            toast("Vui lòng nhập Gemini API Key trong phần Cài đặt.");
             return null;
         }
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
@@ -3218,13 +3035,13 @@ function exportSummary(sum) {
                 }
                 let errorData = null;
                 try { errorData = await response.json(); } catch (e) {}
-                let errorMessage = `Lá»—i HTTP: ${response.status}`;
+                let errorMessage = `Lỗi HTTP: ${response.status}`;
                 if (response.status === 400) {
-                    errorMessage = "Lá»—i: Gemini API Key khÃ´ng há»£p lá»‡ hoáº·c Ä‘Ã£ bá»‹ thay Ä‘á»•i. Vui lÃ²ng kiá»ƒm tra láº¡i trong CÃ i Ä‘áº·t.";
+                    errorMessage = "Lỗi: Gemini API Key không hợp lệ hoặc đã bị thay đổi. Vui lòng kiểm tra lại trong Cài đặt.";
                 } else if (response.status === 429) {
-                    errorMessage = "Lá»—i: ÄÃ£ vÆ°á»£t quÃ¡ háº¡n má»©c yÃªu cáº§u tá»›i Gemini. Vui lÃ²ng thá»­ láº¡i sau Ã­t phÃºt.";
+                    errorMessage = "Lỗi: Đã vượt quá hạn mức yêu cầu tới Gemini. Vui lòng thử lại sau ít phút.";
                 } else if (errorData?.error?.message) {
-                    errorMessage = `Lá»—i tá»« Gemini: ${errorData.error.message}`;
+                    errorMessage = `Lỗi từ Gemini: ${errorData.error.message}`;
                 }
                 toast(errorMessage, 4000);
                 console.error("Gemini API Error:", errorData || response.statusText);
@@ -3235,12 +3052,12 @@ function exportSummary(sum) {
                 return formatGeminiResponse(result.candidates[0].content.parts[0].text);
             } else {
                 console.error("API response structure is unexpected:", result);
-                if (result.promptFeedback?.blockReason) { return `Ná»™i dung bá»‹ cháº·n vÃ¬: ${result.promptFeedback.blockReason}. Vui lÃ²ng thá»­ láº¡i vá»›i ná»™i dung khÃ¡c.`; }
-                return "KhÃ´ng nháº­n Ä‘Æ°á»£c ná»™i dung há»£p lá»‡ tá»« AI.";
+                if (result.promptFeedback?.blockReason) { return `Nội dung bị chặn vì: ${result.promptFeedback.blockReason}. Vui lòng thử lại với nội dung khác.`; }
+                return "Không nhận được nội dung hợp lệ từ AI.";
             }
         } catch (error) {
-            console.error("Lá»—i khi gá»i Gemini API:", error);
-            toast("Lá»—i máº¡ng khi káº¿t ná»‘i Ä‘áº¿n Gemini. Vui lÃ²ng kiá»ƒm tra káº¿t ná»‘i internet.", 4000);
+            console.error("Lỗi khi gọi Gemini API:", error);
+            toast("Lỗi mạng khi kết nối đến Gemini. Vui lòng kiểm tra kết nối internet.", 4000);
             return null;
         }
     }
