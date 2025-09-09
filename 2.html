@@ -1,0 +1,3250 @@
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Ứng dụng Pomodoro hỗ trợ học tập với tích hợp Gemini AI và giao diện hiện đại." />
+    <title>Pomodoro Study App — Tích hợp Gemini AI (Giao diện mới)</title>
+    <style>
+    /*
+    =============================================
+    POMODORO STUDY APP â€” PHIÃŠN Báº¢N GIAO DIá»†N Táº¬P TRUNG (v11.2)
+    =============================================
+    */
+
+    :root {
+      /* Theme Dark (Máº·c Ä‘á»‹nh) - Cáº­p nháº­t tá»« file 2 */
+      --bg: #0f1222;
+      --panel: #171a2e;
+      --panel-rgb: 23, 26, 46; /* ThÃªm biáº¿n RGB cho panel */
+      --muted: #212646;
+      --text: #f4f6ff;
+      --sub: #b7c1ff;
+      --acc: #6c8cff;
+      --acc-2: #27d3a2;
+      --warn: #ffb020;
+      --danger: #ff5c7a;
+      --shadow: 0px 1.8px 2.2px rgba(0, 0, 0, 0.054), 0px 4.3px 5.3px rgba(0, 0, 0, 0.077), 0px 8.1px 10px rgba(0, 0, 0, 0.095), 0px 14.5px 17.9px rgba(0, 0, 0, 0.113), 0px 27.2px 33.4px rgba(0, 0, 0, 0.136), 0px 65px 80px rgba(0, 0, 0, 0.19);
+      --radius: 16px;
+      --panel-opacity: 0.85;
+      --gradient-border: linear-gradient(135deg, var(--acc), var(--acc-2));
+    }
+    
+    /* === START: THÃŠM CÃC THEME Má»šI === */
+    [data-theme='light'] {
+      --bg: #f5f0e8; --panel: #ffffff; --panel-rgb: 255, 255, 255; --muted: #eaddcf; --text: #4a4a4a; --sub: #8a817c; --acc: #d4a373; --acc-2: #a3b18a; --warn: #e76f51; --danger: #d00000;
+      --shadow: 0px 1.8px 2.2px rgba(0, 0, 0, 0.024), 0px 4.3px 5.3px rgba(0, 0, 0, 0.037), 0px 8.1px 10px rgba(0, 0, 0, 0.045), 0px 14.5px 17.9px rgba(0, 0, 0, 0.053), 0px 27.2px 33.4px rgba(0, 0, 0, 0.066), 0px 65px 80px rgba(0, 0, 0, 0.09);
+      --panel-opacity: 0.9;
+      /* NgÄƒn ná»n tá»‘i máº·c Ä‘á»‹nh khi khÃ´ng cÃ³ áº£nh */
+      --bg-image: none;
+    }
+
+    [data-theme='pastel'] {
+      --bg: #fde2e4; --panel: #fff1f2; --panel-rgb: 255, 241, 242; --muted: #fad2e1; --text: #595260; --sub: #8c7a8a; --acc: #c78283; --acc-2: #7ec4cf; --warn: #f9bf45; --danger: #d7263d;
+      --shadow: 0 5px 20px rgba(200,150,150,0.2);
+      --panel-opacity: 0.9;
+      /* NgÄƒn ná»n tá»‘i máº·c Ä‘á»‹nh khi khÃ´ng cÃ³ áº£nh */
+      --bg-image: none;
+    }
+    
+    [data-theme='lofi'] {
+      --bg: #2a2a3e; --panel: #3c3c52; --panel-rgb: 60, 60, 82; --muted: #4d4d66; --text: #e0e0ff; --sub: #a0a0c0; --acc: #ff8c69; --acc-2: #69c6ff; --warn: #ffd700; --danger: #ff6961;
+      --bg-image: url('https://i.pinimg.com/originals/9f/67/74/9f67742194e8f187b5129b6183571120.gif');
+      --panel-opacity: 0.8;
+    }
+    
+    [data-theme='space'] {
+        --bg: #000000; --panel: #1a1a2e; --panel-rgb: 26, 26, 46; --muted: #2a2a4e; --text: #e0e0ff; --sub: #b0b0e0; --acc: #00aaff; --acc-2: #aaff00; --warn: #ffaa00; --danger: #ff0055;
+        --bg-image: url('https://i.gifer.com/origin/a2/a2322310816930a8094f8263e6a7150a_w200.gif');
+        --panel-opacity: 0.75;
+    }
+    /* === END: THÃŠM CÃC THEME Má»šI === */
+
+    *:focus-visible {
+      outline: 2px solid var(--acc); outline-offset: 2px; border-radius: 4px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body {
+      margin:0; 
+      font-family: system-ui, -apple-system, 'Segoe UI Variable', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Inter', sans-serif; 
+      
+      background-color: var(--bg);
+      background-image: var(--bg-image, radial-gradient(1200px 800px at 10% -10%, #20285b 0%, #0f1222 50%, #0b0e1a 100%));
+      
+      background-size: cover; 
+      background-position: center; 
+      color:var(--text); 
+      transition: background 0.5s ease, color 0.5s ease, filter 0.5s ease;
+      text-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+    }
+    a{color:var(--acc)}
+
+    .app{display:flex; min-height:100vh}
+    
+    .app-nav {
+        width: 60px;
+        padding: 16px 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        z-index: 100;
+    }
+    .nav-btn {
+        background: transparent;
+        border: none;
+        color: var(--sub);
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all .2s ease;
+        position: relative;
+    }
+    .nav-btn:hover { background: var(--muted); color: var(--text); }
+    .nav-btn.active { background: var(--acc); color: white; }
+    .nav-btn svg { width: 24px; height: 24px; }
+    .nav-btn .tooltip {
+        position: absolute;
+        left: 110%;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text);
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 12px;
+        box-shadow: var(--shadow);
+        white-space: nowrap;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity .2s ease, visibility .2s ease;
+        pointer-events: none;
+        z-index: 200;
+    }
+    .nav-btn:hover .tooltip { opacity: 1; visibility: visible; }
+
+    .app-content {
+        flex: 1;
+        padding: 24px;
+        overflow-y: auto;
+        max-height: 100vh;
+    }
+
+    .view { display: none; }
+    .view.active { display: grid; gap: 24px; animation: fadeIn .3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .main.reloading { opacity: 0; transition: opacity 0.2s ease-out; }
+
+    .panel-bg{
+        background: rgba(23, 26, 46, var(--panel-opacity));
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border:1px solid rgba(255,255,255,.08);
+    }
+    /* ThÃªm cÃ¡c quy táº¯c border cho theme light/pastel */
+    [data-theme='light'] .panel-bg, [data-theme='pastel'] .panel-bg { border:1px solid rgba(0,0,0,0.05); }
+    [data-theme='lofi'] .panel-bg { border:1px solid rgba(255,255,255,0.1); }
+    [data-theme='space'] .panel-bg { border:1px solid rgba(255,255,255,0.12); }
+
+
+    header.app-header{display:flex; align-items:center; justify-content:space-between; padding:10px 14px; border-radius:var(--radius); box-shadow:var(--shadow); margin-bottom: 24px;}
+    header .actions{display:flex; gap:8px; align-items:center}
+    
+    .btn {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      border: none; /* Sá»­a Ä‘á»•i: bá» border máº·c Ä‘á»‹nh */
+      padding: 10px 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: inset 0 -2px 0 rgba(0,0,0,0.08);
+      font-weight: 600;
+      transition: all .15s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn::before {
+        content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+        border: 2px solid transparent; border-radius: 12px; background: var(--gradient-border) border-box;
+        -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: destination-out; mask-composite: exclude; opacity: 0; transition: opacity 0.3s ease;
+    }
+    .btn:hover::before { opacity: 1; }
+    .btn:hover { background: rgba(255, 255, 255, 0.12); }
+    .btn:active { transform: translateY(1px) scale(0.98); filter: brightness(1); }
+    .btn:disabled { cursor: not-allowed; filter: brightness(0.8) saturate(0.5); }
+    .btn.ghost { background: transparent; border: 1px solid rgba(255, 255, 255, 0.2); }
+    .btn.ghost:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.3); }
+    .btn.acc { background: var(--acc); color: white; }
+    .btn.warn { background: var(--warn); color: white; }
+    .btn.danger { background: var(--danger); color: white; }
+    .btn.small { padding: 6px 10px; font-size: 14px; border-radius: 9px; }
+    .btn.small::before { border-radius: 9px; }
+    .btn > svg { width: 16px; height: 16px; stroke-width: 2.5px; }
+
+    /* === START: Cáº¬P NHáº¬T GIAO DIá»†N QUáº¢N LÃ CHá»¦ Äá»€ === */
+    #view-topics { grid-template-columns: 1fr; }
+    .topic-item { background:rgba(255,255,255,.04); border:1px solid var(--muted); border-radius:12px; padding:8px; margin-bottom:8px; } /* Sá»­a Ä‘á»•i */
+    .topic-header, .sub-row { display:flex; align-items:center; gap:8px; position: relative; }
+    .topic-title { flex:1; font-weight:600; }
+    .chev { width:28px; height:28px; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; flex-shrink: 0; }
+    .chev .ico { display:inline-block; transition: transform .18s ease; }
+    .chev[aria-expanded="false"] .ico { transform: rotate(-90deg); }
+    .subtopics { margin-top:8px; display:flex; flex-direction:column; gap:6px; }
+    .subtopics.hidden { display:none; }
+    
+    .topic-actions, .sub-row .actions {
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity .2s ease, visibility .2s ease;
+        display: flex;
+        gap: 6px;
+        align-items: center;
+    }
+    .topic-item:hover .topic-actions, .sub-row:hover .actions {
+        opacity: 1;
+        visibility: visible;
+    }
+    .actions-menu-btn {
+        padding: 0;
+        width: 28px;
+        height: 28px;
+        font-size: 1.2em;
+        line-height: 1;
+    }
+    .actions-menu {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        border-radius: 8px;
+        padding: 6px;
+        box-shadow: var(--shadow);
+        z-index: 10;
+        min-width: 150px;
+        display: none;
+        flex-direction: column;
+        gap: 4px;
+    }
+    .actions-menu.show { display: flex; }
+    .menu-item {
+        background: transparent; border: none; color: var(--text);
+        padding: 8px 10px; border-radius: 6px; text-align: left;
+        width: 100%; cursor: pointer; transition: background .2s ease;
+        display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500;
+    }
+    .menu-item:hover { background: var(--acc); color: white; }
+    .menu-item.danger:hover { background: var(--danger); }
+    /* === END: Cáº¬P NHáº¬T GIAO DIá»†N QUáº¢N LÃ CHá»¦ Äá»€ === */
+
+    .subtopic-btn{
+        flex:1; 
+        text-align:left;
+        background-color: rgba(0,0,0,0.02); /* Sá»­a Ä‘á»•i */
+    }
+    .subtopic-btn:hover {
+        background-color: var(--muted); /* Sá»­a Ä‘á»•i */
+    }
+    .subtopic-btn.active{
+        outline:2px solid var(--acc); 
+    }
+    .subtopic-btn.active:hover {
+        background: transparent; /* Giá»¯ ná»n trong suá»‘t khi di chuá»™t qua */
+    }
+    
+    .panel{border-radius:var(--radius); padding:24px; box-shadow:var(--shadow)}
+
+    .timer-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .timer{display:grid; gap:16px; grid-template-columns: 1fr; align-items:center; text-align:center}
+    .big-time{font-size: clamp(60px, 12vw, 96px); letter-spacing:1px; font-weight:700; color: var(--text)}
+    .state{font-weight:700; letter-spacing:.6px}
+    .state.work{color:var(--acc-2)} /* Sá»­a Ä‘á»•i mÃ u */
+    .state.break{color:var(--warn)}
+    .state.long{color:var(--danger)} /* Sá»­a Ä‘á»•i mÃ u */
+    .controls{display:flex; flex-wrap:wrap; gap:12px; justify-content:center}    
+    #btnStart { padding: 14px 28px; font-size: 1.2em; }
+    #btnPause, #btnResume { padding: 12px 24px; font-size: 1.1em; }
+
+    /* === START: TÃ™Y CHá»ˆNH Dáº¢I PHÃ‚N CÃCH Má»€M Máº I HÆ N === */
+    #view-timer .panel-bg hr {
+        border: none; /* Bá» Ä‘Æ°á»ng viá»n máº·c Ä‘á»‹nh */
+        height: 1px;  /* Äáº·t chiá»u cao cho Ä‘Æ°á»ng káº» */
+        background-color: var(--muted); /* Sá»­ dá»¥ng mÃ u phá»¥ cá»§a theme */
+        opacity: 0.3; /* LÃ m cho nÃ³ má» Ä‘i, hÃ²a vÃ o ná»n */
+        margin-top: 0; /* Äiá»u chá»‰nh láº¡i khoáº£ng cÃ¡ch */
+    }
+    /* === END: TÃ™Y CHá»ˆNH Dáº¢I PHÃ‚N CÃCH Má»€M Máº I HÆ N === */
+
+    .stats-grid{display:grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap:12px}
+    .stat-card{background:rgba(255,255,255,0.04); border:1px solid var(--muted); border-radius:14px; padding:12px; text-align:center} /* Sá»­a Ä‘á»•i */
+    .stat-card h4{margin:4px 0 8px; color:var(--sub); font-weight:600; font-size: 14px;}
+    .stat-value{font-size: 20px; font-weight: 600;}
+    .tiny{font-size:12px; color:var(--sub)}
+    .history{display:grid; gap:8px; max-height:300px; overflow:auto; padding-right:6px}
+    .hist-item{display:grid; grid-template-columns: 1fr auto; gap:10px; align-items:start; background:rgba(255,255,255,0.04); border:1px solid var(--muted); border-radius:10px; padding:10px} /* Sá»­a Ä‘á»•i */
+
+    .row{display:flex; gap:8px; align-items:center}
+    .row > * {flex:1}
+    input[type="text"], input[type="password"], input[type="number"], select, textarea{width:100%; background:rgba(255,255,255,0.04); color:var(--text); border:1px solid var(--muted); border-radius:10px; padding:10px; outline:none}
+    textarea{min-height:80px; resize: vertical;}
+
+    .toasts{position:fixed; right:16px; bottom:16px; display:flex; flex-direction:column; gap:8px; z-index:9999}
+    .toast{
+        background: var(--panel); /* Sá»­a Ä‘á»•i */
+        border:1px solid var(--muted);
+        color:var(--text);
+        padding:10px 12px; border-radius:12px; box-shadow:var(--shadow);
+        animation: toast-in .3s ease; transform-origin: bottom right;
+    }
+    @keyframes toast-in { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+
+    .modal{position:fixed; inset:0; display:none; align-items:center; justify-content:center; background: rgba(0,0,0,var(--panel-opacity)); z-index:1000; backdrop-filter: blur(5px);} /* Sá»­a Ä‘á»•i: Ä‘á»“ng bá»™ vá»›i file 1.html vÃ  thÃªm blur */
+    .modal.show{display:flex}
+    .modal-card{
+        width:min(720px, 94vw);
+        border-radius:16px;
+        padding:16px;
+        box-shadow:var(--shadow);
+        animation: modal-in .25s ease-out;
+        max-height: 90vh;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+    }
+    @keyframes modal-in { from { opacity: 0; transform: scale(0.92) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    .modal-card h3{margin-top:0}
+    .dashboard-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+    .dashboard-table th, .dashboard-table td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--muted); }
+    .dashboard-table th { color: var(--sub); }
+
+    .footer-note{font-size:12px; color:var(--sub)}
+    .hidden{display:none !important}
+
+    .notes-list { display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto; padding-right: 6px; }
+    .note-item { background: rgba(255,255,255,0.04); border-radius: 10px; padding: 10px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; cursor: pointer; } /* Sá»­a Ä‘á»•i */
+    .note-content-wrapper { flex: 1; min-width: 0; }
+    .note-content { white-space: pre-wrap; word-break: break-word; max-height: 60px; overflow: hidden; position: relative; transition: max-height 0.35s ease-in-out; }
+    .note-content:not(.expanded)::after {
+        content: ''; position: absolute; bottom: 0; right: 0; width: 100%; height: 20px; background: linear-gradient(to top, var(--panel) 20%, transparent);
+    }
+    .note-content.expanded { max-height: 500px; }
+    .note-meta { font-size: 11px; color: var(--sub); margin-top: 4px; }
+    
+    .spinner { border: 2px solid var(--muted); border-top-color: var(--text); border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; } /* Sá»­a Ä‘á»•i */
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .panel-header h3 { margin: 0; }
+    .panel-header .actions { display: flex; gap: 8px; }
+    
+    .aux-panel { margin-top: 24px; }
+    .tab-nav { display: flex; gap: 4px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 16px; }
+    .tab-btn { background: transparent; border: none; color: var(--sub); padding: 8px 16px; cursor: pointer; border-bottom: 2px solid transparent; transition: all .2s ease; font-weight: 600; }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active { color: var(--acc); border-bottom-color: var(--acc); }
+    .tab-content {
+      display: none;
+      padding-top: 8px;
+    }
+    .tab-content.active {
+      animation: fadeIn 0.25s ease-out;
+    }
+    #tasks.tab-content.active,
+    #notes.tab-content.active,
+    #ai.tab-content.active {
+        display: block;
+    }
+
+    #settings-timer.tab-content.active,
+    #settings-ui.tab-content.active,
+    #settings-integrations.tab-content.active {
+        display: flex;
+    }
+
+    .settings-row-toggle {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 16px;
+    }
+    .settings-row-toggle span {
+      flex: 1;
+      cursor: pointer;
+    }
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .toggle-switch .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--muted);
+      transition: .3s;
+      border-radius: 24px;
+    }
+    .toggle-switch .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+    .toggle-switch input:checked + .slider {
+      background-color: var(--acc-2);
+    }
+    .toggle-switch input:checked + .slider:before {
+      transform: translateX(20px);
+    }
+    
+    .chat-messages { max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; padding: 4px; }
+    .chat-msg { padding: 8px 12px; border-radius: 12px; max-width: 85%; word-break: break-word; }
+    .chat-msg.user { background: var(--acc); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+    .chat-msg.model { background: var(--muted); align-self: flex-start; border-bottom-left-radius: 4px; }
+    .chat-input-area { display: flex; gap: 8px; }
+
+    .methods-list { list-style: none; padding: 0; }
+    .method-item { align-items: flex-start; padding: 12px; display: flex; gap: 10px; border-radius: 8px; }
+    .method-item:hover { background: rgba(0,0,0,0.03); } /* Sá»­a Ä‘á»•i */
+    .method-item input[type="checkbox"] { width: 18px; height: 18px; margin-top: 2px; flex-shrink: 0;}
+    .method-item label { flex: 1; }
+    .method-item label.completed { text-decoration: line-through; color: var(--sub); }
+    .method-item .content-wrapper { flex: 1; cursor: pointer; }
+    .method-item .concept { font-size: 14px; color: var(--sub); margin-top: 8px; border-left: 2px solid var(--muted); padding-left: 12px; white-space: pre-wrap; word-break: break-word; }
+    .subtopic-todo-list { list-style: none; padding: 0; margin: 0; max-height: 100px; overflow-y: auto; text-align: left; }
+    .subtopic-todo-list li { display: flex; align-items: center; gap: 8px; padding: 4px; transition: all 0.2s ease-out; }
+    .subtopic-todo-list li.removing { transform: translateX(100%); opacity: 0; }
+    .subtopic-todo-list label { flex: 1; }
+
+    #youtube-player-container { position: absolute; top: -9999px; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.1); border-radius: 10px; } /* Sá»­a Ä‘á»•i */
+    ::-webkit-scrollbar-thumb { background: var(--muted); border-radius: 10px; border: 2px solid transparent; background-clip: content-box; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--sub); background-clip: content-box; }
+    
+    .timer-circle-container {
+        position: relative; width: clamp(250px, 40vw, 320px); height: clamp(250px, 40vw, 320px); margin: 24px auto; display: flex; align-items: center; justify-content: center;
+    }
+    .timer-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+    .timer-circle-bg, .timer-circle-progress { fill: none; stroke-width: 8; }
+    .timer-circle-bg { stroke: var(--muted); } /* Sá»­a Ä‘á»•i */
+    .timer-circle-progress { stroke: var(--acc); stroke-linecap: round; transition: stroke-dashoffset 0.3s linear, stroke 0.5s ease; }
+    @keyframes flash { 0%, 100% { box-shadow: 0 0 10px 2px transparent; } 50% { box-shadow: 0 0 20px 8px currentColor; } }
+    .timer-circle-container.finished { color: var(--acc-2); animation: flash 1s ease-out; }
+    @keyframes breathing-effect { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
+    .timer-circle-container.breathing { animation: breathing-effect 3s ease-in-out infinite; }
+    
+    @media (max-width: 1024px) {
+      .app-content { padding: 20px; }
+      .panel { padding: 20px; }
+      .timer-circle-container { width: clamp(220px, 50vw, 300px); height: clamp(220px, 50vw, 300px); }
+    }
+
+    @media (max-width: 768px) {
+      .app { flex-direction: column; }
+      .app-nav { width: 100%; height: 60px; flex-direction: row; justify-content: center; border-right: none; border-top: 1px solid rgba(255,255,255,.08); order: 2; padding: 0 16px; }
+      .app-content { padding: 16px; order: 1; }
+      .panel { padding: 16px; }
+      .modal-card .tab-nav { overflow-x: auto; }
+    }
+
+    @media (max-width: 480px) {
+      .app-nav { height: 50px; }
+      .nav-btn { flex: 1; }
+      header.app-header { flex-direction: column; align-items: stretch; gap: 8px; }
+      .btn { padding: 8px 12px; }
+      .timer-circle-container { width: clamp(180px, 80vw, 220px); height: clamp(180px, 80vw, 220px); margin: 16px auto; }
+      .panel { padding: 12px; }
+      .app-content { padding: 12px; }
+    }
+
+    #view-timer.no-subtopic-selected > .panel-bg:not(:first-child) { display: none; }
+    #view-timer.no-subtopic-selected .timer-header > .presets { display: none; }
+    #view-timer.no-subtopic-selected .timer { display: none; }
+
+    header.app-header .actions #btnFullscreen { background: transparent; border: none; box-shadow: none; }
+    header.app-header .actions #btnFullscreen:hover { background: var(--muted); filter: none; }
+    header.app-header .actions #btnFullscreen:hover::before { opacity: 0; }
+
+    input[type="text"], input[type="password"], input[type="number"], select, textarea {
+        background: rgba(255,255,255,0.04) !important; /* Sá»­a Ä‘á»•i: chuyá»ƒn sang ná»n tráº¯ng trong suá»‘t */
+        color: var(--text);
+        border: 1px solid rgba(255, 255, 255, 0.1); /* Viá»n tráº¯ng má» */
+        transition: background .2s ease, border-color .2s ease;
+    }
+    input[type="text"]:focus, input[type="password"]:focus, input[type="number"]:focus, select:focus, textarea:focus {
+        background: rgba(255,255,255,0.06) !important; /* Tinh chá»‰nh: sÃ¡t máº«u hÆ¡n */
+        border-color: var(--acc);
+    }
+    /* === START: Sá»¬A Lá»–I Ná»€N INPUT/SELECT TRÃŠN THEME SÃNG === */
+    [data-theme='light'] input, [data-theme='light'] select, [data-theme='light'] textarea,
+    [data-theme='pastel'] input, [data-theme='pastel'] select, [data-theme='pastel'] textarea {
+        background: rgba(0, 0, 0, 0.05) !important; /* DÃ¹ng ná»n Ä‘en má» thay vÃ¬ tráº¯ng má» */
+        border-color: rgba(0, 0, 0, 0.1); /* Viá»n Ä‘en má» trÃªn theme sÃ¡ng */
+    }
+
+    [data-theme='light'] input:focus, [data-theme='light'] select:focus, [data-theme='light'] textarea:focus,
+    [data-theme='pastel'] input:focus, [data-theme='pastel'] select:focus, [data-theme='pastel'] textarea:focus {
+        background: rgba(0, 0, 0, 0.07) !important; /* TÄƒng Ä‘á»™ Ä‘áº­m khi focus */
+    }
+    /* === END: Sá»¬A Lá»–I Ná»€N INPUT/SELECT TRÃŠN THEME SÃNG === */
+    
+    ::placeholder { color: var(--sub); opacity: 0.7; } /* Sá»­a Ä‘á»•i */
+    ::-ms-input-placeholder { color: var(--sub); }
+    :-ms-input-placeholder { color: var(--sub); }
+
+    
+    
+    .draggable-timer {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        color: var(--text);
+        padding: 8px 16px;
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+        font-size: 2em;
+        font-weight: 600;
+        cursor: move;
+        user-select: none;
+        z-index: 9998;
+        opacity: 0;
+        transform: scale(0.9);
+        pointer-events: none;
+        transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+    body.bg-view-mode .draggable-timer {
+        opacity: 1;
+        transform: scale(1);
+        pointer-events: auto;
+    }
+    .app-nav, .panel-bg, .app-header .actions > *, .app-header > .row {
+        transition: opacity 0.35s ease, transform 0.35s ease, background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+    }
+    body.bg-view-mode .app-nav,
+    body.bg-view-mode .view.active > .panel-bg {
+        opacity: 0;
+        pointer-events: none;
+        transform: scale(0.98);
+    }
+    body.bg-view-mode .app-header {
+        background: transparent !important;
+        border-color: transparent !important;
+        box-shadow: none !important;
+    }
+    body.bg-view-mode .app-header .actions > *:not(#btnToggleBg),
+    body.bg-view-mode .app-header > .row {
+        opacity: 0;
+        pointer-events: none;
+    }
+    body.bg-view-mode #btnToggleBg {
+        opacity: 1;
+        pointer-events: auto;
+    }
+    .sound-permission-bar {
+      position: fixed; left: 50%; transform: translateX(-50%);
+      bottom: 48px; z-index: 9999;
+      border-radius: 12px; padding: 10px 14px;
+      display: none; align-items: center; gap: 10px;
+      box-shadow: var(--shadow);
+    }
+    .sound-permission-bar.show { display: flex; }
+    .sound-permission-bar .msg { font-size: 14px; color: var(--text); }
+    .draggable-timer { text-shadow: 0px 0px 8px rgba(0, 0, 0, 0.9); }
+
+    /* Giáº£m/loáº¡i bá» bÃ³ng chá»¯ cho theme sÃ¡ng Ä‘á»ƒ trÃ¡nh nhÃ²e/lÃ³a */
+    body[data-theme='light'],
+    body[data-theme='pastel'] { text-shadow: none; }
+    body[data-theme='light'] .draggable-timer,
+    body[data-theme='pastel'] .draggable-timer { text-shadow: none; }
+
+    /* ============================================= */
+/* ========================================================= */
+/* START: THIẾT LẬP PANEL KIỂU MỜ ĐỤC (FROSTED GLASS)        */
+/* ========================================================= */
+
+/* --- 1. Áp dụng hiệu ứng nền mờ chung cho tất cả các panel --- */
+.app-nav,
+.panel-bg,
+.modal-card,
+.actions-menu,
+.nav-btn .tooltip,
+.draggable-timer, 
+.sound-permission-bar,
+.toast,
+.topic-item,
+.stat-card,
+.hist-item,
+.method-item {
+    background: rgba(var(--panel-rgb), var(--panel-opacity));
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+/* --- 2. Định nghĩa viền cho từng loại panel --- */
+.app-nav {
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+.panel-bg,
+.modal-card,
+.actions-menu,
+.nav-btn .tooltip,
+.draggable-timer, 
+.sound-permission-bar,
+.toast,
+.topic-item,
+.stat-card,
+.hist-item,
+.method-item {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* --- 3. Tinh chỉnh viền cho các theme SÁNG (Light/Pastel) --- */
+[data-theme='light'] .app-nav,
+[data-theme='light'] .panel-bg,
+[data-theme='light'] .modal-card,
+[data-theme='light'] .actions-menu,
+[data-theme='light'] .nav-btn .tooltip,
+[data-theme='light'] .draggable-timer,
+[data-theme='light'] .sound-permission-bar,
+[data-theme='light'] .toast,
+[data-theme='light'] .topic-item,
+[data-theme='light'] .stat-card,
+[data-theme='light'] .hist-item,
+[data-theme='light'] .method-item,
+[data-theme='pastel'] .app-nav,
+[data-theme='pastel'] .panel-bg,
+[data-theme='pastel'] .modal-card,
+[data-theme='pastel'] .actions-menu,
+[data-theme='pastel'] .nav-btn .tooltip,
+[data-theme='pastel'] .draggable-timer,
+[data-theme='pastel'] .sound-permission-bar,
+[data-theme='pastel'] .toast,
+[data-theme='pastel'] .topic-item,
+[data-theme='pastel'] .stat-card,
+[data-theme='pastel'] .hist-item,
+[data-theme='pastel'] .method-item {
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+/* --- 4. Sửa lại hiệu ứng fade-out của ghi chú cho phù hợp --- */
+.note-content:not(.expanded)::after {
+    background: linear-gradient(to top, rgba(var(--panel-rgb), 1) 20%, transparent);
+}
+
+/* --- Các quy tắc còn lại giữ nguyên từ file gốc --- */
+[data-theme='light'] .tab-nav,
+[data-theme='pastel'] .tab-nav {
+    border-bottom-color: rgba(0, 0, 0, 0.1);
+}
+.subtopic-btn {
+    background-color: transparent;
+}
+.subtopic-btn:hover {
+    background-color: var(--muted);
+}
+.method-item[open] summary {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+[data-theme='light'] .method-item[open] summary,
+[data-theme='pastel'] .method-item[open] summary {
+    border-bottom-color: rgba(0, 0, 0, 0.1);
+}
+
+    </style>
+</head>
+<body data-theme="default"> <div class="app" id="app">
+    <nav class="app-nav">
+        <button class="nav-btn active" id="navBtnTimer" data-view="timer" aria-label="Đồng hồ">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            <span class="tooltip">Đồng hồ</span>
+        </button>
+        <button class="nav-btn" id="navBtnTopics" data-view="topics" aria-label="Chủ đề">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg>
+            <span class="tooltip">Chủ đề</span>
+        </button>
+        <button class="nav-btn" id="navBtnStats" data-view="stats" aria-label="Thống kê">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="m19 9-5 5-4-4-3 3"></path></svg>
+            <span class="tooltip">Thống kê</span>
+        </button>
+        <button class="nav-btn" id="navBtnMethods" data-view="methods" aria-label="Phương pháp học">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.042 21.672L13.684 16.6s.408-1.947 1.25-3.25c.842-1.303 2.002-2.5 3.5-3.5s3.25-1.25 3.25-1.25l5.072 1.358c.27.072.358.42.128.628l-3.35 3.35a.499.499 0 0 1-.594.052l-2.07-1.486c-.44-.314-.82-.53-1.11-.665-.29-.135-.55-.22-.78-.245s-.45.045-.63.155c-.18.11-.3.29-.36.5-.06.21.02.48.18.78.16.3.385.68.665 1.11l1.486 2.07a.499.499 0 0 1-.052.594l-3.35 3.35c-.208.23-.556.142-.628-.128z"/><path d="M12 15l-3-3 3-3 3 3-3 3z"/><path d="M9.01 11.99l-3.005 3.004a.997.997 0 0 1-1.41-1.41l3.004-3.005-3.004-3.005a.997.997 0 0 1 1.41-1.41l3.005 3.004z"/><path d="M5.01 11.99l-3.005 3.004a.997.997 0 0 1-1.41-1.41l3.004-3.005-3.004-3.005a.997.997 0 0 1 1.41-1.41l3.005 3.004z"/></svg>
+            <span class="tooltip">Phương pháp học</span>
+        </button>
+        <button class="nav-btn" id="btnSettings" style="margin-top: auto;" aria-label="Cài đặt">
+             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 0 2l-.15.08a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1 0-2l.15.08a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            <span class="tooltip">Cài đặt</span>
+        </button>
+        <button class="nav-btn" id="navBtnGuide" data-view="guide" aria-label="Hướng dẫn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 1 1 5.82 1c0 2-3 2-3 4"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            <span class="tooltip">Hướng dẫn</span>
+        </button>
+    </nav>
+
+    <main class="app-content">
+      <header class="app-header panel-bg">
+        <div class="row" style="gap:12px; align-items:center; flex:0 1 auto">
+          <strong>📚 Pomodoro Study App</strong>
+          <span class="badge" id="selectedContext">Chưa chọn Chủ đề con</span>
+        </div>
+        <div class="actions">
+          <button class="btn ghost small" id="btnDashboard" title="Dashboard Tổng quan">📊 Tổng Quan </button>
+          <button class="btn ghost small" id="btnExport" title="Xuất JSON">⬇️ Xuất File</button>
+          <label class="btn ghost small" for="importFile" title="Nhập JSON">⬆️ Nhập File</label>
+          <input type="file" id="importFile" accept="application/json" style="display:none" />
+          <button class="btn small" id="btnToggleBg" title="Ẩn/Hiện giao diện">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+          <button class="btn small" id="btnFullscreen" title="Toàn màn hình">⟰</button>
+        </div>
+      </header>
+      
+
+      <div id="view-timer" class="view active">
+        <section class="panel panel-bg">
+          <div class="timer-header">
+            <div id="welcomePanel" class="hidden panel-bg" style="text-align:center; padding: 20px; border-radius: var(--radius); width: 100%;">
+                <h3>Chào mừng đến với Pomodoro Study App!</h3>
+                <p>Hãy bắt đầu bằng cách chọn một <strong>Chủ đề con</strong> hoặc tạo Chủ đề/Chủ đề con mới.</p>
+                <button class="btn acc" id="btnHelpCreateTopic">＋ Tạo Chủ đề Mới</button>
+            </div>
+            <div class="presets" role="group" aria-label="Chọn chế độ preset">
+                <button id="btnPresetA" class="btn small ghost" data-preset="A"></button>
+                <button id="btnPresetB" class="btn small ghost" data-preset="B"></button>
+            </div>
+          </div>
+          <hr />
+          <div class="timer" aria-live="polite">
+            <div class="badge" id="stateBadge">TRẠNG THÁI</div>
+            
+            <div class="timer-circle-container">
+              <svg class="timer-svg" viewBox="0 0 100 100">
+                  <circle class="timer-circle-bg" cx="50" cy="50" r="45"></circle>
+                  <circle class="timer-circle-progress" cx="50" cy="50" r="45"></circle>
+              </svg>
+              <div id="timeDisplay" class="big-time">00:00</div>
+            </div>
+
+            <div class="tiny" id="cycleInfo"></div>
+            
+            <div class="controls">
+              <button class="btn acc" id="btnStart" aria-label="Bắt đầu (Space)">▶️ Bắt đầu</button>
+              <button class="btn" id="btnPause" aria-label="Tạm dừng (Space)">⏸️ Tạm dừng</button>
+              <button class="btn" id="btnResume" aria-label="Tiếp tục (Space)">⏵ Tiếp tục</button>
+              <button class="btn warn" id="btnSkip" aria-label="Bỏ qua (N)">⏭️ Bỏ qua</button>
+              <button class="btn danger" id="btnReset">↺ Đặt lại</button>
+            </div>
+            <div class="tiny">Phím tắt: <strong>Space</strong> = Bắt đầu/Tạm dừng/Tiếp tục, <strong>N</strong> = Tiếp theo/Bỏ qua</div>
+          </div>
+        </section>
+
+        <section class="panel panel-bg aux-panel">
+            <nav class="tab-nav">
+                <button class="tab-btn active" data-tab="tasks">Nhiệm vụ</button>
+                <button class="tab-btn" data-tab="notes">Ghi chú</button>
+                <button class="tab-btn" data-tab="ai">Gemini AI</button>
+            </nav>
+            <div id="tasks" class="tab-content active">
+                <h4 style="margin: 0 0 8px; color: var(--sub);">To-do cho chủ đề con này:</h4>
+                <ul id="subtopicTasksList" class="subtopic-todo-list"></ul>
+                <div class="row" style="gap:8px; margin-top: 8px;">
+                    <input type="text" id="newSubtopicTaskInput" placeholder="Thêm một task mới..." />
+                    <button id="btnAddSubtopicTask" class="btn small" style="flex: 0 1 auto;">Thêm</button>
+                </div>
+            </div>
+            <div id="notes" class="tab-content">
+                <div id="generalNotesList" class="notes-list"></div>
+                <div class="add-note-area" style="margin-top: 12px;">
+                    <textarea id="newGeneralNoteText" placeholder="Thêm ghi chú mới..."></textarea>
+                    <div style="text-align: right; margin-top: 8px;">
+                        <button class="btn acc small" id="btnAddGeneralNote">＋ Thêm ghi chú</button>
+                    </div>
+                </div>
+            </div>
+            <div id="ai" class="tab-content">
+                <div class="panel-header" style="margin-bottom: 8px; padding: 0;">
+                    <h4 style="margin:0;">Gemini Assistant cho: <span id="currentSubtopicNameChat">(chưa chọn)</span></h4>
+                    <div class="actions">
+                        <button id="btnNewChat" class="btn small ghost" title="Chat mới">➕</button>
+                        <button id="btnClearChat" class="btn small danger" title="Xóa lịch sử">🗑️</button>
+                    </div>
+                </div>
+                <div id="chatMessages" class="chat-messages"></div>
+                <div id="aiPromptSuggestions" style="display: flex; gap: 6px; margin: 8px 0; flex-wrap: wrap;">
+                  <button class="btn small ghost" data-prompt="Giải thích khái niệm chính của chủ đề này">Giải thích khái niệm</button>
+                  <button class="btn small ghost" data-prompt="Tạo một dàn ý chi tiết cho chủ đề này">Tạo dàn ý</button>
+                  <button class="btn small ghost" data-prompt="Liệt kê 5 câu hỏi ôn tập quan trọng về chủ đề này">Tạo câu hỏi ôn tập</button>
+                </div>
+                <div class="chat-input-area">
+                  <input type="text" id="chatInput" placeholder="Hỏi Gemini điều gì đó..." />
+                  <button id="btnSendMessage" class="btn acc">Gửi</button>
+                </div>
+            </div>
+        </section>
+      </div>
+
+      <div id="view-topics" class="view">
+        <div class="panel panel-bg">
+            <div class="row" style="gap:8px; align-items: center; margin-bottom: 12px;">
+                <h3 style="margin: 0;">Quản lý Chủ đề</h3>
+                <button class="btn small acc" id="btnAddTopic" style="margin-left: auto;">＋ Thêm Chủ đề</button>
+            </div>
+            <div id="topicsList"></div>
+            <div class="footer-note">Nhấp mũi tên để mở/đóng danh sách chủ đề con.</div>
+        </div>
+      </div>
+      
+      <div id="view-stats" class="view">
+        <section class="panel panel-bg">
+            <h3 style="margin:0 0 12px 0;">Thống kê & Lịch sử — <span id="currentSubtopicName">(chưa chọn)</span></h3>
+            <div class="stats-grid">
+              <div class="stat-card"><h4>Tổng thời gian</h4><div class="stat-value" id="statTotal">0 phút</div></div>
+              <div class="stat-card"><h4>Phiên</h4><div class="stat-value" id="statSessions">0</div></div>
+              <div class="stat-card"><h4>Nhiệm vụ Hoàn thành</h4><div class="stat-value" id="statTasks">0</div></div>
+            </div>
+            <div style="margin-top:12px">
+              <h4 style="margin:4px 0 8px; color:var(--sub)">Lịch sử (LÀM VIỆC)</h4>
+              <div class="history" id="historyList"></div>
+            </div>
+        </section>
+      </div>
+      
+      <div id="view-methods" class="view">
+        <div class="panel panel-bg">
+            <h3 style="margin-top: 0;">💡 Các Phương pháp Học tập Hiệu quả</h3>
+            <p class="tiny" style="margin-top: -8px; margin-bottom: 20px;">Nhấp vào từng phương pháp để xem chi tiết.</p>
+            
+            <div class="methods-container">
+                <details class="method-item">
+                    <summary>Kỹ Thuật Feynman: Hiểu Sâu Bằng Cách Giải Thích Đơn Giản</summary>
+                    <div class="method-content">
+                        <p>Nguyên tắc cốt lõi của kỹ thuật này dựa trên một ý tưởng duy nhất: "Nếu bạn không thể giải thích một chủ đề một cách đơn giản, bạn chưa thực sự hiểu nó." Mục tiêu là biến kiến thức phức tạp thành lời giải thích đơn giản đến mức một đứa trẻ cũng có thể hiểu.</p>
+                        <h4>Quy Trình 4 Bước Tinh Gọn</h4>
+                        <ol>
+                            <li><strong>Học:</strong> Chọn một chủ đề và viết ra tất cả những gì bạn biết về nó.</li>
+                            <li><strong>Dạy:</strong> Giả vờ dạy lại chủ đề này bằng ngôn ngữ đơn giản nhất có thể. Viết hoặc nói to ra.</li>
+                            <li><strong>Tìm & Sửa Lỗi:</strong> Bất cứ khi nào bạn bị "kẹt", phải dùng thuật ngữ phức tạp, hoặc không thể giải thích trôi chảy, bạn đã tìm thấy lỗ hổng kiến thức của mình. Hãy quay lại tài liệu gốc để học lại cho đến khi lấp được lỗ hổng đó.</li>
+                            <li><strong>Đơn Giản Hóa:</strong> Sắp xếp lại lời giải thích cuối cùng, sử dụng các ví dụ hoặc phép ví von đơn giản để nó trở nên mạch lạc và dễ hiểu nhất.</li>
+                        </ol>
+                        <h4>Cốt Lõi</h4>
+                        <p>Kỹ thuật Feynman buộc bạn phải chuyển từ việc tiếp thu thụ động (đọc, nghe) sang chủ động xử lý thông tin. Quá trình "bị kẹt" khi giải thích chính là công cụ chẩn đoán mạnh mẽ nhất, nó chỉ ra chính xác điểm bạn còn yếu.</p>
+                        <p><i>Cách nhanh nhất để kiểm tra và củng cố sự hiểu biết của bạn là thử dạy lại nó cho người khác một cách đơn giản.</i></p>
+                    </div>
+                </details>
+
+                <details class="method-item">
+                    <summary>PhÆ°Æ¡ng PhÃ¡p Viáº¿t cá»§a Benjamin Franklin: Há»c Viáº¿t Báº±ng CÃ¡ch TÃ¡i Táº¡o</summary>
+                    <div class="method-content">
+                        <p>Benjamin Franklin Ä‘Ã£ tá»± rÃ¨n luyá»‡n ká»¹ nÄƒng viáº¿t tá»« kÃ©m cá»i trá»Ÿ nÃªn báº­c tháº§y báº±ng má»™t phÆ°Æ¡ng phÃ¡p chá»§ Ä‘á»™ng, thay vÃ¬ chá»‰ Ä‘á»c má»™t cÃ¡ch thá»¥ Ä‘á»™ng. Cá»‘t lÃµi cá»§a phÆ°Æ¡ng phÃ¡p nÃ y lÃ  phÃ¢n tÃ­ch, tÃ¡i táº¡o, vÃ  so sÃ¡nh vá»›i má»™t bÃ i viáº¿t cháº¥t lÆ°á»£ng cao.</p>
+                        <p>ÄÃ¢y lÃ  má»™t vÃ­ dá»¥ kinh Ä‘iá»ƒn cá»§a "Luyá»‡n táº­p cÃ³ Chá»§ Ä‘Ã­ch": táº­p trung vÃ o Ä‘iá»ƒm yáº¿u, cÃ³ má»¥c tiÃªu rÃµ rÃ ng vÃ  nháº­n pháº£n há»“i ngay láº­p tá»©c.</p>
+                        <h4>Quy TrÃ¬nh 3 BÆ°á»›c Cá»‘t LÃµi</h4>
+                        <ol>
+                            <li><strong>PhÃ¢n TÃ­ch (Deconstruct):</strong> Äá»c má»™t bÃ i viáº¿t máº«u xuáº¥t sáº¯c. Sau Ä‘Ã³, chá»‰ ghi láº¡i nhá»¯ng Ã½ chÃ­nh cá»§a tá»«ng Ä‘oáº¡n hoáº·c tá»«ng cÃ¢u ra má»™t tá» giáº¥y riÃªng.</li>
+                            <li><strong>TÃ¡i Táº¡o (Reconstruct):</strong> VÃ i ngÃ y sau, khi Ä‘Ã£ quÃªn Ä‘i vÄƒn phong cá»§a báº£n gá»‘c, hÃ£y dÃ¹ng nhá»¯ng ghi chÃº Ã½ chÃ­nh Ä‘Ã³ Ä‘á»ƒ viáº¿t láº¡i toÃ n bá»™ bÃ i viáº¿t báº±ng ngÃ´n ngá»¯ vÃ  cÃ¡ch diá»…n Ä‘áº¡t cá»§a chÃ­nh báº¡n.</li>
+                            <li><strong>So SÃ¡nh & Sá»­a Lá»—i (Compare & Correct):</strong> Äá»‘i chiáº¿u trá»±c tiáº¿p bÃ i viáº¿t cá»§a báº¡n vá»›i báº£n gá»‘c. ÄÃ¢y lÃ  bÆ°á»›c quan trá»ng nháº¥t. NÃ³ giÃºp báº¡n phÃ¡t hiá»‡n ngay láº­p tá»©c nhá»¯ng lá»—i sai vá» tá»« vá»±ng, cáº¥u trÃºc cÃ¢u, vÃ  cÃ¡ch sáº¯p xáº¿p Ã½ tÆ°á»Ÿng Ä‘á»ƒ sá»­a chá»¯a.</li>
+                        </ol>
+                        <p>Franklin cÃ²n thá»±c hÃ nh cÃ¡c biáº¿n thá»ƒ nÃ¢ng cao nhÆ° xÃ¡o trá»™n thá»© tá»± cÃ¡c Ã½ chÃ­nh Ä‘á»ƒ rÃ¨n luyá»‡n tÆ° duy logic, hoáº·c chuyá»ƒn vÄƒn xuÃ´i thÃ nh thÆ¡ Ä‘á»ƒ lÃ m giÃ u vá»‘n tá»«.</p>
+                        <h4>NguyÃªn Táº¯c VÃ ng</h4>
+                        <p>ThÃ nh cÃ´ng cá»§a phÆ°Æ¡ng phÃ¡p nÃ y khÃ´ng Ä‘áº¿n tá»« viá»‡c láº·p láº¡i vÃ´ thá»©c, mÃ  Ä‘áº¿n tá»« vÃ²ng láº·p pháº£n há»“i trá»±c tiáº¿p. Viá»‡c so sÃ¡nh vá»›i báº£n gá»‘c buá»™c báº¡n pháº£i Ä‘á»‘i máº·t vÃ  sá»­a chá»¯a nhá»¯ng Ä‘iá»ƒm yáº¿u cá»¥ thá»ƒ cá»§a mÃ¬nh, biáº¿n viá»‡c há»c tá»« má»™t quÃ¡ trÃ¬nh mÆ¡ há»“ thÃ nh má»™t bÃ i táº­p cÃ³ thá»ƒ Ä‘o lÆ°á»ng Ä‘Æ°á»£c.</p>
+                        <p><i>Äá»ƒ viáº¿t giá»i hÆ¡n, Ä‘á»«ng chá»‰ Ä‘á»c. HÃ£y chá»n má»™t bÃ i viáº¿t hay, phÃ¢n tÃ­ch nÃ³, cá»‘ gáº¯ng viáº¿t láº¡i, vÃ  so sÃ¡nh Ä‘á»ƒ tÃ¬m ra lá»—i sai.</i></p>
+                    </div>
+                </details>
+
+                <details class="method-item">
+                    <summary>NguyÃªn Táº¯c 80/20 Äá»ƒ Chinh Phá»¥c LÄ©nh Vá»±c Má»›i</summary>
+                    <div class="method-content">
+                        <p>Äá»ƒ khÃ´ng bá»‹ choÃ¡ng ngá»£p khi há»c má»™t lÄ©nh vá»±c má»›i, hÃ£y táº­p trung vÃ o 20% kiáº¿n thá»©c cá»‘t lÃµi mang láº¡i 80% káº¿t quáº£ (Liá»u lÆ°á»£ng Hiá»‡u quáº£ Tá»‘i thiá»ƒu).</p>
+                        <h4>20% cá»‘t lÃµi: Ãp dá»¥ng Khung PhÃ¢n tÃ­ch 5 BÆ°á»›c Ä‘á»ƒ xÃ¡c Ä‘á»‹nh 20% quan trá»ng nháº¥t:</h4>
+                        <ol>
+                            <li><strong>XÃ¡c Ä‘á»‹nh Káº¿t quáº£:</strong> Má»¥c tiÃªu cuá»‘i cÃ¹ng cá»§a báº¡n lÃ  gÃ¬? (vÃ­ dá»¥: xÃ¢y dá»±ng Ä‘Æ°á»£c má»™t trang web).</li>
+                            <li><strong>PhÃ¢n tÃ­ch Ná»n táº£ng:</strong> TÃ¬m 3-5 nguyÃªn lÃ½ báº¥t biáº¿n cá»§a ngÃ nh.</li>
+                            <li><strong>Nháº­n diá»‡n Lá»—i sai Phá»• biáº¿n:</strong> Há»c cÃ¡ch trÃ¡nh nhá»¯ng lá»—i mÃ  ngÆ°á»i má»›i hay máº¯c pháº£i.</li>
+                            <li><strong>TÃ¬m "Yáº¿u tá»‘ NhÃ¢n":</strong> Ká»¹ nÄƒng nÃ o sáº½ giÃºp há»c má»i thá»© khÃ¡c dá»… dÃ ng hÆ¡n? (vÃ­ dá»¥: nháº¡c lÃ½ trong Ã¢m nháº¡c).</li>
+                            <li><strong>Láº­p báº£n Ä‘á»“ á»¨ng dá»¥ng Thá»±c tiá»…n:</strong> Táº­p trung vÃ o 20% cÃ´ng viá»‡c chiáº¿m 80% thá»i gian thá»±c táº¿ cá»§a ngÃ nh.</li>
+                        </ol>
+                    </div>
+                </details>
+
+                <details class="method-item">
+                    <summary>Gá»£i Nhá»› Chá»§ Äá»™ng (Active Recall): NguyÃªn Táº¯c Cá»‘t LÃµi Äá»ƒ Há»c SÃ¢u</summary>
+                    <div class="method-content">
+                        <p>Gá»£i nhá»› chá»§ Ä‘á»™ng lÃ  hÃ nh Ä‘á»™ng ná»— lá»±c truy xuáº¥t thÃ´ng tin tá»« nÃ£o bá»™ mÃ  khÃ´ng nhÃ¬n vÃ o tÃ i liá»‡u. ÄÃ¢y lÃ  phÆ°Æ¡ng phÃ¡p há»c hiá»‡u quáº£ vÆ°á»£t trá»™i so vá»›i viá»‡c Ä‘á»c láº¡i, highlight hay tÃ³m táº¯t má»™t cÃ¡ch thá»¥ Ä‘á»™ng.</p>
+                        <h4>NguyÃªn Táº¯c 20/80</h4>
+                        <p><strong>20% Cá»‘t lÃµi:</strong> HÃ nh Ä‘á»™ng "váº¯t Ã³c" Ä‘á»ƒ nhá»› láº¡i thÃ´ng tin sáº½ cá»§ng cá»‘ cÃ¡c liÃªn káº¿t tháº§n kinh, giÃºp chuyá»ƒn kiáº¿n thá»©c vÃ o bá»™ nhá»› dÃ i háº¡n. Cáº£m giÃ¡c khÃ³ khÄƒn khi cá»‘ gáº¯ng nhá»› chÃ­nh lÃ  dáº¥u hiá»‡u cá»§a viá»‡c há»c táº­p hiá»‡u quáº£ Ä‘ang diá»…n ra.</p>
+                        <p><strong>80% Káº¿t quáº£:</strong> Báº¡n sáº½ ghi nhá»› kiáº¿n thá»©c sÃ¢u vÃ  lÃ¢u hÆ¡n, Ä‘á»“ng thá»i biáº¿t chÃ­nh xÃ¡c mÃ¬nh Ä‘ang yáº¿u á»Ÿ Ä‘Ã¢u.</p>
+                        <h4>CÃ¡c PhÆ°Æ¡ng PhÃ¡p Quan Trá»ng Nháº¥t</h4>
+                        <ul>
+                            <li><strong>Tá»± Kiá»ƒm Tra (Self-testing):</strong> Thay vÃ¬ Ä‘á»c láº¡i ghi chÃº, hÃ£y che chÃºng Ä‘i vÃ  tá»± Ä‘áº·t cÃ¢u há»i cho mÃ¬nh. VÃ­ dá»¥: DÃ¹ng flashcards (tháº» ghi nhá»›) vÃ  luÃ´n tráº£ lá»i trÆ°á»›c khi láº­t xem Ä‘Ã¡p Ã¡n.</li>
+                            <li><strong>Ká»¹ thuáº­t "Blurting":</strong> Sau khi há»c má»™t chá»§ Ä‘á», hÃ£y Ä‘Ã³ng sÃ¡ch láº¡i vÃ  viáº¿t ra giáº¥y má»i thá»© báº¡n cÃ³ thá»ƒ nhá»›. Sau Ä‘Ã³, so sÃ¡nh vá»›i tÃ i liá»‡u gá»‘c Ä‘á»ƒ láº¥p Ä‘áº§y nhá»¯ng lá»— há»•ng kiáº¿n thá»©c.</li>
+                            <li><strong>Dáº¡y láº¡i cho ngÆ°á»i khÃ¡c:</strong> Giáº£i thÃ­ch má»™t khÃ¡i niá»‡m cho ngÆ°á»i khÃ¡c buá»™c báº¡n pháº£i truy xuáº¥t, Ä‘Æ¡n giáº£n hÃ³a vÃ  sáº¯p xáº¿p láº¡i thÃ´ng tin má»™t cÃ¡ch máº¡ch láº¡c.</li>
+                        </ul>
+                        <h4>Lá»£i Ãch VÆ°á»£t Trá»™i: PhÃ¡ Vá»¡ "áº¢o GiÃ¡c ThÃ nh Tháº¡o"</h4>
+                        <p>Sai láº§m lá»›n nháº¥t cá»§a viá»‡c há»c thá»¥ Ä‘á»™ng lÃ  nÃ³ táº¡o ra "áº£o giÃ¡c vá» sá»± thÃ nh tháº¡o" â€“ cáº£m giÃ¡c quen thuá»™c vá»›i tÃ i liá»‡u nhÆ°ng thá»±c cháº¥t khÃ´ng thá»ƒ nhá»› láº¡i hay giáº£i thÃ­ch Ä‘Æ°á»£c.</p>
+                        <p>Gá»£i nhá»› chá»§ Ä‘á»™ng Ä‘Ã³ng vai trÃ² nhÆ° má»™t cÃ´ng cá»¥ cháº©n Ä‘oÃ¡n. Má»—i láº§n báº¡n khÃ´ng thá»ƒ nhá»› ra Ä‘iá»u gÃ¬, báº¡n Ä‘Ã£ phÃ¡t hiá»‡n chÃ­nh xÃ¡c má»™t lá»— há»•ng kiáº¿n thá»©c. Äiá»u nÃ y cho phÃ©p báº¡n táº­p trung Ã´n táº­p vÃ o Ä‘Ãºng Ä‘iá»ƒm yáº¿u, thay vÃ¬ lÃ£ng phÃ­ thá»i gian xem láº¡i nhá»¯ng gÃ¬ Ä‘Ã£ biáº¿t.</p>
+                        <p><i>TÃ³m láº¡i: Äá»«ng chá»‰ Ä‘á»c láº¡i. HÃ£y dá»«ng láº¡i, che tÃ i liá»‡u Ä‘i, vÃ  tá»± há»i: "MÃ¬nh thá»±c sá»± nhá»› Ä‘Æ°á»£c gÃ¬?"</i></p>
+                    </div>
+                </details>
+
+                <details class="method-item">
+                    <summary>Láº·p Láº¡i Ngáº¯t QuÃ£ng (Spaced Repetition): Há»c ÄÃºng Thá»i Äiá»ƒm</summary>
+                    <div class="method-content">
+                        <p>Náº¿u Gá»£i nhá»› chá»§ Ä‘á»™ng lÃ  vá» cÃ¡ch há»c, thÃ¬ Láº·p láº¡i ngáº¯t quÃ£ng lÃ  vá» thá»i Ä‘iá»ƒm há»c. ÄÃ¢y lÃ  má»™t há»‡ thá»‘ng lÃªn lá»‹ch Ã´n táº­p Ä‘á»ƒ Ä‘Æ°a thÃ´ng tin vÃ o trÃ­ nhá»› dÃ i háº¡n má»™t cÃ¡ch hiá»‡u quáº£ nháº¥t.</p>
+                        <h4>NguyÃªn Táº¯c Cá»‘t LÃµi: Chá»‘ng Láº¡i Sá»± LÃ£ng QuÃªn ðŸ§ </h4>
+                        <p>PhÆ°Æ¡ng phÃ¡p nÃ y dá»±a trÃªn "ÄÆ°á»ng cong LÃ£ng quÃªn", cho tháº¥y chÃºng ta quÃªn thÃ´ng tin nhanh nháº¥t ngay sau khi há»c. Láº·p láº¡i ngáº¯t quÃ£ng hoáº¡t Ä‘á»™ng báº±ng cÃ¡ch yÃªu cáº§u báº¡n Ã´n táº­p láº¡i má»™t thÃ´ng tin ngay trÆ°á»›c khi báº¡n sáº¯p quÃªn nÃ³.</p>
+                        <p>Má»—i láº§n Ã´n táº­p thÃ nh cÃ´ng sáº½ lÃ m cho khoáº£ng thá»i gian báº¡n nhá»› thÃ´ng tin Ä‘Ã³ dÃ i ra. Láº§n Ä‘áº§u báº¡n cÃ³ thá»ƒ quÃªn sau 1 ngÃ y, nhÆ°ng sau khi Ã´n táº­p, báº¡n sáº½ nhá»› Ä‘Æ°á»£c trong 3 ngÃ y, rá»“i 1 tuáº§n, 1 thÃ¡ng, vÃ  cá»© tháº¿ xa dáº§n.</p>
+                        <h4>CÃ´ng Cá»¥ Hiá»‡u Quáº£ Nháº¥t: Pháº§n Má»m SRS ðŸ“±</h4>
+                        <p>Thay vÃ¬ tá»± lÃªn lá»‹ch thá»§ cÃ´ng, cÃ¡ch hiá»‡u quáº£ nháº¥t lÃ  sá»­ dá»¥ng cÃ¡c pháº§n má»m Láº·p láº¡i ngáº¯t quÃ£ng (Spaced Repetition Software - SRS). Anki Ä‘Æ°á»£c xem lÃ  tiÃªu chuáº©n vÃ ng. NÃ³ tá»± Ä‘á»™ng hÃ³a hoÃ n toÃ n viá»‡c lÃªn lá»‹ch Ã´n táº­p cho hÃ ng ngÃ n tháº» ghi nhá»› dá»±a trÃªn Ä‘á»™ khÃ³ mÃ  báº¡n tá»± Ä‘Ã¡nh giÃ¡, Ä‘áº£m báº£o báº¡n luÃ´n Ã´n táº­p vÃ o thá»i Ä‘iá»ƒm tá»‘i Æ°u nháº¥t.</p>
+                        <h4>Sai Láº§m Lá»›n Nháº¥t Cáº§n TrÃ¡nh âŒ</h4>
+                        <p>LÃ½ do sá»‘ má»™t khiáº¿n má»i ngÆ°á»i tháº¥t báº¡i vá»›i phÆ°Æ¡ng phÃ¡p nÃ y lÃ  "QuÃ¡ táº£i Lá»‹ch Ã´n táº­p" (Review Overload). Äiá»u nÃ y xáº£y ra khi báº¡n táº¡o quÃ¡ nhiá»u tháº» má»›i má»—i ngÃ y hoáº·c bá» lá»¡ vÃ i ngÃ y Ã´n táº­p, dáº«n Ä‘áº¿n má»™t lÆ°á»£ng tháº» tá»“n Ä‘á»ng khá»•ng lá»“ gÃ¢y náº£n chÃ­.</p>
+                        <p><strong>Giáº£i phÃ¡p (20% hÃ nh Ä‘á»™ng, 80% káº¿t quáº£):</strong> HÃ£y nháº¥t quÃ¡n. Äáº·t ra giá»›i háº¡n thá»±c táº¿ vá» sá»‘ lÆ°á»£ng tháº» má»›i má»—i ngÃ y (vÃ­ dá»¥: 10-20 tháº») vÃ  duy trÃ¬ viá»‡c Ã´n táº­p hÃ ng ngÃ y. ThÃ  há»c Ã­t mÃ  Ä‘á»u cÃ²n hÆ¡n há»c dá»“n.</p>
+                        <h4>Sá»± Káº¿t Há»£p Sá»‘ng CÃ²n: AR + SR</h4>
+                        <p>Láº·p láº¡i ngáº¯t quÃ£ng (SR) vÃ  Gá»£i nhá»› chá»§ Ä‘á»™ng (AR) lÃ  hai máº·t cá»§a cÃ¹ng má»™t Ä‘á»“ng xu vÃ  khÃ´ng thá»ƒ tÃ¡ch rá»i. SR cung cáº¥p lá»‹ch trÃ¬nh KHI NÃ€O nÃªn Ã´n táº­p. AR lÃ  hÃ nh Ä‘á»™ng báº¡n thá»±c hiá»‡n KHI Ã´n táº­p. Sá»± káº¿t há»£p nÃ y Ä‘áº£m báº£o ná»— lá»±c gá»£i nhá»› cá»§a báº¡n xáº£y ra vÃ o "Ä‘iá»ƒm ngá»t" cá»§a trÃ­ nhá»›. Sá»­ dá»¥ng Anki chÃ­nh lÃ  cÃ¡ch triá»ƒn khai ká»¹ thuáº­t káº¿t há»£p nÃ y má»™t cÃ¡ch hiá»‡u quáº£ nháº¥t.</p>
+                    </div>
+                </details>
+            </div>
+        </div>
+      </div>
+
+      <div id="view-guide" class="view">
+        <div class="panel panel-bg">
+            <h3 style="margin-top: 0;">ðŸ“– KhÃ¡m PhÃ¡ Pomodoro Study App</h3>
+            <p>
+                ChÃ o má»«ng báº¡n Ä‘áº¿n vá»›i khÃ´ng gian há»c táº­p Ä‘Æ°á»£c thiáº¿t káº¿ dÃ nh riÃªng cho sá»± táº­p trung vÃ  hiá»‡u quáº£. HÃ£y cÃ¹ng khÃ¡m phÃ¡ nhá»¯ng tÃ­nh nÄƒng sáº½ Ä‘á»“ng hÃ nh cÃ¹ng báº¡n trÃªn hÃ nh trÃ¬nh chinh phá»¥c tri thá»©c.
+            </p>
+
+            <h4>ðŸš€ Khá»Ÿi Äáº§u Nhanh Chá»‰ Trong 4 BÆ°á»›c</h4>
+            <p>Äá»ƒ hÃ nh trÃ¬nh cá»§a báº¡n luÃ´n máº¡ch láº¡c, má»i thá»© trong á»©ng dá»¥ng Ä‘Æ°á»£c sáº¯p xáº¿p theo cáº¥u trÃºc <strong>Chá»§ Ä‘á» Lá»›n â†’ Chá»§ Ä‘á» con</strong>.</p>
+            <ol>
+                <li>Má»Ÿ má»¥c <strong>ðŸ“š Chá»§ Ä‘á»</strong> tá»« thanh Ä‘iá»u hÆ°á»›ng bÃªn cáº¡nh.</li>
+                <li>Nháº¥n <strong>ï¼‹ ThÃªm Chá»§ Ä‘á»</strong> Ä‘á»ƒ táº¡o má»™t lÄ©nh vá»±c lá»›n (vÃ­ dá»¥: "Tiáº¿ng Anh Giao Tiáº¿p").</li>
+                <li>BÃªn cáº¡nh chá»§ Ä‘á» vá»«a táº¡o, nháº¥n <strong>ï¼‹ ThÃªm</strong> Ä‘á»ƒ táº¡o má»™t chá»§ Ä‘á» con, chi tiáº¿t hÆ¡n (vÃ­ dá»¥: "BÃ i 1: Luyá»‡n phÃ¡t Ã¢m IPA").</li>
+                <li>Chá»n chá»§ Ä‘á» con Ä‘Ã³. Giá» Ä‘Ã¢y, báº¡n Ä‘Ã£ sáºµn sÃ ng Ä‘á»ƒ báº¯t Ä‘áº§u phiÃªn há»c Ä‘áº§u tiÃªn cá»§a mÃ¬nh!</li>
+            </ol>
+
+            <hr />
+            <h4>âœ¨ Nhá»¯ng TÃ­nh NÄƒng ÄÃ¡ng ChÃº Ã</h4>
+
+            <h4>PhÆ°Æ¡ng PhÃ¡p Há»c Táº­p ðŸ’¡</h4>
+            <p>KhÃ´ng chá»‰ lÃ  má»™t chiáº¿c Ä‘á»“ng há»“, á»©ng dá»¥ng cÃ²n lÃ  má»™t ngÆ°á»i cá»‘ váº¥n. KhÃ¡m phÃ¡ cÃ¡c phÆ°Æ¡ng phÃ¡p há»c táº­p kinh Ä‘iá»ƒn nhÆ° Feynman, Gá»£i Nhá»› Chá»§ Äá»™ng (Active Recall)... Ä‘á»ƒ tá»‘i Æ°u hÃ³a kháº£ nÄƒng tiáº¿p thu cá»§a báº¡n.</p>
+
+            <h4>Quáº£n LÃ½ Chá»§ Äá» Linh Hoáº¡t (Organizer)</h4>
+            <p>Dá»… dÃ ng sáº¯p xáº¿p cÃ¡c má»¥c tiÃªu há»c táº­p cá»§a báº¡n. KÃ©o vÃ  tháº£ Ä‘á»ƒ thay Ä‘á»•i thá»© tá»± cÃ¡c chá»§ Ä‘á» lá»›n hoáº·c di chuyá»ƒn má»™t chá»§ Ä‘á» con sang má»™t lÄ©nh vá»±c má»›i.</p>
+
+            <h4>Nhiá»‡m Vá»¥ & Ghi ChÃº TÃ­ch Há»£p ðŸ“</h4>
+            <p>Ngay trong mÃ n hÃ¬nh Ä‘á»“ng há»“, báº¡n cÃ³ thá»ƒ táº¡o danh sÃ¡ch viá»‡c cáº§n lÃ m (to-do) cho tá»«ng chá»§ Ä‘á» con hoáº·c ghi láº¡i nhá»¯ng Ã½ tÆ°á»Ÿng chá»£t náº£y ra mÃ  khÃ´ng lÃ m giÃ¡n Ä‘oáº¡n dÃ²ng cháº£y cÃ´ng viá»‡c.</p>
+
+            <h4>Cháº¿ Äá»™ Zen ðŸ§˜</h4>
+            <p>Khi cáº§n táº­p trung tuyá»‡t Ä‘á»‘i, hÃ£y nháº¥n vÃ o biá»ƒu tÆ°á»£ng con máº¯t (ðŸ‘ï¸) á»Ÿ gÃ³c trÃªn bÃªn pháº£i. Giao diá»‡n sáº½ áº©n Ä‘i, chá»‰ Ä‘á»ƒ láº¡i hÃ¬nh ná»n vÃ  chiáº¿c Ä‘á»“ng há»“ tinh gá»n, giÃºp báº¡n hoÃ n toÃ n Ä‘áº¯m mÃ¬nh vÃ o khÃ´ng gian há»c táº­p.</p>
+
+            <h4>Thá»‘ng KÃª & Cá»™t Má»‘c ðŸ†</h4>
+            <p>Theo dÃµi hÃ nh trÃ¬nh cá»§a báº¡n qua nhá»¯ng con sá»‘ biáº¿t nÃ³i. á»¨ng dá»¥ng sáº½ tá»± Ä‘á»™ng ghi nháº­n vÃ  chÃºc má»«ng khi báº¡n Ä‘áº¡t Ä‘Æ°á»£c nhá»¯ng cá»™t má»‘c quan trá»ng (20 giá», 100 giá» há»c...), biáº¿n má»—i ná»— lá»±c thÃ nh má»™t thÃ nh tá»±u Ä‘Ã¡ng tá»± hÃ o.</p>
+
+            <hr />
+            <h4>âŒ¨ï¸ PhÃ­m Táº¯t ThÃ´ng Minh</h4>
+            <ul>
+                <li><kbd>Space</kbd>: Báº¯t Ä‘áº§u / Táº¡m dá»«ng / Tiáº¿p tá»¥c phiÃªn há»c.</li>
+                <li><kbd>N</kbd>: Bá» qua phiÃªn lÃ m viá»‡c hoáº·c nghá»‰ hiá»‡n táº¡i.</li>
+                <li><kbd>Esc</kbd>: ÄÃ³ng cÃ¡c cá»­a sá»• Ä‘ang má»Ÿ (nhÆ° CÃ i Ä‘áº·t).</li>
+            </ul>
+
+            <hr />
+            <h4>ðŸ› ï¸ CÃ i Äáº·t NÃ¢ng Cao & TÃ­ch Há»£p</h4>
+
+            <h4>Trá»£ LÃ½ Gemini AI ðŸ§ </h4>
+            <p>Biáº¿n á»©ng dá»¥ng thÃ nh má»™t ngÆ°á»i báº¡n Ä‘á»“ng hÃ nh thÃ´ng minh. Há»i Ä‘Ã¡p, giáº£i thÃ­ch khÃ¡i niá»‡m, hoáº·c táº¡o dÃ n Ã½ cho chá»§ Ä‘á» há»c ngay trong tab "Gemini AI".</p>
+            <p><strong>Thiáº¿t láº­p:</strong></p>
+            <ol>
+                <li>Truy cáº­p Google AI Studio vÃ  táº¡o má»™t API Key má»›i (miá»…n phÃ­).</li>
+                <li>Sao chÃ©p chuá»—i kÃ½ tá»± API Key Ä‘Ã³.</li>
+                <li>DÃ¡n vÃ o Ã´ "Gemini API Key" trong CÃ i Ä‘áº·t cá»§a á»©ng dá»¥ng vÃ  LÆ°u láº¡i.</li>
+            </ol>
+
+            <h4>Nháº¡c Ná»n YouTube ðŸŽ¶</h4>
+            <p>Táº¡o khÃ´ng gian há»c táº­p hoÃ n háº£o báº±ng cÃ¡ch phÃ¡t má»™t video hoáº·c danh sÃ¡ch phÃ¡t YouTube (nhÆ° nháº¡c lofi, Ã¢m thanh thiÃªn nhiÃªn) lÃ m nháº¡c ná»n.</p>
+            <p><strong>Sá»­ dá»¥ng:</strong> DÃ¡n Ä‘Æ°á»ng dáº«n (URL) video/playlist vÃ o Ã´ "Nháº¡c ná»n YouTube".</p>
+            <p><strong>TÃ¹y chá»n:</strong> TÃ­ch vÃ o Ã´ "DÃ¹ng áº£nh bÃ¬a video lÃ m ná»n" Ä‘á»ƒ tá»± Ä‘á»™ng biáº¿n khÃ´ng gian há»c táº­p cá»§a báº¡n trá»Ÿ nÃªn sá»‘ng Ä‘á»™ng hÆ¡n.</p>
+
+            <h4>An ToÃ n Dá»¯ Liá»‡u: Sao LÆ°u & Phá»¥c Há»“i ðŸ›¡ï¸</h4>
+            <p>ChÃºng tÃ´i hiá»ƒu ráº±ng dá»¯ liá»‡u há»c táº­p cá»§a báº¡n lÃ  vÃ´ giÃ¡. á»¨ng dá»¥ng tá»± Ä‘á»™ng táº¡o má»™t báº£n sao lÆ°u tiáº¿n trÃ¬nh cá»§a báº¡n má»—i ngÃ y Ä‘á»ƒ Ä‘áº£m báº£o khÃ´ng cÃ³ gÃ¬ bá»‹ máº¥t.</p>
+            <p><strong>TÃ¹y Chá»‰nh Sao LÆ°u:</strong> Äá»ƒ báº¡n cÃ³ toÃ n quyá»n kiá»ƒm soÃ¡t, á»©ng dá»¥ng cho phÃ©p tÃ¹y chá»‰nh sá»‘ ngÃ y lÆ°u giá»¯ cÃ¡c báº£n sao lÆ°u. Báº¡n cÃ³ thá»ƒ thay Ä‘á»•i thiáº¿t láº­p nÃ y (tá»« 1 Ä‘áº¿n 30 ngÃ y) trong má»¥c "CÃ i Ä‘áº·t sao lÆ°u". Máº·c Ä‘á»‹nh lÃ  7 ngÃ y, má»™t sá»± cÃ¢n báº±ng há»£p lÃ½ giá»¯a an toÃ n vÃ  dung lÆ°á»£ng.</p>
+            <p><strong>Phá»¥c Há»“i Dá»¯ Liá»‡u:</strong> Náº¿u báº¡n vÃ´ tÃ¬nh xÃ³a nháº§m, hÃ£y vÃ o má»¥c "Phá»¥c há»“i dá»¯ liá»‡u", chá»n má»™t ngÃ y trong quÃ¡ khá»© vÃ  nháº¥n "Phá»¥c há»“i".</p>
+            <p>âš ï¸ <strong>Cáº£nh bÃ¡o quan trá»ng:</strong> HÃ nh Ä‘á»™ng nÃ y sáº½ ghi Ä‘Ã¨ toÃ n bá»™ dá»¯ liá»‡u hiá»‡n táº¡i cá»§a báº¡n báº±ng dá»¯ liá»‡u tá»« báº£n sao lÆ°u. HÃ£y cháº¯c cháº¯n trÆ°á»›c khi thá»±c hiá»‡n.</p>
+
+            
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="modal" id="modalMilestone" role="dialog" aria-modal="true" aria-labelledby="milestoneTitle">
+    <div class="modal-card" style="width: min(600px, 94vw);">
+        <h3 id="milestoneTitle">ðŸŽ‰ ChÃºc má»«ng Báº¡n!</h3>
+        <p id="milestoneMessage" style="white-space: pre-wrap; line-height: 1.6;"></p>
+        <div class="row" style="justify-content:flex-end; margin-top:12px">
+            <button class="btn acc" id="btnMilestoneClose">Tiáº¿p tá»¥c hÃ nh trÃ¬nh!</button>
+        </div>
+    </div>
+  </div>
+  <div class="modal" id="modalSettings" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+      <div class="modal-card">
+          <h3 id="settingsTitle">⚙️ Cài đặt</h3>
+          <nav class="tab-nav">
+              <button class="tab-btn active" data-tab="settings-timer">Đồng hồ</button>
+              <button class="tab-btn" data-tab="settings-ui">Giao diện & Âm thanh</button>
+              <button class="tab-btn" data-tab="settings-integrations">Tích hợp</button>
+          </nav>
+          <div class="settings-content">
+              <div id="settings-timer" class="tab-content active" style="flex-direction:column; gap:20px;">
+                  <div>
+                      <h4>Thời lượng Pomodoro</h4>
+                      <div class="row" id="timerPresetSelector" style="margin-bottom:16px;">
+                          <button class="btn acc" data-preset-target="A"> Kiểu A </button>
+                          <button class="btn ghost" data-preset-target="B"> Kiểu B </button>
+                      </div>
+                      <div class="row">
+                          <label>LÃ€M VIá»†C (phÃºt)<input type="number" id="set_work" min="1" /></label>
+                          <label>NGHá»ˆ NGáº®N (phÃºt)<input type="number" id="set_short" min="1" /></label>
+                          <label>NGHá»ˆ DÃ€I (phÃºt)<input type="number" id="set_long" min="1" /></label>
+                      </div>
+                      <div class="row">
+                          <label>Chu kỳ Pomodoro<input type="number" id="set_cycles" min="1" /></label>
+                          <label>Chu kỳ nghỉ dài<input type="number" id="set_interval" min="2" /></label>
+                      </div>
+                  </div>
+                      <div class="settings-row-toggle">
+                          <label for="set_autoStartNext">Tá»± Ä‘á»™ng báº¯t Ä‘áº§u phiÃªn tiáº¿p theo</label>
+                          <label class="toggle-switch">
+                              <input type="checkbox" id="set_autoStartNext">
+                              <span class="slider"></span>
+                          </label>
+                      </div>
+              </div>
+              <div id="settings-ui" class="tab-content" style="flex-direction: column; gap: 20px;">
+                  <div>
+                      <h4>Giao diện</h4>
+                      <div class="row">
+                          <label>Theme Giao Diện
+                                <select id="set_theme_color">
+                                    <option value="default">Mặc định (Dark Blue)</option>
+                                    <option value="light">Light - Trà Sữa</option>
+                                    <option value="pastel">Pastel - Dễ thương</option>
+                                    <option value="lofi">Lofi Study Room</option>
+                                    <option value="space">Space Station</option>
+                                </select>
+                          </label>
+                      </div>
+                      <div class="row">
+                          <label>Hình nền
+                              <label class="btn small ghost" for="uploadBg">Tải ảnh mới</label>
+                              <input type="file" id="uploadBg" accept="image/*" class="hidden" />
+                          </label>
+                          <button class="btn small danger" id="btnClearBg">Xóa nền</button>
+                      </div>
+                      <div class="row">
+                          <label style="flex: 1;">Độ trong suốt của nền</label>
+                          <input type="range" id="set_panelOpacity" min="0.1" max="1" step="0.05" style="flex: 2;">
+                      </div>
+                      
+                   </div>
+                  
+                   <div>
+                       <h4>Âm thanh</h4>
+                      <div class="row">
+                          <label>Âm lượng (0–1)<input type="number" id="set_volume" step="0.05" min="0" max="1"/></label>
+                          <label>Kiểu âm báo
+                              <select id="set_theme">
+                                  <option value="beep">Beep</option>
+                                  <option value="chime">Chime</option>
+                              </select>
+                          </label>
+                           <button class="btn" id="btnTestSound" style="flex: 0 1 auto; align-self: center;">Test</button>
+                      </div>
+                      <div style="text-align: right; margin-top: 12px;">
+                          <button class="btn ghost small" id="btnToggleCustomSounds">TÃ¹y chá»‰nh Ã¢m bÃ¡o</button>
+                      </div>
+
+                      <div id="customSoundsContainer" class="hidden" style="margin-top: 8px;">
+                      <div class="row" style="display: flex; gap: 8px; justify-content: flex-end;">
+                          <div>
+                              <small>Ã‚m bÃ¡o háº¿t LÃ€M VIá»†C</small>
+                              <label title="Ã‚m bÃ¡o háº¿t LÃ€M VIá»†C" class="btn small ghost" for="uploadSoundWork">LÃ€M VIá»†C</label>
+                              <input type="file" id="uploadSoundWork" accept="audio/*" class="hidden" />
+                          </div>
+                          <div>
+                              <small>Ã‚m bÃ¡o háº¿t NGHá»ˆ NGáº®N</small>
+                              <label title="Ã‚m bÃ¡o háº¿t NGHá»ˆ NGáº®N" class="btn small ghost" for="uploadSoundBreak">NGHá»ˆ NGáº®N</label>
+                              <input type="file" id="uploadSoundBreak" accept="audio/*" class="hidden" />
+                          </div>
+                          <div>
+                              <small>Ã‚m bÃ¡o háº¿t NGHá»ˆ DÃ€I</small>
+                              <label title="Ã‚m bÃ¡o háº¿t NGHá»ˆ DÃ€I" class="btn small ghost" for="uploadSoundLong">NGHá»ˆ DÃ€I</label>
+                              <input type="file" id="uploadSoundLong" accept="audio/*" class="hidden" />
+                          </div>
+                      </div>
+                      </div>
+                  </div>
+              </div>
+              <div id="settings-integrations" class="tab-content" style="flex-direction: column; gap: 20px;">
+                  <div>
+                      <h4>Tích hợp AI</h4>
+                      <label>Gemini API Key
+                          <input type="password" id="set_apiKey" placeholder="Dán API Key của bạn vào đây..." />
+                      </label>
+                      <div class="tiny">Cần có để sử dụng các tính năng AI. Lấy key miễn phí tại <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer">Google AI Studio</a>.</div>
+                  </div>
+                  <div>
+                      <h4>🎵 Nhạc nền YouTube</h4>
+                      <div class="row" style="gap:8px; align-items:center;">
+                          <input type="text" id="set_youtubeUrl" placeholder="Dán link YouTube vào đây..." style="flex:1;">
+                          </div>
+                      <div id="ytUrlFeedback" class="tiny" style="min-height: 1.2em; padding: 4px 0;"></div>
+                      <div class="row" style="margin-top: 4px;">
+                          <label style="flex: 0 1 auto; display: flex; align-items: center; gap: 8px; font-size: 14px;">
+                              <input type="checkbox" id="set_ytThumbAsBg">
+                              <span>Dùng ảnh bìa video làm nền</span>
+                          </label>
+                      </div>
+                      <div class="row" style="margin-top: 8px;">
+                          <button id="btnToggleYtSound" class="btn small" style="flex:0 1 auto;">â–¶ï¸</button>
+                          <input type="range" id="ytSoundVolume" min="0" max="100" step="1" value="80" style="flex:1;">
+                      </div>
+                      <div class="tiny" style="text-align:center; margin-top:4px;">Âm lượng</div>
+                  </div>
+                  <div>
+                      <h4>🛡️ Cài đặt sao lưu</h4>
+                      <div class="row">
+                          <label>Số ngày sao lưu cần giữ lại
+                               <input type="number" id="set_backupDays" min="1" max="30" />
+                          </label>
+                      </div>
+                  </div>
+                  <div>
+                      <h4>🛡️ Phục hồi dữ liệu</h4>
+                      <p class="tiny">Phục hồi dữ liệu từ một bản sao lưu tự động hằng ngày. Hành động này sẽ ghi đè lên dữ liệu hiện tại của bạn.</p>
+                      <div class="row">
+                          <select id="backupList" style="flex: 3;"></select>
+                          <button id="btnRestoreBackup" class="btn warn small" style="flex: 1;">Phục hồi</button>
+                      </div>
+                  </div>
+              </div>
+          </div>
+          <div class="row" style="margin-top:16px; justify-content:flex-end">
+              <button class="btn ghost" id="btnDefaults">Mặc định</button>
+              <button class="btn acc" id="btnSaveSettings">Lưu</button>
+              <button class="btn" id="btnCloseSettings">Đóng</button>
+          </div>
+      </div>
+  </div>
+
+  <div class="modal" id="modalNote" role="dialog" aria-modal="true" aria-labelledby="noteTitle">
+    <div class="modal-card">
+      <h3 id="noteTitle">📝 Ghi chú cho phiên vừa hoàn thành</h3>
+      <div class="row"><textarea id="noteText" placeholder="Bạn học được gì? Khó khăn? Next steps?"></textarea></div>
+      <div class="row" style="justify-content:flex-end; margin-top:8px; gap: 12px;">
+        <button class="btn" id="btnSummarizeNote">✨ Tóm tắt & Gợi ý</button>
+        <button class="btn" id="btnSkipNote">Bỏ qua</button>
+        <button class="btn acc" id="btnSaveNote">Lưu ghi chú</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modalGeneric" role="dialog" aria-modal="true" aria-labelledby="genericTitle">
+      <div class="modal-card" style="width: min(450px, 94vw);">
+          <h3 id="genericTitle">Tiêu đề</h3>
+          <p id="genericMessage" class="hidden"></p>
+          <input type="text" id="genericInput" class="hidden" />
+          <div class="row" style="justify-content:flex-end; margin-top:12px">
+              <button class="btn" id="btnGenericCancel">Hủy</button>
+              <button class="btn acc" id="btnGenericOk">OK</button>
+          </div>
+      </div>
+  </div>
+  
+  <div class="modal" id="modalDashboard" role="dialog" aria-modal="true" aria-labelledby="dashboardTitle">
+    <div class="modal-card" style="width: min(800px, 95vw);">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3 id="dashboardTitle">📊 Tổng quan</h3>
+            <button class="btn ghost small" id="btnCloseDashboard">Đóng</button>
+        </div>
+        <p class="tiny">Tổng hợp thời gian và số phiên đã hoàn thành trên tất cả các chủ đề.</p>
+        <div id="dashboardContent" style="max-height: 60vh; overflow-y: auto;"></div>
+    </div>
+  </div>
+
+  <div class="toasts" id="toasts"></div>
+  <audio id="audioWorkEnd"></audio>
+  <audio id="audioBreakEnd"></audio>
+  <audio id="audioLongEnd"></audio>
+  <div id="youtube-player-container"></div>
+
+  <div id="draggableTimer" class="draggable-timer">00:00</div>
+
+    <div id="soundPermissionBar" class="sound-permission-bar" role="alert" aria-live="polite">
+    <span class="msg">Đang phát (tắt tiếng). Nhấn nút ▶️ để bật tiếng.</span>
+  </div>
+<script src="https://www.youtube.com/iframe_api"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+  <script>
+    // ÄÃ£ bá» fixVietnameseUI: dÃ¹ng trá»±c tiáº¿p tiáº¿ng Viá»‡t (UTF-8) trong HTML/JS
+    // NÃºt toÃ n mÃ n hÃ¬nh: dÃ¹ng biá»ƒu tÆ°á»£ng â†—ï¸/â†™ï¸ thay vÃ¬ chá»¯
+    window.addEventListener('load', ()=>{ try { updateFullscreenButton(); } catch(_) {} });
+    const IS_FILE_PROTOCOL = (window.location.protocol === 'file:');
+    // Watchdog: thÃ´ng bÃ¡o náº¿u API YouTube táº£i cháº­m hoáº·c tháº¥t báº¡i
+    function startYtApiWatchdog(){
+      const fb = document.getElementById('ytUrlFeedback');
+      if (!fb) return;
+      const t1 = setTimeout(()=>{
+        try{ if (!window.YT || !window.YT.Player){ fb.textContent='Đang tải API YouTube...'; fb.style.color='var(--sub)'; } }catch(_){ }
+      }, 1500);
+      const t2 = setTimeout(()=>{
+        try{ if (!window.YT || !window.YT.Player){ fb.textContent='Không tải được API YouTube. Kiểm tra mạng hoặc tải lại trang.'; fb.style.color='var(--danger)'; } }catch(_){ }
+      }, 7000);
+      window.__ytApiWatchdog = { cancel(){ clearTimeout(t1); clearTimeout(t2);} };
+    }
+    startYtApiWatchdog();
+    // Inline i18n fallback so app works over file:// without CORS
+    (function(){
+      const DICT = {
+        'timer.cycleInfo': ({ current = 0, target = 0 } = {}) => `Chu kỳ ${current}/${target}`,
+        'timer.selectSubtopicPrompt': 'Vui lòng chọn một Chủ đề con trước khi thực hiện thao tác.'
+      };
+      window.t = function t(key, vars){
+        try {
+          const v = DICT[key];
+          if (typeof v === 'function') return v(vars || {});
+          if (typeof v === 'string') return v;
+        } catch(_) {}
+        return key;
+      };
+      window.loadLanguage = function loadLanguage(lang){
+        try { localStorage.setItem('lang', lang || 'vi'); } catch(_) {}
+        return Promise.resolve();
+      };
+    })();
+    // storageManager will manage persistence
+    // =============================
+    // STORAGE MANAGER - Quáº£n lÃ½ Dá»¯ liá»‡u vÃ  Sao lÆ°u
+    // =============================
+    const storageManager = {
+        DB_NAME: 'PomodoroAppDB',
+        DB_VERSION: 1,
+        db: null,
+        async initDB() {
+            return new Promise((resolve, reject) => {
+                if (this.db) return resolve(this.db);
+                const request = indexedDB.open(this.DB_NAME, this.DB_VERSION);
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains('settings')) {
+                        db.createObjectStore('settings');
+                    }
+                    if (!db.objectStoreNames.contains('topics')) {
+                        db.createObjectStore('topics', { keyPath: 'id' });
+                    }
+                    if (!db.objectStoreNames.contains('subtopics')) {
+                        const subtopicsStore = db.createObjectStore('subtopics', { keyPath: 'id' });
+                        subtopicsStore.createIndex('by_topic', 'topicId');
+                    }
+                    if (!db.objectStoreNames.contains('backups')) {
+                        db.createObjectStore('backups', { keyPath: 'date' });
+                    }
+                };
+                request.onsuccess = (event) => {
+                    this.db = event.target.result;
+                    console.log('IndexedDB initialized successfully.');
+                    resolve(this.db);
+                };
+                request.onerror = (event) => {
+                    console.error('IndexedDB error:', event.target.errorCode);
+                    reject(event.target.error);
+                };
+            });
+        },
+        async _getStore(storeName, mode = 'readonly') {
+            await this.initDB();
+            const tx = this.db.transaction([storeName], mode);
+            return tx.objectStore(storeName);
+        },
+        async getSettings() {
+            const store = await this._getStore('settings');
+            return new Promise((resolve, reject) => {
+                const request = store.get('main_settings');
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        },
+        async updateSettings(settingsObject) {
+            const store = await this._getStore('settings', 'readwrite');
+            return new Promise((resolve, reject) => {
+                const request = store.put(settingsObject, 'main_settings');
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        },
+        async getAll(storeName) {
+            const store = await this._getStore(storeName);
+            return new Promise((resolve, reject) => {
+                const request = store.getAll();
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        },
+        async update(storeName, object) {
+            const store = await this._getStore(storeName, 'readwrite');
+            return new Promise((resolve, reject) => {
+                const request = store.put(object);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        },
+        async add(storeName, object) {
+            const store = await this._getStore(storeName, 'readwrite');
+            return new Promise((resolve, reject) => {
+                const request = store.add(object);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        },
+        async delete(storeName, key) {
+            const store = await this._getStore(storeName, 'readwrite');
+            return new Promise((resolve, reject) => {
+                const request = store.delete(key);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        },
+        async save(data) {
+            await this.initDB();
+            return new Promise((resolve, reject) => {
+                const tx = this.db.transaction(['settings', 'topics', 'subtopics'], 'readwrite');
+                const settingsStore = tx.objectStore('settings');
+                const topicsStore = tx.objectStore('topics');
+                const subtopicsStore = tx.objectStore('subtopics');
+
+                settingsStore.put(data.settings, 'main_settings');
+                topicsStore.clear();
+                subtopicsStore.clear();
+
+                data.topics.forEach(topic => {
+                    const { subtopics, ...topicData } = topic;
+                    topicsStore.put(topicData);
+                    (subtopics || []).forEach(sub => subtopicsStore.put(sub));
+                });
+
+                tx.oncomplete = () => resolve();
+                tx.onerror = e => reject(e.target.error);
+            });
+        },
+        async autoBackup(data) {
+            await this.initDB();
+            const today = new Date().toISOString().slice(0, 10);
+            const lastBackupDate = localStorage.getItem('lastBackupDate');
+            if (today !== lastBackupDate) {
+                console.log(`Creating backup for ${today}...`);
+                const backupData = { date: today, data: JSON.parse(JSON.stringify(data)) };
+                const transaction = this.db.transaction(['backups'], 'readwrite');
+                const store = transaction.objectStore('backups');
+                const request = store.put(backupData);
+                request.onsuccess = () => {
+                    localStorage.setItem('lastBackupDate', today);
+                    console.log('Daily backup successful.');
+                    this.cleanupOldBackups((data?.settings?.backupDaysToKeep) || 7);
+                };
+                request.onerror = (event) => {
+                    console.error('Backup failed:', event.target.error);
+                };
+            }
+        },
+        async cleanupOldBackups(daysToKeep) {
+            await this.initDB();
+            const transaction = this.db.transaction(['backups'], 'readwrite');
+            const store = transaction.objectStore('backups');
+            const request = store.getAllKeys();
+            request.onsuccess = () => {
+                const allKeys = request.result.sort().reverse();
+                if (allKeys.length > daysToKeep) {
+                    const keysToDelete = allKeys.slice(daysToKeep);
+                    keysToDelete.forEach(key => {
+                        store.delete(key);
+                        console.log(`Deleted old backup: ${key}`);
+                    });
+                }
+            };
+        },
+        async getBackupList() {
+            await this.initDB();
+            return new Promise((resolve, reject) => {
+                const transaction = this.db.transaction(['backups'], 'readonly');
+                const store = transaction.objectStore('backups');
+                const request = store.getAll();
+                request.onsuccess = () => resolve(request.result.sort((a, b) => b.date.localeCompare(a.date)));
+                request.onerror = (event) => reject(event.target.error);
+            });
+        },
+        async restoreBackup(date) {
+            await this.initDB();
+            return new Promise((resolve, reject) => {
+                const transaction = this.db.transaction(['backups'], 'readonly');
+                const store = transaction.objectStore('backups');
+                const request = store.get(date);
+                request.onsuccess = () => {
+                    if (request.result && request.result.data) {
+                        localStorage.setItem('pomodoroData_v11', JSON.stringify(request.result.data));
+                        resolve(request.result.data);
+                    } else {
+                        reject(new Error('KhÃ´ng tÃ¬m tháº¥y báº£n sao lÆ°u.'));
+                    }
+                };
+                request.onerror = (event) => reject(event.target.error);
+            });
+        },
+        exportData(data) {
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            const ts = new Date();
+            const pad = n => `${n}`.padStart(2, '0');
+            a.href = URL.createObjectURL(blob);
+            a.download = `pomodoro_backup_${ts.getFullYear()}${pad(ts.getMonth() + 1)}${pad(ts.getDate())}.json`;
+            a.click();
+            URL.revokeObjectURL(a.href);
+        },
+        async importData(file) {
+            const text = await file.text();
+            const obj = JSON.parse(text);
+            if (!obj.version || !obj.settings || !Array.isArray(obj.topics)) {
+                throw new Error('Tệp không đúng định dạng');
+            }
+            localStorage.setItem('pomodoroData_v11', JSON.stringify(obj));
+            return obj;
+        }
+    };
+
+    // =============================
+    // Helpers
+    // =============================
+    const $ = (sel, root=document) => root.querySelector(sel);
+    const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+    function on(el, evt, handler){ if(!el){ console.warn('Missing element', evt); return; } el.addEventListener(evt, handler); }
+    const formatMMSS = (s) => { const m = Math.floor(s/60).toString().padStart(2,'0'); const ss = Math.floor(s%60).toString().padStart(2,'0'); return `${m}:${ss}`; };
+    const uid = (p='id') => `${p}_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+    const todayISO = () => new Date().toISOString();
+    function toast(msg, ms=2600){ const box=$('#toasts'); const t=document.createElement('div'); t.className='toast'; t.textContent=msg; box.appendChild(t); setTimeout(()=>{t.style.opacity='0';}, ms-300); setTimeout(()=> box.removeChild(t), ms); }
+    function escapeHTML(str){ return str.replace(/[&<>"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;' }[m])); }
+    function formatDaysHoursMinutes(totalMinutes) {
+        if (!totalMinutes || totalMinutes < 1) return "0 phút";
+        const totalHours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+        const mm = minutes.toString().padStart(2, '0');
+        return `${totalHours} tiếng ${mm} phút`;
+    }
+    function formatGeminiResponse(text) {
+        return text.replace(/(\*\*|__|\*|_|#+\s*)/g, '');
+    }
+    function normalizeDataStructure(obj){
+        if (!obj || typeof obj !== 'object') return;
+        const s = obj.settings || {};
+        const mergedSettings = {
+            ...defaults.settings,
+            ...s,
+            durations: { ...defaults.settings.durations, ...(s.durations || {}) }
+        };
+        if (!Array.isArray(mergedSettings.achievedMilestones)) mergedSettings.achievedMilestones = [];
+        obj.settings = mergedSettings;
+        obj.topics = Array.isArray(obj.topics) ? obj.topics : [];
+        obj.topics.forEach(t => {
+            t.subtopics = Array.isArray(t.subtopics) ? t.subtopics : [];
+            t.subtopics.forEach(st => {
+                st.tasks = st.tasks || [];
+                st.generalNotes = st.generalNotes || [];
+                st.summaries = st.summaries || [];
+                st.chatHistory = st.chatHistory || [];
+                st.stats = st.stats || { totalMinutes: 0, sessionsCompleted: 0, tasksCompleted: 0 };
+                st.sessions = st.sessions || [];
+                st.timerState = st.timerState || { state: 'idle', prevState: null, remaining: 0, segmentTotal: 0, cycleIndex: 0 };
+            });
+        });
+    }
+    function extractYouTubeID(url) {
+        if (!url) return null;
+        const regExp = /^.*(?:youtu.be\/|shorts\/|live\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([A-Za-z0-9_-]{11}).*/;
+        const match = url.match(regExp);
+        return match ? match[1] : null;
+    }
+    let sessionYoutubeUrl = '';
+    function getActiveYoutubeUrl(){
+        try {
+            if (sessionYoutubeUrl) return sessionYoutubeUrl;
+            const el = document.getElementById('set_youtubeUrl');
+            const v = (el && el.value ? el.value : '').trim();
+            return v;
+        } catch(_) { return ''; }
+    }
+    function getActiveVideoId(){ return extractYouTubeID(getActiveYoutubeUrl()); }
+    function handleYoutubeUrlInput() {
+        const input = $("#set_youtubeUrl");
+        const feedbackEl = $("#ytUrlFeedback");
+        const toggleBtn = $("#btnToggleYtSound");
+        const url = input.value.trim();
+        const videoId = extractYouTubeID(url);
+
+        if (videoId) {
+            feedbackEl.textContent = "OK. Link há»£p lá»‡. Äang chuáº©n bá»‹ phÃ¡t...";
+            feedbackEl.style.color = 'var(--acc-2)';
+            toggleBtn.disabled = false;
+            sessionYoutubeUrl = url;
+            try {
+                const thumbUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+                const img = new Image();
+                img.onload = async () => { data.settings.customBg = thumbUrl; try { await saveData(); } catch(_) {} applyCustomBg(); };
+                img.onerror = async () => { const fb = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`; data.settings.customBg = fb; try { await saveData(); } catch(_) {} applyCustomBg(); };
+                img.src = thumbUrl;
+            } catch(_) {}
+            try {
+                if (IS_FILE_PROTOCOL) {
+                    const isMuted = _ytUnlocked ? 0 : 1;
+                    fallbackLoadVideo(videoId, { autoplay: 1, mute: isMuted });
+                    try { setTimeout(() => { try { fallbackPostMessage('playVideo'); } catch(_) {} }, 250); } catch(_) {}
+                    if (!_ytUnlocked) { showSoundPermission(); }
+                try { setTimeout(() => { const fb = document.getElementById('ytUrlFeedback'); if (fb) fb.textContent = 'Äang phÃ¡t'; }, 500); } catch(_) {}
+                } else {
+                    updateYouTubePlayer();
+                }
+            } catch(_) {}
+        } else if (url === '') {
+            feedbackEl.textContent = "";
+            toggleBtn.disabled = true;
+            if (IS_FILE_PROTOCOL) { try { fallbackStop(); } catch(_) {} }
+            else if (ytPlayer && ytPlayer.stopVideo) { ytPlayer.stopVideo(); }
+        } else {
+            feedbackEl.textContent = "âŒ Link khÃ´ng há»£p lá»‡ hoáº·c khÃ´ng Ä‘Æ°á»£c há»— trá»£.";
+            feedbackEl.style.color = 'var(--danger)';
+            toggleBtn.disabled = true;
+        }
+    }
+    
+    // THAY Äá»”I: HÃ m applyTheme Ä‘Æ°á»£c cáº­p nháº­t hoÃ n toÃ n
+    function applyTheme(previewTheme) {
+        const theme = previewTheme || data.settings.theme || 'default';
+        document.body.dataset.theme = theme;
+        
+        const themeHasBg = ['lofi', 'space'].includes(theme);
+        const isLightTheme = (theme === 'light' || theme === 'pastel');
+        const customBg = data.settings.customBg;
+
+        // helper: always clear any previously forced inline fallback
+        const clearInlineBgFallback = () => { try { document.body.style.backgroundImage = ''; } catch(_) {} };
+
+        if (customBg && !data.settings.useYtThumbnailAsBg) {
+            document.body.style.setProperty('--bg-image', `url(${customBg})`);
+            clearInlineBgFallback();
+        } else if (customBg && data.settings.useYtThumbnailAsBg) {
+            document.body.style.setProperty('--bg-image', `url(${customBg})`);
+            clearInlineBgFallback();
+        } else if (themeHasBg) {
+            // Use theme-provided background (e.g., lofi/space)
+            document.body.style.removeProperty('--bg-image');
+            clearInlineBgFallback();
+        } else if (isLightTheme) {
+            // For light/pastel, avoid dark radial fallback
+            document.body.style.setProperty('--bg-image', 'none');
+            clearInlineBgFallback();
+        } else {
+            // Dark/default fallback
+            document.body.style.setProperty('--bg-image', '');
+            document.body.style.backgroundImage = 'radial-gradient(1200px 800px at 10% -10%, #20285b 0%, #0f1222 50%, #0b0e1a 100%)';
+        }
+    }
+
+
+    const defaults = {
+        version: 11,
+        settings: {
+            apiKey: "",
+            currentView: 'timer',
+            preset: 'A',
+            autoStartNext: true,
+            soundOn: true,
+            volume: 0.8,
+            soundTheme: 'beep',
+            theme: 'default',
+            cyclesA: 4,
+            longBreakIntervalA: 4,
+            cyclesB: 4,
+            longBreakIntervalB: 4,
+            durations: { A_work: 25, A_short: 5, A_long: 15, B_work: 50, B_short: 10, B_long: 30 },
+            selectedTopicId: '',
+            selectedSubtopicId: '',
+            collapsedTopics: {},
+            customBg: '',
+            customSounds: { work_end: '', break_end: '', long_end: '' },
+            youtubeUrl: '',
+            youtubeVolume: 80,
+            useYtThumbnailAsBg: true,
+            panelOpacity: 0.85,
+            panelBlur: 10,
+            backupDaysToKeep: 7,
+            achievedMilestones: []
+        },
+        topics: [{
+            id: uid('t'),
+            name: 'Chá»§ Ä‘á» máº«u',
+            subtopics: [{
+                id: uid('s'),
+                name: 'Chá»§ Ä‘á» con máº«u',
+                tasks: [],
+                generalNotes: [],
+                summaries: [],
+                chatHistory: [],
+                stats: { totalMinutes: 0, sessionsCompleted: 0, tasksCompleted: 0 },
+                sessions: [],
+                timerState: { state: 'idle', prevState: null, remaining: 0, segmentTotal: 0, cycleIndex: 0 }
+            }]
+        }]
+    };
+    let data;
+    let editingPreset = 'A';
+
+    // (CÃ¡c hÃ m cÃ²n láº¡i giá»¯ nguyÃªn)
+    // ...
+    // ...
+    async function callGeminiAPI(prompt, retries = 3, delay = 1000) {
+        const apiKey = data.settings.apiKey || "";
+        if (!apiKey) {
+            toast("Vui lÃ²ng nháº­p Gemini API Key trong pháº§n CÃ i Ä‘áº·t.");
+            return null;
+        }
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+        const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
+
+        try {
+            const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            if (!response.ok) {
+                if (response.status === 429 && retries > 0) {
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    return callGeminiAPI(prompt, retries - 1, delay * 2);
+                }
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const result = await response.json();
+            if (result.candidates && result.candidates[0]?.content?.parts?.[0]?.text) {
+                return formatGeminiResponse(result.candidates[0].content.parts[0].text);
+            } else {
+                console.error("API response structure is unexpected:", result);
+                if (result.promptFeedback?.blockReason) { return `Ná»™i dung bá»‹ cháº·n vÃ¬: ${result.promptFeedback.blockReason}. Vui lÃ²ng thá»­ láº¡i vá»›i ná»™i dung khÃ¡c.`; }
+                return "KhÃ´ng nháº­n Ä‘Æ°á»£c ná»™i dung há»£p lá»‡ tá»« AI.";
+            }
+        } catch (error) {
+            console.error("Lá»—i khi gá»i Gemini API:", error);
+            if (retries > 0) {
+                await new Promise(resolve => setTimeout(resolve, delay));
+                return callGeminiAPI(prompt, retries - 1, delay * 2);
+            }
+            return "ÄÃ£ xáº£y ra lá»—i khi káº¿t ná»‘i vá»›i AI. Vui lÃ²ng kiá»ƒm tra káº¿t ná»‘i máº¡ng vÃ  thá»­ láº¡i.";
+        }
+    }
+    let AUDIO_CTX = null;
+    function ensureAudio(){ if(!AUDIO_CTX) AUDIO_CTX = new (window.AudioContext||window.webkitAudioContext)(); }
+    function tone(freq=880, durMs=200, vol=0.2, type='sine', when=0){ ensureAudio(); const ctx=AUDIO_CTX; const o=ctx.createOscillator(); const g=ctx.createGain(); o.type=type; o.frequency.value=freq; o.connect(g); g.connect(ctx.destination); const t = ctx.currentTime + when; g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t+0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + durMs/1000); o.start(t); o.stop(t + durMs/1000 + 0.05); }
+    function playSound(kind){
+      if(!data.settings.soundOn) return;
+      const vol = Math.max(0, Math.min(1, data.settings.volume ?? 0.8));
+      const ref = data.settings.customSounds?.[kind];
+      let audioEl;
+      if (kind === 'work_end') audioEl = $('#audioWorkEnd'); else if (kind === 'break_end') audioEl = $('#audioBreakEnd'); else if (kind === 'long_end') audioEl = $('#audioLongEnd');
+      if (ref && audioEl) {
+        if (ref.startsWith('data:') || ref.startsWith('http') || ref.startsWith('blob:')) {
+            audioEl.src = ref;
+            audioEl.volume = vol;
+            audioEl.play().catch(e => console.error("Lá»—i phÃ¡t Ã¢m thanh:", e));
+        } else {
+            getStoredFileUrl(ref).then(url => {
+                if (url) {
+                    audioEl.src = url;
+                    audioEl.volume = vol;
+                    audioEl.play().catch(e => console.error("Lá»—i phÃ¡t Ã¢m thanh:", e));
+                }
+            });
+        }
+        return;
+      }
+      const theme = data.settings.soundTheme || 'beep';
+      if(theme==='beep'){
+        if(kind==='work_end') { tone(880,250,vol); tone(660,180,vol*0.8, 'sine', 0.22); } else if(kind==='break_end') { tone(660,220,vol*0.9); } else if(kind==='long_end') { tone(520,200,vol); tone(780,200,vol, 'sine', 0.22); tone(1040,220,vol, 'sine', 0.44); }
+      } else {
+        if(kind==='work_end') { tone(1200,160,vol*0.9,'triangle'); tone(900,220,vol*0.8,'triangle',0.18); } else if(kind==='break_end') { tone(880,240,vol*0.8,'triangle'); } else if(kind==='long_end') { tone(600,220,vol*0.9,'triangle'); tone(950,240,vol*0.9,'triangle',0.22); tone(1200,240,vol,'triangle',0.44); }
+      }
+    }
+      async function saveData() {
+        try {
+          await storageManager.save(data);
+        } catch (err) {
+          console.error('Failed to save data:', err);
+          toast(`Lá»—i lÆ°u dá»¯ liá»‡u: ${err.message}`);
+        }
+      }
+        async function ensureValidSelection(){
+          const set = data.settings;
+          if (!data.topics || data.topics.length === 0) { set.selectedTopicId = ''; set.selectedSubtopicId = ''; await saveData(); return; }
+          const t = data.topics.find(x=>x.id===set.selectedTopicId);
+          const s = t?.subtopics.find(x=>x.id===set.selectedSubtopicId);
+          if(!t || !s){
+            const t0 = data.topics[0];
+            const s0 = t0?.subtopics?.[0];
+            set.selectedTopicId = t0?.id || '';
+            set.selectedSubtopicId = s0?.id || '';
+            await saveData();
+          }
+        }
+    function showInputModal(title, okCallback, defaultValue = '') {
+        $('#genericTitle').textContent = title;
+        $('#genericMessage').classList.add('hidden');
+        const input = $('#genericInput'); input.value = defaultValue; input.classList.remove('hidden');
+        $('#modalGeneric').classList.add('show'); input.focus(); input.select();
+        const okHandler = () => { okCallback(input.value); cleanup(); };
+        const cancelHandler = () => cleanup();
+        const keyHandler = (e) => { if (e.key === 'Enter') okHandler(); if (e.key === 'Escape') cancelHandler(); };
+        $('#btnGenericOk').onclick = okHandler; $('#btnGenericCancel').onclick = cancelHandler; input.onkeydown = keyHandler;
+        function cleanup() { $('#modalGeneric').classList.remove('show'); $('#btnGenericOk').onclick = null; $('#btnGenericCancel').onclick = null; input.onkeydown = null; }
+    }
+    function showConfirmModal(title, message, okCallback) {
+        $('#genericTitle').textContent = title;
+        const msgEl = $('#genericMessage'); msgEl.textContent = message; msgEl.classList.remove('hidden');
+        $('#genericInput').classList.add('hidden'); $('#modalGeneric').classList.add('show');
+        const okHandler = () => { okCallback(true); cleanup(); };
+        const cancelHandler = () => { okCallback(false); cleanup(); };
+        $('#btnGenericOk').onclick = okHandler; $('#btnGenericCancel').onclick = cancelHandler;
+        function cleanup() { $('#modalGeneric').classList.remove('show'); $('#btnGenericOk').onclick = null; $('#btnGenericCancel').onclick = null; }
+    }
+    async function switchView(viewId) {
+        $$('.view').forEach(v => v.classList.remove('active'));
+        $(`#view-${viewId}`).classList.add('active');
+        $$('.nav-btn').forEach(b => b.classList.remove('active'));
+        const navBtn = $(`.nav-btn[data-view="${viewId}"]`);
+        if (navBtn) navBtn.classList.add('active');
+        data.settings.currentView = viewId;
+        await saveData();
+        if (viewId === 'stats') {
+            renderDashboard();
+        }
+    }
+    function closeAllMenus() {
+        $$('.actions-menu.show').forEach(menu => menu.classList.remove('show'));
+    }
+    function renderTopics(){
+      const wrap = $('#topicsList');
+      if (!wrap) return;
+      wrap.innerHTML='';
+      const collapsedMap = data.settings.collapsedTopics || {};
+      data.topics.forEach(topic => {
+        const box = document.createElement('div');
+        box.className='topic-item';
+        box.dataset.tid = topic.id;
+        const header = document.createElement('div');
+        header.className='topic-header';
+        const isCollapsed = !!collapsedMap[topic.id];
+        const chev = document.createElement('button');
+        chev.className='btn small ghost chev';
+        chev.setAttribute('title','Má»Ÿ/Ä‘Ã³ng subtopics');
+        chev.setAttribute('aria-expanded', String(!isCollapsed));
+        chev.innerHTML = '<span class="ico">â–¼</span>';
+        const title = document.createElement('div');
+        title.className='topic-title';
+        title.textContent = topic.name;
+        const act = document.createElement('div');
+        act.className='topic-actions';
+        const bAdd = document.createElement('button');
+        bAdd.className='btn small';
+        bAdd.innerHTML = 'ï¼‹ ThÃªm';
+        bAdd.title = 'ThÃªm Chá»§ Ä‘á» con';
+        const menuContainer = document.createElement('div');
+        menuContainer.style.position = 'relative';
+        const bMore = document.createElement('button');
+        bMore.className = 'btn small ghost actions-menu-btn';
+        bMore.innerHTML = '...';
+        bMore.title = 'ThÃªm tÃ¹y chá»n';
+        const menu = document.createElement('div');
+        menu.className = 'actions-menu';
+        const bEdit = document.createElement('button');
+        bEdit.className = 'menu-item';
+        bEdit.innerHTML = 'Sá»­a tÃªn Chá»§ Ä‘á»';
+        const bDel = document.createElement('button');
+        bDel.className = 'menu-item danger';
+        bDel.innerHTML = 'XÃ³a Chá»§ Ä‘á»';
+        menu.append(bEdit, bDel);
+        menuContainer.append(bMore, menu);
+        act.append(bAdd, menuContainer);
+        header.append(chev, title, act);
+        const subs = document.createElement('div');
+        subs.className='subtopics' + (isCollapsed? ' hidden':'');
+        subs.dataset.tid = topic.id;
+        topic.subtopics.forEach(st => {
+          const row = document.createElement('div');
+          row.className='sub-row';
+          row.dataset.sid = st.id;
+          const btn = document.createElement('button');
+          btn.className='btn subtopic-btn';
+          btn.textContent = 'â€¢ '+st.name;
+          btn.dataset.sid = st.id;
+          btn.dataset.tid = topic.id;
+          if(data.settings.selectedSubtopicId===st.id) btn.classList.add('active');
+          const subActions = document.createElement('div');
+          subActions.className = 'actions';
+          const subMenuContainer = document.createElement('div');
+          subMenuContainer.style.position = 'relative';
+          const subBMore = document.createElement('button');
+          subBMore.className = 'btn small ghost actions-menu-btn';
+          subBMore.innerHTML = '...';
+          subBMore.title = 'ThÃªm tÃ¹y chá»n';
+          const subMenu = document.createElement('div');
+          subMenu.className = 'actions-menu';
+          const subBEdit = document.createElement('button');
+          subBEdit.className = 'menu-item';
+          subBEdit.innerHTML = 'Sá»­a tÃªn Chá»§ Ä‘á» con';
+          const subBDel = document.createElement('button');
+          subBDel.className = 'menu-item danger';
+          subBDel.innerHTML = 'XÃ³a Chá»§ Ä‘á» con';
+          subMenu.append(subBEdit, subBDel);
+          subMenuContainer.append(subBMore, subMenu);
+          subActions.append(subMenuContainer);
+          row.append(btn, subActions);
+          subs.appendChild(row);
+          btn.addEventListener('click', ()=> selectSubtopic(topic.id, st.id));
+          subBMore.addEventListener('click', (e) => { e.stopPropagation(); closeAllMenus(); subMenu.classList.toggle('show'); });
+          subBEdit.addEventListener('click', ()=> showInputModal('Äá»•i tÃªn Chá»§ Ä‘á» con', async (newName) => { if(!newName) return; st.name=newName; await storageManager.update('subtopics', st); renderAll(); }, st.name));
+          subBDel.addEventListener('click', ()=> showConfirmModal('XÃ¡c nháº­n xÃ³a', `Báº¡n cÃ³ cháº¯c muá»‘n xÃ³a Chá»§ Ä‘á» con "${st.name}"? Má»i dá»¯ liá»‡u liÃªn quan sáº½ bá»‹ máº¥t.`, async (ok) => { if(!ok) return; topic.subtopics = topic.subtopics.filter(x=>x.id!==st.id); const set=data.settings; if(set.selectedSubtopicId===st.id){ set.selectedSubtopicId=''; set.selectedTopicId=''; ensureValidSelection(); } await storageManager.delete('subtopics', st.id); renderAll(); }));
+        });
+        chev.addEventListener('click', async ()=>{ if(isCollapsed){ delete collapsedMap[topic.id]; } else { collapsedMap[topic.id] = true; } data.settings.collapsedTopics = collapsedMap; await storageManager.updateSettings(data.settings); renderTopics(); });
+        bMore.addEventListener('click', (e) => { e.stopPropagation(); closeAllMenus(); menu.classList.toggle('show'); });
+        bAdd.addEventListener('click', ()=> showInputModal('TÃªn Chá»§ Ä‘á» con má»›i?', async (name) => { if(!name) return; const newSub = { id: uid('s'), topicId: topic.id, name, tasks: [], generalNotes: [], summaries: [], chatHistory: [], stats:{ totalMinutes:0, sessionsCompleted:0, tasksCompleted: 0 }, sessions: [], timerState: { state: 'idle', prevState: null, remaining: 0, segmentTotal: 0, cycleIndex: 0 } }; topic.subtopics.push(newSub); await storageManager.add('subtopics', newSub); renderTopics(); }));
+        bEdit.addEventListener('click', ()=> showInputModal('Äá»•i tÃªn Chá»§ Ä‘á»', async (newName) => { if(!newName) return; topic.name=newName; await storageManager.update('topics', topic); renderTopics(); }, topic.name));
+        bDel.addEventListener('click', ()=> showConfirmModal('XÃ¡c nháº­n xÃ³a', `Báº¡n cÃ³ cháº¯c muá»‘n xÃ³a Chá»§ Ä‘á» "${topic.name}"? Má»i chá»§ Ä‘á» con vÃ  dá»¯ liá»‡u liÃªn quan sáº½ bá»‹ máº¥t.`, async (ok) => { if(!ok) return; data.topics = data.topics.filter(t=>t.id!==topic.id); delete collapsedMap[topic.id]; if(data.settings.selectedTopicId===topic.id){ data.settings.selectedTopicId=''; data.settings.selectedSubtopicId=''; ensureValidSelection(); } await storageManager.delete('topics', topic.id); for(const sub of topic.subtopics){ await storageManager.delete('subtopics', sub.id); } renderAll(); }));
+        box.append(header, subs);
+        wrap.appendChild(box);
+      });
+      if (window.Sortable) {
+        const topicsListEl = document.getElementById('topicsList');
+        if (topicsListEl) {
+          if (topicsListEl._sortable) { try { topicsListEl._sortable.destroy(); } catch (e) {} }
+          topicsListEl._sortable = new Sortable(topicsListEl, {
+            animation: 150,
+            draggable: '.topic-item',
+            onEnd: async function (evt) {
+              if (evt.oldIndex === evt.newIndex) return;
+              const moved = data.topics.splice(evt.oldIndex, 1)[0];
+              data.topics.splice(evt.newIndex, 0, moved);
+              await saveData();
+              renderTopics();
+            }
+          });
+          topicsListEl.querySelectorAll('.subtopics').forEach(subsEl => {
+            new Sortable(subsEl, {
+              group: 'subtopics-group',
+              animation: 150,
+              draggable: '.sub-row',
+              onEnd: async function (evt) {
+                const fromTopicId = evt.from?.dataset?.tid || evt.from?.closest('.topic-item')?.dataset?.tid;
+                const toTopicId = evt.to?.dataset?.tid || evt.to?.closest('.topic-item')?.dataset?.tid;
+                const fromTopic = data.topics.find(t => t.id === fromTopicId);
+                const toTopic = data.topics.find(t => t.id === toTopicId);
+                if (!fromTopic || !toTopic) return;
+                let movedSubtopic = null;
+                const movedSid = evt.item?.dataset?.sid || evt.item?.querySelector('.subtopic-btn')?.dataset?.sid;
+                if (movedSid) {
+                  const idx = fromTopic.subtopics.findIndex(s => s.id === movedSid);
+                  if (idx >= 0) movedSubtopic = fromTopic.subtopics.splice(idx, 1)[0];
+                }
+                if (!movedSubtopic) {
+                  movedSubtopic = fromTopic.subtopics.splice(evt.oldIndex, 1)[0];
+                }
+                if (!movedSubtopic) return;
+                movedSubtopic.topicId = toTopic.id;
+                toTopic.subtopics.splice(evt.newIndex, 0, movedSubtopic);
+                if (data.settings.selectedSubtopicId === movedSubtopic.id) {
+                  data.settings.selectedTopicId = toTopic.id;
+                }
+                await saveData();
+                renderTopics();
+              }
+            });
+          });
+        }
+      }
+    }
+    function selectSubtopic(topicId, subId) {
+        const mainEl = $('.app-content');
+        const oldSubtopic = getCurrentSubtopic();
+        if (oldSubtopic && timer.state !== 'idle') {
+            oldSubtopic.timerState = {
+                state: timer.state,
+                prevState: timer.prevState,
+                remaining: timer.remaining,
+                segmentTotal: timer.segmentTotal,
+                cycleIndex: timer.cycleIndex
+            };
+        }
+        mainEl.classList.add('reloading');
+        setTimeout(async () => {
+            data.settings.selectedTopicId = topicId;
+            data.settings.selectedSubtopicId = subId;
+            const newSubtopic = getCurrentSubtopic();
+            if (newSubtopic.timerState) {
+                timer.state = newSubtopic.timerState.state;
+                timer.prevState = newSubtopic.timerState.prevState || null;
+                timer.remaining = newSubtopic.timerState.remaining;
+                timer.segmentTotal = newSubtopic.timerState.segmentTotal;
+                timer.cycleIndex = newSubtopic.timerState.cycleIndex;
+            } else {
+                timer.reset();
+            }
+            await saveData();
+            timer.updateUI();
+            renderAll();
+            switchView('timer');
+            mainEl.classList.remove('reloading');
+        }, 200);
+    }
+    function getCurrentSubtopic(){ const tid=data.settings.selectedTopicId, sid=data.settings.selectedSubtopicId; if(!tid||!sid) return null; const t=data.topics.find(x=>x.id===tid); if(!t) return null; return t.subtopics.find(x=>x.id===sid) || null; }
+    function renderContextBadge(){
+      const s=getCurrentSubtopic();
+      const name = s ? s.name : '(chÆ°a chá»n)';
+      const selectedContext = $('#selectedContext');
+      const currentName = $('#currentSubtopicName');
+      const currentChatName = $('#currentSubtopicNameChat');
+      if (selectedContext) selectedContext.textContent = s? `Chá»§ Ä‘á» con: ${s.name}`:'ChÆ°a chá»n Chá»§ Ä‘á» con';
+      if (currentName) currentName.textContent = name;
+      if (currentChatName) currentChatName.textContent = name;
+    }
+    function renderSubtopicTasks() {
+        const s = getCurrentSubtopic();
+        const listEl = $('#subtopicTasksList');
+        const inputEl = $('#newSubtopicTaskInput');
+        if (!listEl || !inputEl) return;
+        const addArea = inputEl.parentElement;
+        if (!s) {
+            listEl.innerHTML = '<li class="tiny" style="opacity: 0.7;">Chá»n chá»§ Ä‘á» con Ä‘á»ƒ xem to-do list.</li>';
+            addArea.classList.add('hidden'); return;
+        }
+        addArea.classList.remove('hidden');
+        listEl.innerHTML = '';
+        const uncompletedTasks = s.tasks ? s.tasks.filter(t => !t.isCompleted) : [];
+
+        if (uncompletedTasks.length === 0) {
+            listEl.innerHTML = '<li class="tiny" style="opacity: 0.7;">Tuyá»‡t vá»i! KhÃ´ng cÃ²n task nÃ o.</li>';
+        }
+        uncompletedTasks.forEach(task => {
+            const item = document.createElement('li');
+            item.innerHTML = `<input type="checkbox" id="${task.id}" title="HoÃ n thÃ nh task"> <label for="${task.id}">${escapeHTML(task.text)}</label>`;
+            item.querySelector('input').addEventListener('change', (e) => toggleSubtopicTask(e.target.id, item));
+            listEl.appendChild(item);
+        });
+    }
+    async function addSubtopicTask() {
+        const s = getCurrentSubtopic();
+        if (!s) { toast(t('timer.selectSubtopicPrompt')); return; }
+        const input = $('#newSubtopicTaskInput');
+        const text = input.value.trim();
+        if (text) {
+            if (!s.tasks) s.tasks = [];
+            s.tasks.push({ id: uid('task'), text, isCompleted: false, createdAt: todayISO() });
+            await saveData();
+            renderSubtopicTasks();
+            input.value = '';
+        }
+        input.focus();
+    }
+    async function toggleSubtopicTask(taskId, listItemElement) {
+        const s = getCurrentSubtopic();
+        if (!s || !s.tasks) return;
+        const task = s.tasks.find(t => t.id === taskId);
+        if (task) {
+            task.isCompleted = true;
+            s.stats.tasksCompleted = (s.stats.tasksCompleted || 0) + 1;
+            await saveData();
+            listItemElement.classList.add('removing');
+            setTimeout(() => {
+                renderSubtopicTasks();
+                renderStatsHistory();
+            }, 200);
+        }
+    }
+    const timer = {
+      state:'idle', prevState:null, tickHandle:null, endAt:null,
+      remaining:0, segmentTotal:0, cyclesTarget:4, cycleIndex:0, mode:'A',
+      persistInterval: 60*1000,
+      lastPersist: 0,
+      async setPreset(p, {silent=false}={}){
+        const st = data.settings;
+        this.mode = p;
+        this.cyclesTarget = (p==='A' ? st.cyclesA : st.cyclesB);
+        st.preset = p;
+        await saveData();
+        if (this.state === 'idle') {
+          this.reset();
+        }
+      },
+      currentDurations(){ const d=data.settings.durations; return this.mode==='A'? {work:d.A_work, short:d.A_short, long:d.A_long} : {work:d.B_work, short:d.B_short, long:d.B_long}; },
+      currentConfig(){ const s=data.settings; return this.mode==='A'? {cycles:s.cyclesA, interval:s.longBreakIntervalA} : {cycles:s.cyclesB, interval:s.longBreakIntervalB}; },
+      updateUI() {
+        const badge = $('#stateBadge');
+        const progressCircle = $('.timer-circle-progress');
+        const container = $('.timer-circle-container');
+        if (!badge || !progressCircle || !container) return;
+        $('#btnStart').classList.toggle('hidden', this.state !== 'idle');
+        $('#btnPause').classList.toggle('hidden', !['work', 'break', 'long_break'].includes(this.state));
+        $('#btnResume').classList.toggle('hidden', this.state !== 'paused');
+        let currentColor = 'var(--muted)';
+        if (this.state === 'work') { badge.textContent = 'LÃ€M VIá»†C'; badge.className = 'badge state work'; currentColor = 'var(--acc)'; }
+        else if (this.state === 'break') { badge.textContent = 'NGHá»ˆ NGáº®N'; badge.className = 'badge state break'; currentColor = 'var(--warn)'; }
+        else if (this.state === 'long_break') { badge.textContent = 'NGHá»ˆ DÃ€I'; badge.className = 'badge state long'; currentColor = 'var(--danger)'; }
+        else if (this.state === 'paused') { badge.textContent = 'Táº M Dá»ªNG'; badge.className = 'badge'; }
+        else { badge.textContent = 'Sáº´N SÃ€NG'; badge.className = 'badge'; }
+        if (['work','break','long_break'].includes(this.state)) { container.classList.add('breathing'); } else { container.classList.remove('breathing'); }
+        progressCircle.style.stroke = currentColor; container.classList.remove('finished');
+        const timeEl = $('#timeDisplay'); if (timeEl) timeEl.textContent = formatMMSS(this.remaining);
+        const radius = progressCircle.r.baseVal.value; const circumference = 2 * Math.PI * radius;
+        const offset = this.segmentTotal>0 ? (circumference - (this.remaining / this.segmentTotal) * circumference) : circumference;
+        progressCircle.style.strokeDasharray = circumference;
+        progressCircle.style.strokeDashoffset = isNaN(offset) ? circumference : offset;
+        const cyc = $('#cycleInfo'); if (cyc) { const cfg=this.currentConfig(); cyc.textContent = t('timer.cycleInfo', { current: this.cycleIndex, target: cfg.cycles }); }
+        const draggableTimer = $('#draggableTimer'); if (draggableTimer) draggableTimer.textContent = formatMMSS(this.remaining);
+      },
+      persistTimerState(force=false){
+        try{
+          const s = getCurrentSubtopic(); if(!s) return;
+          const state = { state:this.state, prevState:this.prevState, remaining:this.remaining, segmentTotal:this.segmentTotal, cycleIndex:this.cycleIndex };
+          s.timerState = state; try{ localStorage.setItem('timerState_'+s.id, JSON.stringify(state)); }catch(_){ }
+          this.lastPersist = Date.now();
+        }catch(_){ }
+      },
+      _startTick(){ if(this.tickHandle) clearInterval(this.tickHandle); this.tickHandle = setInterval(()=>{ if(this.remaining>0){ this.remaining -= 1; this.updateUI(); this.persistTimerState(); } if(this.remaining<=0){ clearInterval(this.tickHandle); this.tickHandle=null; this._onFinishSegment(); } }, 1000); },
+      _onFinishSegment(){
+        if (this.state === 'work') {
+            const s = getCurrentSubtopic();
+            if (s) {
+                const duration = this.currentDurations().work;
+                s.stats.totalMinutes = (s.stats.totalMinutes || 0) + duration;
+                s.stats.sessionsCompleted = (s.stats.sessionsCompleted || 0) + 1;
+                const newSession = {
+                    id: uid('sess'),
+                    dateISO: todayISO(),
+                    durationMinutes: duration,
+                    mode: this.mode,
+                    note: ''
+                };
+                if (!s.sessions) s.sessions = [];
+                s.sessions.unshift(newSession);
+                saveData();
+                renderStatsHistory();
+                checkAndShowMilestones();
+            }
+            this.cycleIndex++;
+        }
+        playSound(this.state === 'work' ? 'work_end' : 'break_end');
+        const container = $('.timer-circle-container');
+        if(container) container.classList.add('finished');
+        if (data.settings.autoStartNext) {
+          if(this.state==='work'){
+            this.beginBreak();
+          } else {
+            this.beginWork();
+          }
+        } else {
+          if(this.tickHandle){ clearInterval(this.tickHandle); this.tickHandle=null; }
+          this.state = 'idle';
+          this.prevState = null;
+          this.updateUI();
+          toast("PhiÃªn Ä‘Ã£ hoÃ n thÃ nh! Nháº¥n Báº¯t Ä‘áº§u Ä‘á»ƒ báº¯t Ä‘áº§u phiÃªn tiáº¿p theo.");
+        }
+      },
+      beginWork(){ this.prevState=this.state; this.state='work'; const d=this.currentDurations().work*60; this.segmentTotal=d; if(this.prevState!=='paused') this.remaining=d; this._startTick(); this.updateUI(); },
+      beginBreak() {
+        this.prevState = this.state;
+        const config = this.currentConfig();
+        const durations = this.currentDurations();
+        if (this.cycleIndex > 0 && this.cycleIndex % config.interval === 0) {
+          this.state = 'long_break';
+          const d = durations.long * 60;
+          this.segmentTotal = d;
+          if (this.prevState !== 'paused') this.remaining = d;
+          toast(`Tuyá»‡t vá»i! ÄÃ£ Ä‘áº¿n lÃºc nghá»‰ dÃ i.`);
+        } else {
+          this.state = 'break';
+          const d = durations.short * 60;
+          this.segmentTotal = d;
+          if (this.prevState !== 'paused') this.remaining = d;
+        }
+        this._startTick();
+        this.updateUI();
+      },
+      async start(){ if(!getCurrentSubtopic()){ toast('HÃ£y chá»n má»™t Chá»§ Ä‘á» con trÆ°á»›c khi báº¯t Ä‘áº§u'); return; } ensureAudio(); if(this.state==='idle'){ this.cycleIndex = this.cycleIndex || 0; this.beginWork(); } else if(this.state==='paused'){ this.resume(); } await this.persistTimerState(true); },
+      async pause(){ if(this.tickHandle){ clearInterval(this.tickHandle); this.tickHandle=null; } this.prevState=this.state; this.state='paused'; this.updateUI(); await this.persistTimerState(true); },
+      async resume(){ if(this.state!=='paused'){ return; } this.state=this.prevState||'work'; this._startTick(); this.updateUI(); await this.persistTimerState(true); },
+      async skip(){ this.remaining=0; if(this.tickHandle){ clearInterval(this.tickHandle); this.tickHandle=null; } this._onFinishSegment(); await this.persistTimerState(true); },
+      async reset(){ if(this.tickHandle){ clearInterval(this.tickHandle); this.tickHandle=null; } this.state='idle'; this.prevState=null; this.remaining=0; this.segmentTotal=0; this.cycleIndex=0; this.updateUI(); await this.persistTimerState(true); }
+    };
+    async function deleteSummary(id) {
+        showConfirmModal('XÃ¡c nháº­n xÃ³a', 'Báº¡n cÃ³ cháº¯c muá»‘n xÃ³a tÃ³m táº¯t nÃ y?', async (ok) => {
+            if (!ok) return;
+            const s = getCurrentSubtopic();
+            if (!s || !s.summaries) return;
+            const original = [...s.summaries];
+            s.summaries = s.summaries.filter(x => x.id !== id);
+            try {
+                await storageManager.update('subtopics', s);
+                renderSummaries();
+                toast('ÄÃ£ xÃ³a tÃ³m táº¯t.');
+            } catch (err) {
+                console.error('Failed to delete summary:', err);
+                s.summaries = original;
+                toast('KhÃ´ng thá»ƒ lÆ°u thay Ä‘á»•i.');
+            }
+        });
+    }
+function exportSummary(sum) {
+        const blob = new Blob([sum.content], { type: 'text/plain' });
+        const a = document.createElement('a');
+        const ts = new Date(sum.createdAt);
+        const pad = n => `${n}`.padStart(2, '0');
+        a.href = URL.createObjectURL(blob);
+        a.download = `summary_${ts.getFullYear()}${pad(ts.getMonth()+1)}${pad(ts.getDate())}.txt`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+}
+    function renderStatsHistory(){
+        const s = getCurrentSubtopic();
+        const statTotal = $('#statTotal');
+        const statSessions = $('#statSessions');
+        const statTasks = $('#statTasks');
+        const list = $('#historyList');
+        if (!statTotal || !statSessions || !statTasks || !list) return;
+
+        if (!s) {
+            statTotal.textContent = '0 phÃºt';
+            statSessions.textContent = '0';
+            statTasks.textContent = '0';
+            list.innerHTML = '<div class="tiny">ChÆ°a cÃ³ dá»¯ liá»‡u</div>';
+            return;
+        }
+
+        const total = (s.stats && s.stats.totalMinutes) ? s.stats.totalMinutes : 0;
+        const count = (s.stats && s.stats.sessionsCompleted) ? s.stats.sessionsCompleted : 0;
+        const tasksDone = s.tasks ? s.tasks.filter(t => t.isCompleted).length : 0;
+
+        statTotal.textContent = formatDaysHoursMinutes(total);
+        statSessions.textContent = String(count);
+        statTasks.textContent = String(tasksDone);
+
+        list.innerHTML = '';
+        const sessions = Array.isArray(s.sessions) ? s.sessions : [];
+        if (sessions.length === 0) {
+            list.innerHTML = '<div class="tiny">ChÆ°a cÃ³ phiÃªn nÃ o</div>';
+            return;
+        }
+        sessions.forEach(sess => {
+            const row = document.createElement('div');
+            row.className = 'hist-item';
+            const content = document.createElement('div');
+            const date = sess.dateISO ? new Date(sess.dateISO) : new Date();
+            const dur = (sess.durationMinutes != null) ? sess.durationMinutes : (sess.workMinutes || 0);
+            content.innerHTML = `<div class="hist-meta">${date.toLocaleString()} Â· ${dur}' Â· Mode ${sess.mode || ''}</div>` +
+                                `<div>${sess.note ? escapeHTML(sess.note) : '<span class="tiny">(chÆ°a cÃ³ ghi chÃº)</span>'}</div>`;
+            row.appendChild(content);
+            list.appendChild(row);
+        });
+    }
+    function renderGeneralNotes(){
+        const listEl = $('#generalNotesList');
+        if (!listEl) return;
+        const s = getCurrentSubtopic();
+        if (!s) { listEl.innerHTML = '<div class="tiny">Vui lÃ²ng chá»n má»™t chá»§ Ä‘á» con.</div>'; return; }
+        s.generalNotes = s.generalNotes || [];
+        if (s.generalNotes.length === 0) { listEl.innerHTML = '<div class="tiny">ChÆ°a cÃ³ ghi chÃº.</div>'; return; }
+        listEl.innerHTML = '';
+        s.generalNotes.forEach(note => {
+            const item = document.createElement('div'); item.className = 'note-item';
+            const content = document.createElement('div'); content.className = 'note-content'; content.textContent = typeof note === 'string' ? note : (note.text || '');
+            const meta = document.createElement('div'); meta.className = 'note-meta'; meta.textContent = note.createdAt ? new Date(note.createdAt).toLocaleString() : '';
+            const actions = document.createElement('div');
+            const delBtn = document.createElement('button'); delBtn.className = 'btn small danger'; delBtn.textContent = 'XÃ³a';
+            delBtn.onclick = async (e)=>{
+                e.stopPropagation();
+                const s2 = getCurrentSubtopic(); if (!s2) return;
+                s2.generalNotes = (s2.generalNotes || []).filter(x => (x.id || x) !== (note.id || note));
+                await saveData();
+                renderGeneralNotes();
+            };
+            actions.appendChild(delBtn);
+            const wrap = document.createElement('div'); wrap.className = 'note-content-wrapper'; wrap.append(content, meta);
+            item.append(wrap, actions);
+            listEl.appendChild(item);
+        });
+    }
+    function addGeneralNote(){
+        showInputModal('ThÃªm ghi chÃº', async (text) => {
+            if (!text) return;
+            const s = getCurrentSubtopic();
+        if (!s) { toast('Chá»n má»™t chá»§ Ä‘á» con trÆ°á»›c.'); return; }
+            s.generalNotes = s.generalNotes || [];
+            s.generalNotes.unshift({ id: uid('gn'), text, createdAt: todayISO() });
+            await saveData();
+            renderGeneralNotes();
+        }, '');
+    }
+    async function summarizeNotes(){
+        const s = getCurrentSubtopic();
+        if (!s) { toast('Chá»n chá»§ Ä‘á» con trÆ°á»›c.'); return; }
+        const notes = (s.generalNotes || []).map(n => (typeof n === 'string' ? n : (n.text||''))).filter(Boolean);
+        if (notes.length === 0) { toast('ChÆ°a cÃ³ ghi chÃº Ä‘á»ƒ tÃ³m táº¯t.'); return; }
+        const btn = $('#btnSummarize');
+        if (btn) { btn.disabled = true; btn.innerHTML = '<div class="spinner"></div>'; }
+        try {
+            const prompt = `TÃ³m táº¯t cÃ¡c ghi chÃº sau theo gáº¡ch Ä‘áº§u dÃ²ng, ngáº¯n gá»n, rÃµ rÃ ng:\n\n${notes.join('\n- ')}`;
+            const result = await callGeminiAPI(prompt);
+            if (!s.summaries) s.summaries = [];
+            s.summaries.unshift({ id: uid('sum'), content: result || '(KhÃ´ng táº¡o Ä‘Æ°á»£c tÃ³m táº¯t)', createdAt: todayISO() });
+            await saveData();
+            renderSummaries();
+        } catch (e) {
+            console.error(e);
+            toast('TÃ³m táº¯t tháº¥t báº¡i.');
+        } finally {
+            if (btn) { btn.disabled = false; btn.textContent = 'TÃ³m táº¯t'; }
+        }
+    }
+    function renderSummaries() {
+        const listEl = $('#summariesList');
+        if (!listEl) return;
+        const s = getCurrentSubtopic();
+        if (!s) { listEl.innerHTML = '<div class="tiny">Vui lÃ²ng chá»n má»™t chá»§ Ä‘á» con Ä‘á»ƒ xem tÃ³m táº¯t.</div>'; return; }
+        listEl.innerHTML = '';
+        if (!s.summaries || s.summaries.length === 0) { listEl.innerHTML = '<div class="tiny">ChÆ°a cÃ³ tÃ³m táº¯t nÃ o.</div>'; return; }
+        s.summaries.forEach(sum => {
+            const item = document.createElement('div'); item.className = 'note-item';
+            const contentWrapper = document.createElement('div'); contentWrapper.className = 'note-content-wrapper';
+            const sumContent = document.createElement('div'); sumContent.className = 'note-content'; sumContent.textContent = sum.content;
+            const sumMeta = document.createElement('div'); sumMeta.className = 'note-meta'; sumMeta.textContent = new Date(sum.createdAt).toLocaleString();
+            contentWrapper.append(sumContent, sumMeta);
+            const actions = document.createElement('div');
+            const expBtn = document.createElement('button'); expBtn.className = 'btn small'; expBtn.textContent = 'Xuáº¥t'; expBtn.onclick = (e)=>{ e.stopPropagation(); exportSummary(sum); };
+            const delBtn = document.createElement('button'); delBtn.className = 'btn small danger'; delBtn.textContent = 'XÃ³a'; delBtn.onclick = (e)=>{ e.stopPropagation(); deleteSummary(sum.id); };
+            actions.append(expBtn, delBtn);
+            item.append(contentWrapper, actions);
+            item.addEventListener('click', ()=> sumContent.classList.toggle('expanded'));
+            listEl.appendChild(item);
+        });
+    }
+      function loadEditingPresetFields(){
+          const s = data.settings;
+          const d = s.durations;
+          if(editingPreset === 'A'){
+              $('#set_work').value = d.A_work;
+              $('#set_short').value = d.A_short;
+              $('#set_long').value = d.A_long;
+              $('#set_cycles').value = s.cyclesA;
+              $('#set_interval').value = s.longBreakIntervalA;
+          } else {
+              $('#set_work').value = d.B_work;
+              $('#set_short').value = d.B_short;
+              $('#set_long').value = d.B_long;
+              $('#set_cycles').value = s.cyclesB;
+              $('#set_interval').value = s.longBreakIntervalB;
+          }
+      }
+      function highlightPresetSelector(){
+          $$('#timerPresetSelector button').forEach(btn=>{
+              const isActive = btn.dataset.presetTarget === editingPreset;
+              btn.classList.toggle('acc', isActive);
+              btn.classList.toggle('ghost', !isActive);
+          });
+      }
+      function openSettings(){
+          const s = data.settings;
+          editingPreset = s.preset;
+          $('#set_apiKey').value = s.apiKey || '';
+          loadEditingPresetFields();
+          highlightPresetSelector();
+          $('#set_volume').value=s.volume ?? 0.8;
+          $('#set_theme').value=s.soundTheme || 'beep';
+          // THAY Äá»”I: Cáº­p nháº­t giÃ¡ trá»‹ dropdown
+          $('#set_theme_color').value = s.theme || 'default';
+          const activeUrl = getActiveYoutubeUrl();
+          $('#set_youtubeUrl').value = activeUrl || '';
+          const initialVideoId = extractYouTubeID(activeUrl);
+          $('#btnToggleYtSound').disabled = !initialVideoId;
+          if ($('#ytUrlFeedback')) {
+              $('#ytUrlFeedback').textContent = '';
+          }
+          $('#ytSoundVolume').value = s.youtubeVolume || 80;
+          $('#set_ytThumbAsBg').checked = !!s.useYtThumbnailAsBg;
+          $('#set_panelOpacity').value = s.panelOpacity || 0.85;
+          if ($('#set_autoStartNext')) { $('#set_autoStartNext').checked = !!s.autoStartNext; }
+          if ($('#set_backupDays')) { $('#set_backupDays').value = s.backupDaysToKeep || 7; }
+        const backupListEl = $('#backupList');
+        if (backupListEl) {
+            storageManager.getBackupList().then(backups => {
+                backupListEl.innerHTML = '<option value="">-- Chá»n ngÃ y Ä‘á»ƒ phá»¥c há»“i --</option>';
+                if (backups && backups.length > 0) {
+                    backups.forEach(backup => {
+                        const option = document.createElement('option');
+                        option.value = backup.date;
+                        option.textContent = `Báº£n sao lÆ°u ngÃ y: ${new Date(backup.date).toLocaleDateString('vi-VN')}`;
+                        backupListEl.appendChild(option);
+                    });
+                } else {
+                    backupListEl.innerHTML = '<option value="">KhÃ´ng cÃ³ báº£n sao lÆ°u nÃ o</option>';
+                }
+            });
+        }
+        $('#modalSettings').classList.add('show');
+    }
+    function closeSettings(){ $('#modalSettings').classList.remove('show'); }
+    async function setDefaults(){
+        data.settings.durations={A_work:25,A_short:5,A_long:15,B_work:50,B_short:10,B_long:30};
+        data.settings.cyclesA=4;
+        data.settings.longBreakIntervalA=4;
+        data.settings.cyclesB=4;
+        data.settings.longBreakIntervalB=4;
+        data.settings.preset='A';
+        data.settings.volume=0.8;
+        data.settings.soundTheme='beep';
+        await saveData(); openSettings(); toast('ÄÃ£ khÃ´i phá»¥c máº·c Ä‘á»‹nh'); }
+      async function saveSettings(){
+          const s = data.settings;
+          s.apiKey = $('#set_apiKey').value.trim();
+          const d = s.durations;
+          if(editingPreset === 'A'){
+              d.A_work = clampInt($('#set_work').value,1,999);
+              d.A_short = clampInt($('#set_short').value,1,999);
+              d.A_long = clampInt($('#set_long').value,1,999);
+              s.cyclesA = clampInt($('#set_cycles').value,1,12);
+              s.longBreakIntervalA = clampInt($('#set_interval').value,2,12);
+          } else {
+              d.B_work = clampInt($('#set_work').value,1,999);
+              d.B_short = clampInt($('#set_short').value,1,999);
+              d.B_long = clampInt($('#set_long').value,1,999);
+              s.cyclesB = clampInt($('#set_cycles').value,1,12);
+              s.longBreakIntervalB = clampInt($('#set_interval').value,2,12);
+          }
+          s.volume = clampFloat($('#set_volume').value,0,1,0.8);
+          s.soundTheme = $('#set_theme').value==='chime' ? 'chime':'beep';
+          // THAY Äá»”I: LÆ°u giÃ¡ trá»‹ theme
+          s.theme = $('#set_theme_color').value;
+          s.panelOpacity = parseFloat($('#set_panelOpacity').value) || 0.85;
+          s.autoStartNext = !!($('#set_autoStartNext') && $('#set_autoStartNext').checked);
+          if ($('#set_backupDays')) { s.backupDaysToKeep = clampInt($('#set_backupDays').value, 1, 30); }
+
+          // Bá»• sung: Náº¿u chá»n theme sÃ¡ng, luÃ´n táº¯t thumbnail YouTube lÃ m ná»n
+          if (s.theme === 'light' || s.theme === 'pastel') {
+              s.useYtThumbnailAsBg = false;
+              // Náº¿u ná»n hiá»‡n táº¡i lÃ  thumbnail YouTube, bá» ná»n Ä‘á»ƒ giá»¯ ná»n gá»‘c cá»§a theme sÃ¡ng
+              if (typeof s.customBg === 'string' && s.customBg.includes('img.youtube.com/vi/')) {
+                  s.customBg = '';
+              }
+          } else {
+              // NgÆ°á»£c láº¡i, vá»›i theme tá»‘i thÃ¬ báº­t dÃ¹ng thumbnail YouTube (náº¿u cÃ³ link)
+              s.useYtThumbnailAsBg = true;
+          }
+
+          const newYtUrl = $('#set_youtubeUrl').value.trim();
+          s.useYtThumbnailAsBg = $('#set_ytThumbAsBg').checked;
+          s.youtubeVolume = parseInt($('#ytSoundVolume').value, 10);
+          sessionYoutubeUrl = newYtUrl;
+          updateYouTubePlayer(); 
+
+          await saveData();
+          applyTheme();
+          applyCustomBg();
+          applyPanelOpacity();
+          updatePresetButtonsText();
+          timer.setPreset(s.preset, {silent:true});
+
+          closeSettings();
+          toast('ÄÃ£ lÆ°u cÃ i Ä‘áº·t');
+      }
+    function clampInt(v,min,max){ v=parseInt(v||0,10); if(isNaN(v)) v=min; return Math.max(min, Math.min(max, v)); }
+    function clampFloat(v,min,max,def){ v=parseFloat(v); if(Number.isNaN(v)) v=def; return Math.max(min, Math.min(max, v)); }
+    const dbPromise = new Promise((resolve, reject) => {
+        const req = indexedDB.open('pomodoro_files', 1);
+        req.onupgradeneeded = (e) => e.target.result.createObjectStore('files');
+        req.onsuccess = (e) => resolve(e.target.result);
+        req.onerror = (e) => reject(e);
+    });
+    const fileCache = {};
+    function handleFileUpload(file, callback) {
+        if (!file) return;
+        dbPromise.then(db => {
+            const id = uid('file');
+            const tx = db.transaction('files', 'readwrite');
+            tx.objectStore('files').put(file, id);
+            tx.oncomplete = () => callback(id);
+            tx.onerror = () => toast("Lá»—i lÆ°u file.");
+        });
+    }
+    function getStoredFileUrl(id){
+        if (!id) return Promise.resolve('');
+        if (fileCache[id]) return Promise.resolve(fileCache[id]);
+        return dbPromise.then(db => new Promise((resolve) => {
+            const tx = db.transaction('files', 'readonly');
+            const req = tx.objectStore('files').get(id);
+            req.onsuccess = (e) => {
+                const file = e.target.result;
+                if (file) {
+                    const url = URL.createObjectURL(file);
+                    fileCache[id] = url;
+                    resolve(url);
+                } else resolve('');
+            };
+            req.onerror = () => resolve('');
+        }));
+    }
+    function applyCustomBg() {
+        const ref = data.settings.customBg;
+        const theme = data.settings.theme;
+        const themeHasBg = ['lofi', 'space'].includes(theme);
+        const isLightTheme = (theme === 'light' || theme === 'pastel');
+
+        const clearInlineBgFallback = () => { try { document.body.style.backgroundImage = ''; } catch(_) {} };
+
+        if (ref) {
+            const urlPromise = (ref.startsWith('data:') || ref.startsWith('http') || ref.startsWith('blob:'))
+                ? Promise.resolve(ref)
+                : getStoredFileUrl(ref);
+            
+            urlPromise.then(url => {
+                if (url) {
+                    document.body.style.setProperty('--bg-image', `url(${url})`);
+                } else {
+                    document.body.style.setProperty('--bg-image', isLightTheme ? 'none' : '');
+                }
+                clearInlineBgFallback();
+            });
+        } else if (!themeHasBg) {
+            if (isLightTheme) {
+                // Light/pastel: khÃ´ng dÃ¹ng ná»n tá»‘i
+                document.body.style.setProperty('--bg-image', 'none');
+                clearInlineBgFallback();
+            } else {
+                // Dark/default fallback
+                document.body.style.setProperty('--bg-image', 'radial-gradient(1200px 800px at 10% -10%, #20285b 0%, #0f1222 50%, #0b0e1a 100%)');
+            }
+        } else {
+            // Let the CSS for the theme handle the background
+            document.body.style.removeProperty('--bg-image');
+            clearInlineBgFallback();
+        }
+    }
+    function applyPanelOpacity() { document.documentElement.style.setProperty('--panel-opacity', data.settings.panelOpacity); }
+      function renderDashboard(){
+          const stats = data.topics.flatMap(t => t.subtopics.map(s => ({ topic: t.name, subtopic: s.name, m: s.stats.totalMinutes || 0, c: s.stats.sessionsCompleted || 0, t: s.stats.tasksCompleted || 0 })));
+          const totalM = stats.reduce((a, b) => a + b.m, 0);
+          const totalC = stats.reduce((a, b) => a + b.c, 0);
+          const totalT = stats.reduce((a, b) => a + b.t, 0);
+
+        let tableHTML = `<p class="tiny"><strong>Tá»•ng thá»i gian:</strong> ${formatDaysHoursMinutes(totalM)} | <strong>Tá»•ng phiÃªn:</strong> ${totalC} | <strong>Tá»•ng nhiá»‡m vá»¥:</strong> ${totalT}</p>
+        <table class="dashboard-table">
+            <thead><tr><th>Chá»§ Ä‘á»</th><th>Chá»§ Ä‘á» con</th><th>Thá»i gian</th><th>PhiÃªn</th><th>Nhiá»‡m vá»¥</th></tr></thead>
+            <tbody>`;
+
+          stats.forEach(item => {
+            tableHTML += `<tr><td>${escapeHTML(item.topic)}</td><td>${escapeHTML(item.subtopic)}</td><td>${formatDaysHoursMinutes(item.m)}</td><td>${item.c}</td><td>${item.t}</td></tr>`;
+        });
+
+        tableHTML += '</tbody></table>';
+        const contentEl = $('#dashboardContent');
+        if (contentEl) contentEl.innerHTML = tableHTML;
+    }
+    function getMilestones(){
+        return [
+            { hours: 10000, title: "Gá»­i báº¡n, 10.000+ giá» (ChÃ¢n SÆ°)", message: "Tháº­t vinh dá»± khi Ä‘Æ°á»£c trÃ² chuyá»‡n cÃ¹ng báº¡n. KhÃ´ng cÃ³ nhiá»u ngÆ°á»i trÃªn tháº¿ giá»›i Ä‘áº¡t Ä‘áº¿n cáº¥p Ä‘á»™ nÃ y. Báº¡n khÃ´ng chá»‰ thÃ nh tháº¡o má»™t ká»¹ nÄƒng, báº¡n Ä‘Ã£ Ä‘á»‹nh nghÄ©a láº¡i nÃ³. Sá»± ná»— lá»±c vÃ  hy sinh cá»§a báº¡n Ä‘Ã£ táº¡o ra nhá»¯ng Ä‘iá»u phi thÆ°á»ng.\nCÃ³ láº½ bÃ¢y giá» báº¡n khÃ´ng cÃ²n nghÄ© vá» viá»‡c há»c ká»¹ nÄƒng ná»¯a, mÃ  lÃ  vá» viá»‡c Ä‘á»ƒ láº¡i di sáº£n. Báº¡n sáº½ truyá»n láº¡i ngá»n Ä‘uá»‘c nÃ y nhÆ° tháº¿ nÃ o? Báº¡n sáº½ phÃ¡ vá»¡ nhá»¯ng giá»›i háº¡n nÃ o tiáº¿p theo mÃ  chÆ°a ai tá»«ng nghÄ© tá»›i? Tháº¿ giá»›i Ä‘ang dÃµi theo nhá»¯ng gÃ¬ báº¡n lÃ m, khÃ´ng pháº£i Ä‘á»ƒ há»c theo má»™t cÃ´ng thá»©c, mÃ  Ä‘á»ƒ Ä‘Æ°á»£c truyá»n cáº£m há»©ng tá»« chÃ­nh hÃ nh trÃ¬nh vÃ  sá»± sÃ¡ng táº¡o cá»§a báº¡n.\nCáº£m Æ¡n báº¡n vÃ¬ Ä‘Ã£ cho chÃºng tÃ´i tháº¥y nhá»¯ng giá»›i háº¡n cá»§a con ngÆ°á»i cÃ³ thá»ƒ Ä‘Æ°á»£c Ä‘áº©y xa Ä‘áº¿n nhÆ°á»ng nÃ o." },
+            { hours: 5000, title: "Gá»­i báº¡n, 5.000 giá» (Tinh ThÃ´ng)", message: "Sá»± cá»‘ng hiáº¿n cá»§a báº¡n tháº­t Ä‘Ã¡ng kinh ngáº¡c. Báº¡n Ä‘Ã£ trá»Ÿ thÃ nh má»™t chuyÃªn gia, má»™t ngÆ°á»i mÃ  ngÆ°á»i khÃ¡c tÃ¬m Ä‘áº¿n Ä‘á»ƒ há»c há»i vÃ  xin lá»i khuyÃªn. Ká»¹ nÄƒng cá»§a báº¡n khÃ´ng chá»‰ lÃ  má»™t cÃ´ng cá»¥, nÃ³ Ä‘Ã£ trá»Ÿ thÃ nh má»™t pháº§n con ngÆ°á»i báº¡n.\nLá»i nháº¯n cá»§a tÃ´i dÃ nh cho báº¡n lÃ : HÃ£y luÃ´n giá»¯ cho mÃ¬nh \"tÃ¢m trÃ­ cá»§a ngÆ°á»i má»›i báº¯t Ä‘áº§u\". Äá»«ng Ä‘á»ƒ kiáº¿n thá»©c sÃ¢u rá»™ng cá»§a mÃ¬nh biáº¿n thÃ nh sá»± tá»± mÃ£n. HÃ£y tiáº¿p tá»¥c há»c há»i tá»« nhá»¯ng lÄ©nh vá»±c khÃ¡c, láº¯ng nghe nhá»¯ng ngÆ°á»i má»›i vÃ o nghá» vÃ  khÃ´ng ngá»«ng Ä‘áº·t cÃ¢u há»i. Giá» Ä‘Ã¢y, vai trÃ² cá»§a báº¡n khÃ´ng chá»‰ lÃ  lÃ m tá»‘t cÃ´ng viá»‡c cá»§a mÃ¬nh, mÃ  cÃ²n lÃ  nÃ¢ng Ä‘á»¡ vÃ  truyá»n cáº£m há»©ng cho nhá»¯ng ngÆ°á»i Ä‘i sau." },
+            { hours: 1000, title: "Gá»­i báº¡n, 1.000 giá» (Vá»¯ng VÃ ng)", message: "Báº¡n khÃ´ng cÃ²n lÃ  ngÆ°á»i má»›i ná»¯a. Báº¡n Ä‘Ã£ cÃ³ nÄƒng lá»±c, sá»± tá»± tin vÃ  cÃ³ thá»ƒ táº¡o ra nhá»¯ng káº¿t quáº£ Ä‘Ã¡ng tá»± hÃ o. Báº¡n xá»©ng Ä‘Ã¡ng Ä‘Æ°á»£c cÃ´ng nháº­n vÃ¬ sá»± kiÃªn trÃ¬ cá»§a mÃ¬nh.\nBÃ¢y giá», thá»­ thÃ¡ch cá»§a báº¡n lÃ  chuyá»ƒn tá»« \"lÃ m theo\" sang \"tháº¥u hiá»ƒu\". HÃ£y tá»± há»i mÃ¬nh \"Táº¡i sao nÃ³ láº¡i hoáº¡t Ä‘á»™ng nhÆ° váº­y?\". HÃ£y thá»­ dáº¡y láº¡i cho ngÆ°á»i khÃ¡c, vÃ¬ Ä‘Ã³ lÃ  cÃ¡ch tá»‘t nháº¥t Ä‘á»ƒ cá»§ng cá»‘ kiáº¿n thá»©c cá»§a chÃ­nh mÃ¬nh. ÄÃ¢y lÃ  lÃºc Ä‘á»ƒ tinh chá»‰nh, tá»‘i Æ°u hÃ³a vÃ  báº¯t Ä‘áº§u hÃ¬nh thÃ nh phong cÃ¡ch Ä‘á»™c Ä‘Ã¡o cá»§a riÃªng báº¡n. HÃ£y biáº¿n sá»± thÃ nh tháº¡o thÃ nh nghá»‡ thuáº­t." },
+            { hours: 100, title: "Gá»­i báº¡n, 100 giá» (Äá»‹nh HÃ¬nh)", message: "Báº¡n Ä‘Ã£ vÆ°á»£t qua Ä‘Æ°á»£c giai Ä‘oáº¡n khÃ³ khÄƒn nháº¥t vÃ  giá» Ä‘Ã¢y, ká»¹ nÄƒng nÃ y Ä‘ang thá»±c sá»± \"ngáº¥m\" vÃ o báº¡n. Nhá»¯ng tia sÃ¡ng cá»§a sá»± thÃ nh tháº¡o Ä‘Ã£ báº¯t Ä‘áº§u xuáº¥t hiá»‡n. Tháº­t tuyá»‡t vá»i!\nÄÃ¢y lÃ  giai Ä‘oáº¡n báº¡n cáº£m tháº¥y há»©ng khá»Ÿi nháº¥t, nhÆ°ng cÅ©ng lÃ  lÃºc dá»… rÆ¡i vÃ o cÃ¡i báº«y \"biáº¿t Ä‘á»§ rá»“i\". Äá»«ng dá»«ng láº¡i. HÃ£y báº¯t Ä‘áº§u khÃ¡m phÃ¡ sÃ¢u hÆ¡n, thá»­ nghiá»‡m nhá»¯ng ká»¹ thuáº­t má»›i vÃ  Ä‘á»«ng ngáº¡i phÃ¡ vá»¡ cÃ¡c quy táº¯c báº¡n vá»«a há»c Ä‘Æ°á»£c. HÃ£y tÃ¬m má»™t cá»™ng Ä‘á»“ng hoáº·c má»™t ngÆ°á»i hÆ°á»›ng dáº«n Ä‘á»ƒ nháº­n Ä‘Æ°á»£c pháº£n há»“i. Sá»± tÃ² mÃ² chÃ­nh lÃ  nhiÃªn liá»‡u tá»‘t nháº¥t Ä‘á»ƒ Ä‘Æ°a báº¡n tiáº¿n xa hÆ¡n. HÃ£y biáº¿n ká»¹ nÄƒng nÃ y thÃ nh cá»§a riÃªng báº¡n." },
+            { hours: 20, title: "Gá»­i báº¡n, 20 giá» (Khai Má»Ÿ)", message: "ChÃºc má»«ng báº¡n Ä‘Ã£ lÃ m Ä‘Æ°á»£c Ä‘iá»u khÃ³ nháº¥t: Báº¯t Ä‘áº§u.\nÄá»«ng lo láº¯ng náº¿u bÃ¢y giá» báº¡n cáº£m tháº¥y mÃ¬nh tháº­t vá»¥ng vá», cháº­m cháº¡p vÃ  liÃªn tá»¥c máº¯c lá»—i. Má»i báº­c tháº§y Ä‘á»u tá»«ng lÃ  má»™t \"tháº£m há»a\" khi má»›i báº¯t Ä‘áº§u. HÃ£y nhá»› ráº±ng má»¥c tiÃªu cá»§a báº¡n lÃºc nÃ y khÃ´ng pháº£i lÃ  sá»± hoÃ n háº£o, mÃ  lÃ  sá»± hiá»‡n diá»‡n. Má»—i giá» báº¡n dÃ nh ra Ä‘á»ƒ luyá»‡n táº­p lÃ  má»™t chiáº¿n tháº¯ng trÆ°á»›c sá»± trÃ¬ hoÃ£n vÃ  ná»—i sá»£ tháº¥t báº¡i.\nHÃ£y kiÃªn nháº«n vá»›i chÃ­nh mÃ¬nh, táº­n hÆ°á»Ÿng tá»«ng tiáº¿n bá»™ nhá» nháº¥t vÃ  Ä‘á»«ng bao giá» so sÃ¡nh khá»Ÿi Ä‘áº§u cá»§a mÃ¬nh vá»›i \"Ä‘oáº¡n giá»¯a\" cá»§a ngÆ°á»i khÃ¡c. Báº¡n Ä‘ang xÃ¢y dá»±ng ná»n mÃ³ng, vÃ  má»™t ná»n mÃ³ng vá»¯ng cháº¯c cáº§n thá»i gian. Cá»© tiáº¿p tá»¥c nhÃ©!" }
+        ];
+    }
+    async function checkAndShowMilestones() {
+        if (!data || !data.settings) return;
+        if (!Array.isArray(data.settings.achievedMilestones)) data.settings.achievedMilestones = [];
+        const totalMinutes = data.topics.reduce((total, topic) => {
+            return total + topic.subtopics.reduce((subTotal, subtopic) => {
+                return subTotal + (subtopic.stats.totalMinutes || 0);
+            }, 0);
+        }, 0);
+        const totalHours = totalMinutes / 60;
+        const milestones = getMilestones();
+        const achieved = Array.isArray(data.settings.achievedMilestones) ? data.settings.achievedMilestones : [];
+        const eligible = milestones.filter(m => totalHours >= m.hours && !achieved.includes(m.hours));
+        if (eligible.length === 0) return false;
+        const target = eligible.reduce((best, m) => (best && best.hours > m.hours ? best : m), null);
+        if (!target) return false;
+        $('#milestoneTitle').textContent = target.title;
+        $('#milestoneMessage').textContent = target.message;
+        $('#modalMilestone').classList.add('show');
+        data.settings.achievedMilestones.push(target.hours);
+        await saveData();
+        return true;
+    }
+    async function seedAchievedMilestones() {
+        if (!data || !data.settings) return;
+        if (!Array.isArray(data.settings.achievedMilestones)) {
+            data.settings.achievedMilestones = [];
+            await saveData();
+        }
+    }
+    async function handleSendMessage() {
+        const btn = $('#btnSendMessage');
+        const input = $('#chatInput');
+        const query = input.value.trim();
+        const subtopic = getCurrentSubtopic();
+        if (!query) return;
+        if (!subtopic) { toast(t('timer.selectSubtopicPrompt')); return; }
+        input.value = '';
+        btn.disabled = true;
+        btn.innerHTML = '<div class="spinner"></div>';
+        subtopic.chatHistory.push({ role: 'user', text: query });
+        renderChat();
+        const response = await callGeminiAPI(query);
+        if (response) {
+            subtopic.chatHistory.push({ role: 'model', text: response });
+            await saveData();
+            renderChat();
+        }
+        btn.disabled = false;
+        btn.innerHTML = 'Gá»­i';
+    }
+    function renderChat() {
+        const s = getCurrentSubtopic();
+        const messagesEl = $('#chatMessages');
+        const chatInput = $('#chatInput');
+        const sendBtn = $('#btnSendMessage');
+        if (!messagesEl || !chatInput || !sendBtn) return;
+        if (!s) {
+            messagesEl.innerHTML = '<div class="tiny">Chá»n chá»§ Ä‘á» con Ä‘á»ƒ báº¯t Ä‘áº§u chat.</div>';
+            chatInput.disabled = true; sendBtn.disabled = true;
+            return;
+        }
+        chatInput.disabled = false; sendBtn.disabled = false;
+        messagesEl.innerHTML = '';
+        if (!s.chatHistory || s.chatHistory.length === 0) {
+            messagesEl.innerHTML = '<div class="tiny">ChÆ°a cÃ³ tin nháº¯n nÃ o.</div>';
+            return;
+        }
+        s.chatHistory.forEach(msg => {
+            const msgEl = document.createElement('div');
+            msgEl.className = `chat-msg ${msg.role}`;
+            msgEl.textContent = msg.text;
+            messagesEl.appendChild(msgEl);
+        });
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+    async function handleSummarizeNote() {
+        const btn = $('#btnSummarizeNote');
+        const noteTextEl = $('#noteText');
+        const noteText = noteTextEl.value.trim();
+        const subtopic = getCurrentSubtopic();
+        if (!noteText) { toast("Vui lÃ²ng nháº­p ghi chÃº trÆ°á»›c khi tÃ³m táº¯t."); return; }
+        const originalContent = btn.innerHTML;
+        btn.innerHTML = '<div class="spinner"></div>'; btn.disabled = true;
+        const prompt = `Dá»±a vÃ o thÃ´ng tin sau:\n- Chá»§ Ä‘á»: "${subtopic?.name || 'khÃ´ng rÃµ'}"\n- Ghi chÃº cá»§a ngÆ°á»i dÃ¹ng sau má»™t phiÃªn lÃ m viá»‡c: "${noteText}"\n\nHÃ£y táº¡o má»™t báº£n tÃ³m táº¯t ngáº¯n gá»n vá» nhá»¯ng gÃ¬ Ä‘Ã£ lÃ m vÃ  Ä‘á» xuáº¥t má»™t bÆ°á»›c há»£p lÃ½ tiáº¿p theo. Äá»‹nh dáº¡ng cÃ¢u tráº£ lá»i nhÆ° sau:\n\n---\n**âœ¨ TÃ³m táº¯t AI:**\n[TÃ³m táº¯t á»Ÿ Ä‘Ã¢y]\n\n**ðŸš€ Gá»£i Ã½ tiáº¿p theo:**\n[Gá»£i Ã½ á»Ÿ Ä‘Ã¢y]`;
+        const result = await callGeminiAPI(prompt);
+        if (result) {
+            noteTextEl.value += `\n\n${result}`;
+        }
+        btn.innerHTML = originalContent; btn.disabled = false;
+    }
+    function clearChat() {
+        const s = getCurrentSubtopic();
+        if (!s) { toast(t('timer.selectSubtopicPrompt')); return; }
+        showConfirmModal('XÃ¡c nháº­n xÃ³a', 'Báº¡n cÃ³ cháº¯c muá»‘n xÃ³a toÃ n bá»™ lá»‹ch sá»­ chat cá»§a chá»§ Ä‘á» con nÃ y?', async (ok) => {
+            if (ok) {
+                s.chatHistory = [];
+                await saveData();
+                renderChat();
+                toast("ÄÃ£ xÃ³a lá»‹ch sá»­ chat.");
+            }
+        });
+    }
+    let ytPlayer;
+    let ytUserPaused = false;
+    let ytFallbackFrame = null;
+    let ytFallbackIsPlaying = false;
+    function buildFallbackSrc(videoId, { autoplay=1, mute=1 }={}){
+        const params = new URLSearchParams({
+            autoplay: String(autoplay),
+            mute: String(mute),
+            controls: '0',
+            playsinline: '1',
+            loop: '1',
+            playlist: videoId,
+            enablejsapi: '1',
+            origin: 'https://www.youtube.com'
+        }).toString();
+        return `https://www.youtube.com/embed/${videoId}?${params}`;
+    }
+    function ensureFallbackFrame(){
+        const cont = document.getElementById('youtube-player-container');
+        if (!cont) return null;
+        if (ytFallbackFrame && ytFallbackFrame.isConnected) return ytFallbackFrame;
+        const ifr = document.createElement('iframe');
+        ifr.id = 'yt-fallback';
+        ifr.width = '1'; ifr.height = '1';
+        ifr.style.position = 'absolute'; ifr.style.top='-9999px'; ifr.style.left='-9999px';
+        ifr.allow = 'autoplay; encrypted-media; picture-in-picture';
+        cont.innerHTML = '';
+        cont.appendChild(ifr);
+        ytFallbackFrame = ifr;
+        return ifr;
+    }
+    function fallbackLoadVideo(videoId, {autoplay=1, mute=1}={}){
+        const cont = document.getElementById('youtube-player-container');
+        if (!cont) return;
+        cont.innerHTML = '';
+        const ifr = document.createElement('iframe');
+        ifr.id = 'yt-fallback';
+        ifr.width = '1';
+        ifr.height = '1';
+        ifr.style.position = 'absolute';
+        ifr.style.top='-9999px';
+        ifr.style.left='-9999px';
+        ifr.allow = 'autoplay; encrypted-media; picture-in-picture';
+        ifr.src = buildFallbackSrc(videoId, {autoplay, mute});
+        cont.appendChild(ifr);
+        ytFallbackFrame = ifr;
+        ytFallbackIsPlaying = !!autoplay;
+        try { 
+            const btn = document.getElementById('btnToggleYtSound'); 
+            if (btn) btn.textContent = ytFallbackIsPlaying ? 'â¸ï¸' : 'â–¶ï¸'; 
+        } catch(_) {}
+    }
+    function fallbackPostMessage(func, args=[]) {
+        try {
+            if (!ytFallbackFrame || !ytFallbackFrame.contentWindow) return;
+            ytFallbackFrame.contentWindow.postMessage(JSON.stringify({ event:'command', func, args }), 'https://www.youtube.com');
+        } catch(_) {}
+    }
+    function fallbackPlay(){ fallbackPostMessage('playVideo'); }
+    function fallbackStop(){
+        try {
+            if (ytFallbackFrame) {
+                ytFallbackFrame.src = 'about:blank';
+                ytFallbackIsPlaying = false;
+            }
+        } catch(_) {}
+    }
+    function fallbackPause(){ fallbackStop(); }
+    function fallbackUnMute(){ fallbackPostMessage('unMute'); }
+    function fallbackMute(){ fallbackPostMessage('mute'); }
+    window.onYouTubeIframeAPIReady = function() {
+        if (IS_FILE_PROTOCOL) {
+            try { window.__ytApiWatchdog && window.__ytApiWatchdog.cancel(); } catch(_) {}
+            return;
+        }
+        const opts = {
+            height: '1',
+            width: '1',
+            playerVars: { autoplay: 0, controls: 0, playsinline: 1 },
+            events: { onReady: onPlayerReady, onStateChange: onPlayerStateChange },
+            host: 'https://www.youtube.com'
+        };
+        if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
+            opts.origin = window.location.origin;
+        }
+        ytPlayer = new YT.Player('youtube-player-container', opts);
+        try { window.__ytApiWatchdog && window.__ytApiWatchdog.cancel(); const fb = document.getElementById('ytUrlFeedback'); if (fb) { fb.textContent=''; } } catch(_) {}
+    };
+
+    let _ytPrimed = false;
+    let _ytUnlocked = false;
+    try { _ytUnlocked = localStorage.getItem('sound_unlocked') === '1'; } catch(_) {}
+    function showSoundPermission() {
+        const bar = document.getElementById('soundPermissionBar');
+        if (!bar) return;
+        if (_ytUnlocked) { bar.classList.remove('show'); return; }
+        bar.classList.add('show');
+    }
+    function hideSoundPermission() {
+        const bar = document.getElementById('soundPermissionBar');
+        if (!bar) return;
+        bar.classList.remove('show');
+    }
+    function unlockAudioChain() {
+        try { if (AUDIO_CTX && typeof AUDIO_CTX.resume === 'function') AUDIO_CTX.resume(); } catch(_) {}
+        try {
+            if (IS_FILE_PROTOCOL) {
+                fallbackUnMute();
+                fallbackPlay();
+            } else if (ytPlayer && ytPlayer.unMute) {
+                ytPlayer.unMute();
+                ytPlayer.playVideo();
+            }
+        } catch(_) {}
+        _ytUnlocked = true;
+        try { localStorage.setItem('sound_unlocked','1'); } catch(_) {}
+        hideSoundPermission();
+        toast('Ã‚m thanh Ä‘Ã£ Ä‘Æ°á»£c báº­t!');
+    }
+    function onPlayerReady(event) {
+        try {
+            const iframe = ytPlayer && ytPlayer.getIframe ? ytPlayer.getIframe() : null;
+            if (iframe) {
+                iframe.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture');
+            }
+        } catch (_) {}
+        try { if (ytPlayer && ytPlayer.setVolume) ytPlayer.setVolume((data && data.settings && data.settings.youtubeVolume) || 80); } catch(_) {}
+        updateYouTubePlayer();
+    }
+    function onPlayerStateChange(event) {
+        const btn = $('#btnToggleYtSound');
+        if (event.data == YT.PlayerState.PLAYING) {
+            btn.textContent = 'â¸ï¸';
+            hideSoundPermission();
+        } else {
+            btn.textContent = 'â–¶ï¸';
+        }
+        if (event.data === YT.PlayerState.ENDED) {
+            if (!ytUserPaused) ytPlayer.playVideo();
+        }
+    }
+    async function ytFadeTo(target, ms=250) {
+        try {
+            if (!ytPlayer || !ytPlayer.getVolume || !ytPlayer.setVolume) return;
+            ytPlayer.unMute();
+            const start = ytPlayer.getVolume();
+            const diff = target - start;
+            if (Math.abs(diff) < 1 || ms <= 0) { ytPlayer.setVolume(target); return; }
+            const t0 = performance.now();
+            await new Promise(res => {
+                const step = (t) => {
+                    const p = Math.min(1, (t - t0) / ms);
+                    const v = Math.round(start + diff * p);
+                    ytPlayer.setVolume(v);
+                    if (p < 1) requestAnimationFrame(step); else res();
+                };
+                requestAnimationFrame(step);
+            });
+        } catch(_) {}
+    }
+    async function ytFadeInPlay(ms=220) {
+        try {
+            const tgt = Math.max(0, Math.min(100, (data && data.settings && data.settings.youtubeVolume) || 80));
+            if (!IS_FILE_PROTOCOL) {
+                if (!ytPlayer) return;
+                ytPlayer.unMute();
+                ytPlayer.playVideo();
+                try { ytPlayer.setVolume(0); } catch(_) {}
+                await ytFadeTo(tgt, ms);
+            } else {
+                const vid = getActiveVideoId();
+                if (vid) { fallbackLoadVideo(vid, {autoplay:1, mute:0}); }
+            }
+        } catch(_) {}
+    }
+    async function ytFadeOutPause(ms=180) {
+        try {
+            const tgt = Math.max(0, Math.min(100, (data && data.settings && data.settings.youtubeVolume) || 80));
+            if (!IS_FILE_PROTOCOL) {
+                if (!ytPlayer) return;
+                await ytFadeTo(0, ms);
+                try { ytPlayer.pauseVideo(); ytPlayer.setVolume(tgt); } catch(_) {}
+            } else {
+                try { fallbackPause(); } catch(_) {}
+            }
+        } catch(_) {}
+    }
+    async function updateYouTubePlayer() {
+        const videoId = getActiveVideoId();
+        if (data.settings.useYtThumbnailAsBg && videoId) {
+            const thumbUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+            const img = new Image();
+            img.onload = async () => { data.settings.customBg = thumbUrl; await saveData(); applyCustomBg(); };
+            img.onerror = async () => { const fb = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`; data.settings.customBg = fb; await saveData(); applyCustomBg(); };
+            img.src = thumbUrl;
+        } else if (!videoId) {
+            data.settings.customBg = '';
+            await saveData();
+            applyCustomBg();
+        }
+        if (IS_FILE_PROTOCOL) {
+            if (!videoId) { 
+                fallbackStop();
+                hideSoundPermission();
+                return;
+            }
+            const isMuted = _ytUnlocked ? 0 : 1;
+            fallbackLoadVideo(videoId, { autoplay: 1, mute: isMuted });
+            if (!_ytUnlocked) {
+                showSoundPermission();
+            }
+            return;
+        }
+        if (!ytPlayer || !ytPlayer.cueVideoById) return;
+        if (!videoId) {
+            if (ytPlayer.stopVideo) ytPlayer.stopVideo();
+            hideSoundPermission();
+            return;
+        }
+        ytPlayer.cueVideoById(videoId);
+        ytPlayer.setVolume(data.settings.youtubeVolume);
+    }
+    function toggleYtSound() {
+        if (!_ytUnlocked) {
+            try { ensureAudio(); } catch(_) {}
+            try { unlockAudioChain(); } catch(_) {}
+            return;
+        }
+        if (IS_FILE_PROTOCOL) {
+            const vid = getActiveVideoId();
+            if (!ytFallbackFrame || !ytFallbackFrame.isConnected) {
+                if (!vid) { toast('ChÆ°a cÃ³ link há»£p lá»‡. DÃ¡n link rá»“i báº¥m â–¶ï¸.'); return; }
+                fallbackLoadVideo(vid, { autoplay: 1, mute: 0 });
+                ytFallbackIsPlaying = true;
+                try { const btn = document.getElementById('btnToggleYtSound'); if (btn) btn.textContent = 'â¸ï¸'; } catch(_) {}
+                toast('Äang phÃ¡t nháº¡c ná»n...');
+                return;
+            }
+            if (ytFallbackIsPlaying) {
+                fallbackPostMessage('pauseVideo');
+                ytFallbackIsPlaying = false;
+                toast('ÄÃ£ dá»«ng nháº¡c ná»n.');
+            } else {
+                if (!vid) { toast('ChÆ°a cÃ³ link há»£p lá»‡. DÃ¡n link rá»“i báº¥m â–¶ï¸.'); return; }
+                fallbackPostMessage('playVideo');
+                ytFallbackIsPlaying = true;
+                toast('Äang phÃ¡t nháº¡c ná»n...');
+            }
+            try { 
+                const btn = document.getElementById('btnToggleYtSound'); 
+                if (btn) btn.textContent = ytFallbackIsPlaying ? 'â¸ï¸' : 'â–¶ï¸'; 
+            } catch(_) {}
+            return;
+        }
+        if (!ytPlayer || typeof ytPlayer.getPlayerState !== 'function') return;
+        const playerState = ytPlayer.getPlayerState();
+        if (playerState === YT.PlayerState.PLAYING || playerState === YT.PlayerState.BUFFERING) {
+            ytFadeOutPause();
+            ytUserPaused = true;
+            toast('ÄÃ£ dá»«ng nháº¡c ná»n.');
+        } else {
+            ytFadeInPlay();
+            ytUserPaused = false;
+            toast('Äang phÃ¡t nháº¡c ná»n...');
+        }
+    }
+    function bindEvents(){
+      on($('#btnToggleBg'), 'click', toggleBackgroundView);
+      on($('#btnMilestoneClose'), 'click', () => $('#modalMilestone').classList.remove('show'));
+      on($('#btnAddTopic'), 'click', () => showInputModal('TÃªn Chá»§ Ä‘á» má»›i?', async (name) => { if (!name) return; data.topics.push({ id: uid('t'), name, subtopics: [] }); await saveData(); renderTopics(); }));
+      on($('#btnExport'), 'click', ()=> storageManager.exportData(data));
+        on($("#importFile"), 'change', (e) => {
+          const f = e.target.files[0];
+          if (!f) return;
+          storageManager.importData(f).then(async (d) => {
+            data = d;
+            normalizeDataStructure(data);
+            await ensureValidSelection();
+            await seedAchievedMilestones();
+            toast('ÄÃ£ nháº­p dá»¯ liá»‡u thÃ nh cÃ´ng!');
+            renderAll();
+          }).catch(err => toast('Nháº­p tháº¥t báº¡i: ' + err.message));
+          e.target.value = null;
+        });
+      on($('#btnRestoreBackup'), 'click', () => {
+          const backupListEl = $('#backupList');
+          const selectedDate = backupListEl ? backupListEl.value : '';
+          if (!selectedDate) { toast('Vui lÃ²ng chá»n má»™t báº£n sao lÆ°u.'); return; }
+          showConfirmModal('XÃ¡c nháº­n phá»¥c há»“i', `Báº¡n cÃ³ cháº¯c muá»‘n phá»¥c há»“i dá»¯ liá»‡u tá»« ngÃ y ${new Date(selectedDate).toLocaleDateString()}? Dá»¯ liá»‡u hiá»‡n táº¡i sáº½ bá»‹ ghi Ä‘Ã¨.`, (ok) => {
+              if (ok) {
+                  storageManager.restoreBackup(selectedDate).then((d) => {
+                      data = d;
+                      toast('Phá»¥c há»“i dá»¯ liá»‡u thÃ nh cÃ´ng! Táº£i láº¡i trang...');
+                      setTimeout(() => window.location.reload(), 1500);
+                  }).catch(err => {
+                      toast(`Lá»—i: ${err.message}`);
+                  });
+              }
+          });
+      });
+      on($('#set_theme_color'), 'input', (e) => {
+          const selectedTheme = e.target.value;
+          applyTheme(selectedTheme);
+          if (selectedTheme === 'light' || selectedTheme === 'pastel') {
+              const ytThumbCheckbox = $('#set_ytThumbAsBg');
+              if (ytThumbCheckbox) {
+                  ytThumbCheckbox.checked = false;
+                  toast('ÄÃ£ táº¯t ná»n YouTube Ä‘á»ƒ há»£p vá»›i theme sÃ¡ng.', 2000);
+              }
+              // Äáº£m báº£o xem trÆ°á»›c ná»n gá»‘c cho theme sÃ¡ng
+              try { document.body.style.setProperty('--bg-image', 'none'); } catch(_) {}
+          } else {
+              // Theme tá»‘i: tá»± báº­t dÃ¹ng thumbnail YouTube náº¿u cÃ³ link
+              const ytThumbCheckbox = $('#set_ytThumbAsBg');
+              if (ytThumbCheckbox) {
+                  ytThumbCheckbox.checked = true;
+              }
+              try { updateYouTubePlayer(); } catch(_) {}
+          }
+      });
+      on($('#btnSettings'), 'click', openSettings);
+      on($('#btnHelpCreateTopic'), 'click', () => {
+          switchView('topics');
+          $('#btnAddTopic').click();
+      });
+      on($('#btnDashboard'), 'click', () => {
+          renderDashboard();
+          $('#modalDashboard').classList.add('show');
+      });
+      on($('#btnCloseDashboard'), 'click', () => {
+          $('#modalDashboard').classList.remove('show');
+      });
+      on($('#btnCloseSettings'), 'click', closeSettings);
+      on($('#btnSaveSettings'), 'click', saveSettings);
+      on($('#btnDefaults'), 'click', setDefaults);
+      on($('#btnTestSound'), 'click', ()=>{ ensureAudio(); playSound('work_end'); });
+      on($('#btnToggleCustomSounds'), 'click', (e) => {
+          e.preventDefault();
+          const container = $('#customSoundsContainer');
+          if (container) container.classList.toggle('hidden');
+      });
+      on($('#btnSaveNote'), 'click', async ()=>{ const s=getCurrentSubtopic(); if(!s) return; const id=pendingNoteSessionId; const sess=s.sessions.find(x=>x.id===id); if(sess){ sess.note=$('#noteText').value.trim(); await saveData(); renderStatsHistory(); toast('ÄÃ£ lÆ°u ghi chÃº'); } closeNoteModal(); });
+      on($('#btnSkipNote'), 'click', ()=> closeNoteModal());
+      on($('#btnAddGeneralNote'), 'click', addGeneralNote);
+      on($('#btnSummarizeNote'), 'click', handleSummarizeNote);
+      on($('#btnSendMessage'), 'click', handleSendMessage);
+      on($('#chatInput'), 'keydown', (e) => { if (e.key === 'Enter') handleSendMessage(); });
+      $$('#aiPromptSuggestions button').forEach(btn => {
+        on(btn, 'click', () => {
+          const promptTemplate = btn.dataset.prompt;
+          $('#chatInput').value = promptTemplate;
+          $('#chatInput').focus();
+        });
+      });
+      on($('#btnClearChat'), 'click', clearChat);
+      on($('#btnNewChat'), 'click', clearChat);
+      on($('#btnAddSubtopicTask'), 'click', addSubtopicTask);
+      on($('#newSubtopicTaskInput'), 'keydown', (e) => { if (e.key === 'Enter') addSubtopicTask(); });
+      on($('#btnToggleYtSound'), 'click', toggleYtSound);
+      on($('#ytSoundVolume'), 'input', (e) => {
+          const vol = parseInt(e.target.value, 10);
+          if (ytPlayer && ytPlayer.setVolume) {
+              ytPlayer.setVolume(vol);
+          }
+      });
+      on($('#set_youtubeUrl'), 'input', handleYoutubeUrlInput);
+      $$('.nav-btn[data-view]').forEach(btn => btn.addEventListener('click', () => switchView(btn.dataset.view)));
+      $$('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabId = btn.dataset.tab;
+                const parent = btn.closest('.aux-panel, .modal-card');
+                if (!parent) return;
+                parent.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+                btn.classList.add('active');
+                parent.querySelectorAll('.tab-content').forEach(c => {
+                    c.classList.remove('active');
+                    c.style.display = 'none';
+                });
+                const activeContent = parent.querySelector(`#${tabId}`);
+                if(activeContent) {
+                    activeContent.classList.add('active');
+                    activeContent.style.display = 'block';
+                    if(parent.closest('#modalSettings')) {
+                        activeContent.style.display = 'flex';
+                    }
+                }
+            });
+        });
+        $$('#timerPresetSelector button').forEach(btn => {
+          btn.addEventListener('click', () => {
+            editingPreset = btn.dataset.presetTarget;
+            highlightPresetSelector();
+            loadEditingPresetFields();
+          });
+        });
+        $$('.presets button').forEach(button => {
+          button.addEventListener('click', (e) => {
+            const newPreset = e.target.dataset.preset;
+            const currentPreset = data.settings.preset;
+            if (newPreset === currentPreset) {
+              return;
+            }
+            if (timer.state !== 'idle') {
+              showConfirmModal(
+                'XÃ¡c nháº­n chuyá»ƒn Ä‘á»•i',
+                `Báº¡n cÃ³ cháº¯c muá»‘n chuyá»ƒn sang Kiá»ƒu ${newPreset}? Thao tÃ¡c nÃ y sáº½ dá»«ng vÃ  Ä‘áº·t láº¡i phiÃªn lÃ m viá»‡c hiá»‡n táº¡i.`,
+                (confirmed) => {
+                  if (confirmed) {
+                    timer.reset();
+                    timer.setPreset(newPreset);
+                    renderAll();
+                    toast(`ÄÃ£ chuyá»ƒn sang Kiá»ƒu ${newPreset}.`);
+                  }
+                }
+              );
+            } 
+            else {
+              timer.setPreset(newPreset);
+              renderAll();
+              toast(`ÄÃ£ chuyá»ƒn sang Kiá»ƒu ${newPreset}.`);
+            }
+          });
+        });
+      on($('#btnStart'), 'click', ()=> timer.start());
+      on($('#btnPause'), 'click', ()=> timer.pause());
+      on($('#btnResume'), 'click', ()=> timer.resume());
+      on($('#btnSkip'), 'click', ()=> timer.skip());
+      on($('#btnReset'), 'click', ()=> timer.reset());
+      on($('#uploadBg'), 'change', (e) => { handleFileUpload(e.target.files[0], async (id) => { data.settings.customBg = id; await saveData(); applyCustomBg(); toast("ÄÃ£ cáº­p nháº­t hÃ¬nh ná»n."); }); e.target.value = null; });
+      on($('#btnClearBg'), 'click', async () => {
+          data.settings.customBg = '';
+          data.settings.useYtThumbnailAsBg = false;
+          await saveData();
+          applyCustomBg();
+          toast("ÄÃ£ xÃ³a hÃ¬nh ná»n tÃ¹y chá»‰nh.");
+          if ($('#modalSettings').classList.contains('show')) {
+              openSettings();
+          }
+      });
+      
+      on($('#uploadSoundWork'), 'change', (e) => { handleFileUpload(e.target.files[0], async (id) => { data.settings.customSounds.work_end = id; await saveData(); toast("ÄÃ£ lÆ°u Ã¢m bÃ¡o háº¿t LÃ€M VIá»†C."); }); e.target.value = null; });
+      on($('#uploadSoundBreak'), 'change', (e) => { handleFileUpload(e.target.files[0], async (id) => { data.settings.customSounds.break_end = id; await saveData(); toast("ÄÃ£ lÆ°u Ã¢m bÃ¡o háº¿t NGHá»ˆ NGáº®N."); }); e.target.value = null; });
+      on($('#uploadSoundLong'), 'change', (e) => { handleFileUpload(e.target.files[0], async (id) => { data.settings.customSounds.long_end = id; await saveData(); toast("ÄÃ£ lÆ°u Ã¢m bÃ¡o háº¿t NGHá»ˆ DÃ€I."); }); e.target.value = null; });
+      on($('#btnFullscreen'), 'click', toggleFullScreen);
+      document.addEventListener('fullscreenchange', updateFullscreenButton);
+      window.addEventListener('keydown', (e)=>{ const tag=(e.target.tagName||'').toLowerCase(); const isTyping=['input','textarea','select'].includes(tag); if(e.code==='Space' && !isTyping){ e.preventDefault(); if(timer.state==='idle'||timer.state==='paused') timer.start(); else timer.pause(); } if(e.key==='n'||e.key==='N'){ if(!isTyping){ e.preventDefault(); timer.skip(); } } if(e.key==='Escape'){ $$('.modal').forEach(m => m.classList.remove('show')); } });
+      $$('.modal').forEach(m=> m.addEventListener('click', (ev)=>{ if(ev.target===m) m.classList.remove('show'); }));
+      window.addEventListener('click', (e) => {
+        if (!e.target.closest('.actions-menu-btn')) {
+            closeAllMenus();
+        }
+      });
+      window.addEventListener('beforeunload', () => timer.persistTimerState(true));
+      const draggableElement = $('#draggableTimer');
+      let isDragging = false;
+      let offsetX, offsetY;
+      if (draggableElement) {
+        draggableElement.addEventListener('mousedown', (e) => {
+          isDragging = true;
+          const rect = draggableElement.getBoundingClientRect();
+          offsetX = e.clientX - rect.left;
+          offsetY = e.clientY - rect.top;
+          draggableElement.style.transition = 'none';
+        });
+        document.addEventListener('mousemove', (e) => {
+          if (!isDragging) return;
+          let newX = e.clientX - offsetX;
+          let newY = e.clientY - offsetY;
+          const boundaryX = window.innerWidth - draggableElement.offsetWidth;
+          const boundaryY = window.innerHeight - draggableElement.offsetHeight;
+          newX = Math.max(0, Math.min(newX, boundaryX));
+          newY = Math.max(0, Math.min(newY, boundaryY));
+          draggableElement.style.left = newX + 'px';
+          draggableElement.style.top = newY + 'px';
+          draggableElement.style.bottom = 'auto';
+          draggableElement.style.right = 'auto';
+        });
+        document.addEventListener('mouseup', () => {
+          if (!isDragging) return;
+          isDragging = false;
+          draggableElement.style.transition = '';
+        });
+      }
+    }
+    function toggleBackgroundView(){
+        const body = document.body;
+        body.classList.toggle('bg-view-mode');
+        const isActive = body.classList.contains('bg-view-mode');
+        const btn = $('#btnToggleBg');
+        if (!btn) return;
+        if (isActive) {
+            btn.title = 'Hiá»‡n giao diá»‡n';
+            btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" y1="2" x2="22" y2="22"/></svg>`;
+        } else {
+            btn.title = 'áº¨n giao diá»‡n';
+            btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>`;
+        }
+    }
+    function updateMainViewVisibility() {
+        const hasSubtopic = !!getCurrentSubtopic();
+        const timerView = $('#view-timer');
+        const welcomePanel = $('#welcomePanel');
+        if (welcomePanel) {
+            welcomePanel.classList.toggle('hidden', hasSubtopic);
+        }
+        if (timerView) {
+            if (hasSubtopic) {
+                timerView.classList.remove('no-subtopic-selected');
+            } else {
+                timerView.classList.add('no-subtopic-selected');
+            }
+        }
+    }
+    function updatePresetButtonsText() {
+        const settings = data.settings;
+        const cyclesA = settings.cyclesA;
+        const cyclesB = settings.cyclesB;
+        const workA = settings.durations.A_work;
+        const workB = settings.durations.B_work;
+        const btnA = $('#btnPresetA');
+        const btnB = $('#btnPresetB');
+        if (btnA) {
+            btnA.textContent = `${cyclesA}Ã—${workA} (A)`;
+        }
+        if (btnB) {
+            btnB.textContent = `${cyclesB}Ã—${workB} (B)`;
+        }
+    }
+    function renderAll(){
+        updatePresetButtonsText();
+        const currentPreset = data.settings.preset;
+        $$('.presets button').forEach(button => {
+          const isSelected = button.dataset.preset === currentPreset;
+          button.classList.toggle('acc', isSelected);
+          button.classList.toggle('ghost', !isSelected);
+          button.setAttribute('aria-pressed', isSelected);
+        });
+        updateMainViewVisibility();
+        timer.setPreset(data.settings.preset, {silent:true});
+        renderTopics();
+        renderContextBadge();
+        renderStatsHistory();
+        renderGeneralNotes();
+        renderChat();
+        applyCustomBg();
+        applyPanelOpacity();
+        renderSubtopicTasks();
+        updateFullscreenButton();
+        switchView(data.settings.currentView);
+        // fixVietnameseUI Ä‘Ã£ bá»‹ loáº¡i bá»; ná»™i dung hiá»ƒn thá»‹ trá»±c tiáº¿p báº±ng UTF-8
+    }
+    function toggleFullScreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(err => {
+                toast(`Lá»—i: KhÃ´ng thá»ƒ báº­t cháº¿ Ä‘á»™ toÃ n mÃ n hÃ¬nh: ${err.message}`);
+            });
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+        }
+    }
+    function updateFullscreenButton() {
+        const btn = $('#btnFullscreen');
+        if (document.fullscreenElement) {
+            btn.innerHTML = 'â†™ï¸';
+            btn.title = 'ThoÃ¡t toÃ n mÃ n hÃ¬nh';
+        } else {
+            btn.innerHTML = 'â†—ï¸';
+            btn.title = 'ToÃ n mÃ n hÃ¬nh';
+        }
+    }
+    async function initializeApp() {
+      try {
+        await storageManager.initDB();
+        const [settings, topics, subtopics] = await Promise.all([
+          storageManager.getSettings(),
+          storageManager.getAll('topics'),
+          storageManager.getAll('subtopics')
+        ]);
+        let merged;
+        if (!settings || topics.length === 0 || subtopics.length === 0) {
+          const defaultData = JSON.parse(JSON.stringify(defaults));
+          await storageManager.updateSettings(defaultData.settings);
+          for (const t of defaultData.topics) {
+            const { subtopics: subs, ...topicData } = t;
+            await storageManager.add('topics', topicData);
+            for (const sub of subs) {
+              await storageManager.add('subtopics', { ...sub, topicId: t.id });
+            }
+          }
+          merged = defaultData;
+        } else {
+          const map = {};
+          for (const t of topics) map[t.id] = { ...t, subtopics: [] };
+          for (const s of subtopics) map[s.topicId]?.subtopics.push(s);
+          merged = { version: defaults.version, settings, topics: Object.values(map) };
+        }
+        data = window.data = merged;
+        normalizeDataStructure(data);
+        await ensureValidSelection();
+        await seedAchievedMilestones();
+        renderAll();
+        try { storageManager.autoBackup(data); } catch (e) { console.warn('AutoBackup error:', e); }
+        bindEvents();
+        applyTheme();
+      } catch (err) {
+        console.error('Initialization error:', err);
+        toast(`Lá»—i khá»Ÿi táº¡o: ${err.message}`);
+      }
+    }
+    callGeminiAPI = async function(prompt, retries = 3, delay = 1000) {
+        const apiKey = data?.settings?.apiKey || "";
+        if (!apiKey) {
+            toast("Vui lÃ²ng nháº­p Gemini API Key trong pháº§n CÃ i Ä‘áº·t.");
+            return null;
+        }
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+        const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
+        try {
+            const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            if (!response.ok) {
+                if (response.status === 429 && retries > 0) {
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    return callGeminiAPI(prompt, retries - 1, delay * 2);
+                }
+                let errorData = null;
+                try { errorData = await response.json(); } catch (e) {}
+                let errorMessage = `Lá»—i HTTP: ${response.status}`;
+                if (response.status === 400) {
+                    errorMessage = "Lá»—i: Gemini API Key khÃ´ng há»£p lá»‡ hoáº·c Ä‘Ã£ bá»‹ thay Ä‘á»•i. Vui lÃ²ng kiá»ƒm tra láº¡i trong CÃ i Ä‘áº·t.";
+                } else if (response.status === 429) {
+                    errorMessage = "Lá»—i: ÄÃ£ vÆ°á»£t quÃ¡ háº¡n má»©c yÃªu cáº§u tá»›i Gemini. Vui lÃ²ng thá»­ láº¡i sau Ã­t phÃºt.";
+                } else if (errorData?.error?.message) {
+                    errorMessage = `Lá»—i tá»« Gemini: ${errorData.error.message}`;
+                }
+                toast(errorMessage, 4000);
+                console.error("Gemini API Error:", errorData || response.statusText);
+                return null;
+            }
+            const result = await response.json();
+            if (result.candidates && result.candidates[0]?.content?.parts?.[0]?.text) {
+                return formatGeminiResponse(result.candidates[0].content.parts[0].text);
+            } else {
+                console.error("API response structure is unexpected:", result);
+                if (result.promptFeedback?.blockReason) { return `Ná»™i dung bá»‹ cháº·n vÃ¬: ${result.promptFeedback.blockReason}. Vui lÃ²ng thá»­ láº¡i vá»›i ná»™i dung khÃ¡c.`; }
+                return "KhÃ´ng nháº­n Ä‘Æ°á»£c ná»™i dung há»£p lá»‡ tá»« AI.";
+            }
+        } catch (error) {
+            console.error("Lá»—i khi gá»i Gemini API:", error);
+            toast("Lá»—i máº¡ng khi káº¿t ná»‘i Ä‘áº¿n Gemini. Vui lÃ²ng kiá»ƒm tra káº¿t ná»‘i internet.", 4000);
+            return null;
+        }
+    }
+    loadLanguage(localStorage.getItem('lang') || 'vi').then(initializeApp);
+    </script>
+</body>
+</html>
