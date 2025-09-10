@@ -7,7 +7,7 @@
     <style>
     /*
     =============================================
-    POMODORO STUDY APP — PHIÊN BẢN GIAO DIỆN TẬP TRUNG (v11.2)
+    POMODORO STUDY APP — PHIÊN BẢN GIAO DIỆN TẬP TRUNG (v1.0)
     =============================================
     */
 
@@ -1738,7 +1738,7 @@ header.app-header{display:flex; align-items:center; justify-content:space-betwee
 
 
     const defaults = {
-        version: 11,
+        version: 1,
         settings: {
             apiKey: "",
             currentView: 'timer',
@@ -1766,21 +1766,7 @@ header.app-header{display:flex; align-items:center; justify-content:space-betwee
             backupDaysToKeep: 7,
             achievedMilestones: []
         },
-        topics: [{
-            id: uid('t'),
-            name: 'Chủ đề mẫu',
-            subtopics: [{
-                id: uid('s'),
-                name: 'Chủ đề con mẫu',
-                tasks: [],
-                generalNotes: [],
-                summaries: [],
-                chatHistory: [],
-                stats: { totalMinutes: 0, sessionsCompleted: 0, tasksCompleted: 0 },
-                sessions: [],
-                timerState: { state: 'idle', prevState: null, remaining: 0, segmentTotal: 0, cycleIndex: 0 }
-            }]
-        }]
+        topics: []
     };
     let data;
     let editingPreset = 'A';
@@ -3349,9 +3335,10 @@ function exportSummary(sum) {
           storageManager.getAll('subtopics')
         ]);
         let merged;
-        if (!settings || topics.length === 0 || subtopics.length === 0) {
+        if (!settings) {
           const defaultData = JSON.parse(JSON.stringify(defaults));
           await storageManager.updateSettings(defaultData.settings);
+          // Seed any default topics/subtopics if provided
           for (const t of defaultData.topics) {
             const { subtopics: subs, ...topicData } = t;
             await storageManager.add('topics', topicData);
