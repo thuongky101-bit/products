@@ -618,6 +618,76 @@ header.app-header{display:flex; align-items:center; justify-content:space-betwee
       box-shadow: var(--shadow);
     }
     .sound-permission-bar.show { display: flex; }
+
+    /* ========================================================= */
+    /* START: CẢI THIỆN GIAO DIỆN ÂM THANH (HTML Refactor)     */
+    /* ========================================================= */
+
+    #customSoundsContainer {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 12px;
+      background: rgba(var(--panel-rgb), var(--panel-opacity));
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      width: 100%;
+    }
+
+    .custom-sound-row {
+      align-items: center;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(var(--panel-rgb), calc(var(--panel-opacity) * 0.85));
+      width: 100%;
+      gap: 12px;
+    }
+
+    .custom-sound-row .custom-sound-label {
+      flex: 1;
+      margin: 0;
+      font-size: 14px;
+      color: var(--sub);
+      font-weight: 500;
+      cursor: default;
+    }
+
+    .custom-sound-row .btn[for] {
+      flex-shrink: 0;
+      margin-left: 12px;
+      content: 'Tải lên';
+    }
+
+    [data-theme='light'] #customSoundsContainer,
+    [data-theme='pastel'] #customSoundsContainer {
+      border-color: rgba(0, 0, 0, 0.08);
+    }
+    [data-theme='light'] .custom-sound-row,
+    [data-theme='pastel'] .custom-sound-row {
+      border-color: rgba(0, 0, 0, 0.08);
+      background: rgba(var(--panel-rgb), 0.85);
+    }
+
+    .custom-sound-row .custom-sound-label {
+      flex: 1;
+      margin: 0;
+      font-size: 14px;
+      color: var(--sub);
+      font-weight: 500;
+      cursor: default;
+    }
+
+    .custom-sound-row .btn[for] {
+      flex-shrink: 0;
+      margin-left: 12px;
+      /* Văn bản hiển thị đã đặt trong HTML; khai báo content nhằm nhấn mạnh mục đích nút */
+      content: 'Tải lên';
+    }
+    /* ========================================================= */
+    /* END: CẢI THIỆN GIAO DIỆN ÂM THANH (HTML Refactor)         */
+    /* ========================================================= */
     .sound-permission-bar .msg { font-size: 14px; color: var(--text); }
     .draggable-timer { text-shadow: 0px 0px 8px rgba(0, 0, 0, 0.9); }
 
@@ -1180,12 +1250,13 @@ header.app-header{display:flex; align-items:center; justify-content:space-betwee
                               </select>
                           </label>
                       </div>
-                      <div class="row">
-                          <label>Hình nền
-                              <label class="btn small ghost" for="uploadBg">Tải ảnh mới</label>
+                      <div class="row" style="margin-top: 12px;">
+                          <label style="flex: 1;">Hình nền</label>
+                          <div style="flex: 2; display: flex; gap: 8px;">
+                              <label class="btn small ghost" for="uploadBg" style="flex: 1;">Tải ảnh mới</label>
                               <input type="file" id="uploadBg" accept="image/*" class="hidden" />
-                          </label>
-                          <button class="btn small danger" id="btnClearBg">Xóa nền</button>
+                              <button class="btn small danger" id="btnClearBg" style="flex: 1;">Xóa nền</button>
+                          </div>
                       </div>
                       <div class="row">
                           <label style="flex: 1;">Độ trong suốt của nền</label>
@@ -1197,40 +1268,52 @@ header.app-header{display:flex; align-items:center; justify-content:space-betwee
                   
                    <div>
                       <h4>Âm thanh</h4>
+                      
                       <div class="row">
-                          <label>Âm lượng (0–1)<input type="number" id="set_volume" step="0.05" min="0" max="1"/></label>
-                          <label>Kiểu âm báo
+                          <label style="flex: 1;">Âm lượng (0–1)
+                              <input type="number" id="set_volume" step="0.05" min="0" max="1"/>
+                          </label>
+                          <button class="btn" id="btnTestSound" style="flex-grow: 0; align-self: flex-end;">Test</button>
+                      </div>
+
+                      <div class="row" style="margin-top: 12px;">
+                          <label style="flex: 1;">Kiểu âm báo (Mặc định)
                               <select id="set_theme">
                                   <option value="beep">Beep</option>
                                   <option value="chime">Chime</option>
                               </select>
                           </label>
-                           <button class="btn" id="btnTestSound" style="flex: 0 1 auto; align-self: center;">Test</button>
-                      </div>
-                      <div style="text-align: right; margin-top: 12px;">
-                          <button class="btn ghost small" id="btnToggleCustomSounds">Tùy chỉnh âm báo</button>
                       </div>
 
-                      <div id="customSoundsContainer" class="hidden" style="margin-top: 8px;">
-                      <div class="row" style="display: flex; gap: 8px; justify-content: flex-end;">
-                          <div>
-                              <small>Âm báo hết LÀM VIỆC</small>
-                              <label title="Âm báo hết LÀM VIỆC" class="btn small ghost" for="uploadSoundWork">LÀM VIỆC</label>
+                      <div class="settings-row-toggle" style="margin-top: 16px;">
+                          <label for="set_useCustomSounds">Sử dụng âm báo tùy chỉnh</label>
+                          <label class="toggle-switch">
+                              <input type="checkbox" id="set_useCustomSounds">
+                              <span class="slider"></span>
+                          </label>
+                      </div>
+
+                      <div id="customSoundsContainer" class="hidden">
+                          
+                          <div class="row custom-sound-row">
+                              <label for="uploadSoundWork" class="custom-sound-label">Âm báo hết LÀM VIỆC</label>
+                              <label class="btn small ghost" for="uploadSoundWork" title="Tải lên tệp âm báo LÀM VIỆC">Tải lên</label>
                               <input type="file" id="uploadSoundWork" accept="audio/*" class="hidden" />
                           </div>
-                          <div>
-                              <small>Âm báo hết NGHỈ NGẮN</small>
-                              <label title="Âm báo hết NGHỈ NGẮN" class="btn small ghost" for="uploadSoundBreak">NGHỈ NGẮN</label>
+                          
+                          <div class="row custom-sound-row">
+                              <label for="uploadSoundBreak" class="custom-sound-label">Âm báo hết NGHỈ NGẮN</label>
+                              <label class="btn small ghost" for="uploadSoundBreak" title="Tải lên tệp âm báo NGHỈ NGẮN">Tải lên</label>
                               <input type="file" id="uploadSoundBreak" accept="audio/*" class="hidden" />
                           </div>
-                          <div>
-                              <small>Âm báo hết NGHỈ DÀI</small>
-                              <label title="Âm báo hết NGHỈ DÀI" class="btn small ghost" for="uploadSoundLong">NGHỈ DÀI</label>
+                          
+                          <div class="row custom-sound-row">
+                              <label for="uploadSoundLong" class="custom-sound-label">Âm báo hết NGHỈ DÀI</label>
+                              <label class="btn small ghost" for="uploadSoundLong" title="Tải lên tệp âm báo NGHỈ DÀI">Tải lên</label>
                               <input type="file" id="uploadSoundLong" accept="audio/*" class="hidden" />
                           </div>
+
                       </div>
-                      </div>
-                      
                   </div>
               </div>
               <div id="settings-integrations" class="tab-content" style="flex-direction: column; gap: 20px;">
@@ -1585,7 +1668,6 @@ header.app-header{display:flex; align-items:center; justify-content:space-betwee
         'timer.cycleInfo': ({ current = 0, target = 0 } = {}) => `Chu kỳ ${current}/${target}`,
         'timer.selectSubtopicPrompt': 'Vui lòng chọn một Chủ đề con trước khi thực hiện thao tác.',
       },
-      // end vi
       en: {
         navTooltipTimer: "Timer",
         navTooltipTopics: "Topics",
@@ -1697,9 +1779,15 @@ header.app-header{display:flex; align-items:center; justify-content:space-betwee
         const key = el.getAttribute('data-i18n-key');
         const value = dict[key];
         if (value == null) return;
-        const attrs = (el.getAttribute('data-i18n-attr') || '').split('|').map(s=>s.trim()).filter(Boolean);
-        attrs.forEach(attr => { if (attr) el.setAttribute(attr, typeof value === 'function' ? value() : value); });
-        if (!attrs.includes('only')) {
+        const attrsRaw = el.getAttribute('data-i18n-attr') || '';
+        const attrs = attrsRaw.split('|').map(s => s.trim()).filter(Boolean);
+        const attrOnly = attrs.includes('only');
+        attrs
+          .filter(attr => attr && attr !== 'only')
+          .forEach(attr => {
+            el.setAttribute(attr, typeof value === 'function' ? value() : value);
+          });
+        if (!attrOnly) {
           const text = typeof value === 'function' ? value() : value;
           setElTextPreserveIcon(el, text);
         }
@@ -1723,7 +1811,6 @@ header.app-header{display:flex; align-items:center; justify-content:space-betwee
     function tagI18nElements(){
       const setKey = (sel, key) => { const el = document.querySelector(sel); if (el) el.setAttribute('data-i18n-key', key); };
       const setKeyAttr = (sel, key, attr) => { const el = document.querySelector(sel); if (el) { el.setAttribute('data-i18n-key', key); el.setAttribute('data-i18n-attr', attr); } };
-      const setKeyEl = (el, key, attr) => { if (!el) return; el.setAttribute('data-i18n-key', key); if (attr) el.setAttribute('data-i18n-attr', attr); };
       // Nav tooltips
       setKey('#navBtnTimer .tooltip', 'navTooltipTimer');
       setKey('#navBtnTopics .tooltip', 'navTooltipTopics');
@@ -1743,7 +1830,7 @@ header.app-header{display:flex; align-items:center; justify-content:space-betwee
       setKey('#welcomePanel h3', 'welcomeHeading');
       setKey('#welcomePanel p', 'welcomeText');
       setKey('#btnHelpCreateTopic', 'btnHelpCreateTopic');
-      const presets = document.querySelector('.presets[role="group"]'); if (presets){ presets.setAttribute('data-i18n-key','presetsAria'); presets.setAttribute('data-i18n-attr','aria-label'); }
+      const presets = document.querySelector('.presets[role="group"]'); if (presets){ presets.setAttribute('data-i18n-key','presetsAria'); presets.setAttribute('data-i18n-attr','aria-label|only'); }
       setKey('#btnPresetC', 'btnPresetCText');
       // Timer badge + controls
       setKey('#stateBadge', 'stateBadgeReady');
@@ -1773,290 +1860,7 @@ header.app-header{display:flex; align-items:center; justify-content:space-betwee
       setKey('.tab-btn[data-tab="settings-integrations"]', 'settingsTabIntegrations');
       setKey('#btnSaveSettings', 'btnSaveSettings');
       setKey('#btnCloseSettings', 'btnClose');
-      // Method Editor modal
-      try {
-        setKey('#methodEditorTitle', 'methodEditorEditHeader');
-        setKeyEl(document.querySelector('#methodEditorTitleInput')?.closest('label') || document.querySelector('#methodEditorTitleInput')?.parentElement, 'methodEditorTitleLabel');
-        setKeyAttr('#toolH4', 'methodEditorToolH4Title', 'title');
-        setKeyAttr('#toolBold', 'methodEditorToolBoldTitle', 'title');
-        setKeyAttr('#toolItalic', 'methodEditorToolItalicTitle', 'title');
-        setKeyAttr('#toolList', 'methodEditorToolListTitle', 'title');
-        setKeyAttr('#toolBullet', 'methodEditorToolBulletTitle', 'title');
-        setKeyAttr('#toolColor', 'methodEditorToolColorTitle', 'title');
-        setKey('#btnAutoFormat', 'methodEditorAutoFormatLabel');
-        setKeyAttr('#btnAutoFormat', 'methodEditorAutoFormatNeedKeyTitle', 'title');
-        setKey('#btnCancelMethodEditor', 'methodEditorCancel');
-        setKey('#btnSaveMethod', 'methodEditorSave');
-      } catch(_) {}
-      // Settings: Timer labels
-      try {
-        setKeyEl(document.querySelector('#set_work')?.closest('label') || document.querySelector('#set_work')?.parentElement, 'labelWorkMinutes');
-        setKeyEl(document.querySelector('#set_short')?.closest('label') || document.querySelector('#set_short')?.parentElement, 'labelShortMinutes');
-        setKeyEl(document.querySelector('#set_long')?.closest('label') || document.querySelector('#set_long')?.parentElement, 'labelLongMinutes');
-        setKeyEl(document.querySelector('#set_winddown')?.closest('label') || document.querySelector('#set_winddown')?.parentElement, 'labelWinddownMinutes');
-        setKeyEl(document.querySelector('#set_cycles')?.closest('label') || document.querySelector('#set_cycles')?.parentElement, 'labelPomodoroCycles');
-        setKeyEl(document.querySelector('#set_interval')?.closest('label') || document.querySelector('#set_interval')?.parentElement, 'labelLongBreakInterval');
-        setKey('#settings-flowtime h4', 'flowtimeHeader');
-        setKeyEl(document.querySelector('#set_flowRatio')?.closest('label') || document.querySelector('#set_flowRatio')?.parentElement, 'labelFlowRatio');
-        setKey('#settings-flowtime .tiny', 'flowRatioHint');
-        setKey('label[for="set_autoStartNext"]', 'labelAutoStartNext');
-        setKey('label[for="set_enableWinddown"]', 'labelEnableWinddown');
-        setKey('label[for="set_enableSessionNotes"]', 'labelEnableSessionNotes');
-      } catch(_) {}
-      // Settings: UI labels
-      try {
-        setKey('#settings-ui > div:first-child > h4', 'uiHeaderAppearance');
-        setKeyEl(document.querySelector('#set_theme_color')?.closest('label') || document.querySelector('#set_theme_color')?.parentElement, 'labelThemeColor');
-        const themeOpts = { default: 'optThemeDefault', light: 'optThemeLight', pastel: 'optThemePastel', lofi: 'optThemeLofi', space: 'optThemeSpace' };
-        Object.entries(themeOpts).forEach(([val, key]) => {
-          const opt = document.querySelector(`#set_theme_color option[value="${val}"]`);
-          setKeyEl(opt, key);
-        });
-        setKeyEl(document.querySelector('#set_backgroundMode')?.closest('label') || document.querySelector('#set_backgroundMode')?.parentElement, 'labelBackgroundMode');
-        const bgOpts = { cover: 'optBgCover', contain: 'optBgContain', auto: 'optBgAuto' };
-        Object.entries(bgOpts).forEach(([val, key]) => {
-          const opt = document.querySelector(`#set_backgroundMode option[value="${val}"]`);
-          setKeyEl(opt, key);
-        });
-        setKey('label[for="uploadBg"]', 'uploadBgButton');
-        setKey('#btnClearBg', 'btnClearBgLabel');
-        const op = document.querySelector('#set_panelOpacity'); if (op && op.previousElementSibling && op.previousElementSibling.tagName === 'LABEL') setKeyEl(op.previousElementSibling, 'labelPanelOpacity');
-        // Sound
-        setKey('#settings-ui > div:nth-of-type(2) > h4', 'uiHeaderSound');
-        setKeyEl(document.querySelector('#set_volume')?.closest('label') || document.querySelector('#set_volume')?.parentElement, 'labelVolume');
-        setKeyEl(document.querySelector('#set_theme')?.closest('label') || document.querySelector('#set_theme')?.parentElement, 'labelSoundTheme');
-        const sOpts = { beep: 'optSoundBeep', chime: 'optSoundChime' };
-        Object.entries(sOpts).forEach(([val, key]) => { const opt = document.querySelector(`#set_theme option[value="${val}"]`); setKeyEl(opt, key); });
-        setKey('#btnTestSound', 'btnTestSound');
-        setKey('#btnToggleCustomSounds', 'btnToggleCustomSounds');
-        const sm = document.querySelectorAll('#customSoundsContainer small');
-        if (sm && sm.length >= 3) {
-          setKeyEl(sm[0], 'labelSoundWorkEnd');
-          setKeyEl(sm[1], 'labelSoundShortEnd');
-          setKeyEl(sm[2], 'labelSoundLongEnd');
-        }
-      } catch(_) {}
-      // Settings: Integrations
-      try {
-        const integ = document.querySelector('#settings-integrations');
-        if (integ) {
-          const h4s = integ.querySelectorAll('h4');
-          if (h4s[0]) setKeyEl(h4s[0], 'integrationsHeaderAI');
-          setKeyEl(document.querySelector('#set_apiKey')?.closest('label') || document.querySelector('#set_apiKey')?.parentElement, 'labelApiKey');
-          setKeyAttr('#set_apiKey', 'phApiKey', 'placeholder');
-          if (h4s[1]) setKeyEl(h4s[1], 'integrationsHeaderYtBg');
-          setKeyAttr('#set_youtubeUrl', 'phYtUrl', 'placeholder');
-          setKeyEl(document.querySelector('#set_ytThumbAsBg')?.closest('label') || document.querySelector('#set_ytThumbAsBg')?.parentElement, 'labelYtThumbAsBg');
-          const vol = document.querySelector('#ytSoundVolume'); if (vol && vol.parentElement && vol.parentElement.nextElementSibling && vol.parentElement.nextElementSibling.classList.contains('tiny')) setKeyEl(vol.parentElement.nextElementSibling, 'ytVolumeLabel');
-          if (h4s[2]) setKeyEl(h4s[2], 'backupHeader');
-          setKeyEl(document.querySelector('#set_backupDays')?.closest('label') || document.querySelector('#set_backupDays')?.parentElement, 'labelBackupDays');
-          if (h4s[3]) setKeyEl(h4s[3], 'restoreHeader');
-          const warn = integ.querySelector('p.tiny'); if (warn) setKeyEl(warn, 'restoreWarning');
-          setKey('#btnRestoreBackup', 'btnRestore');
-        }
-      } catch(_) {}
-      // Modal footer
-      setKey('#btnDefaults', 'btnDefaults');
-      // Dashboard modal
-      try {
-        setKey('#dashboardTitle', 'dashboardTitleText');
-        setKey('#btnCloseDashboard', 'btnCloseDashboard');
-        const dashIntro = document.querySelector('#modalDashboard p.tiny'); if (dashIntro) setKeyEl(dashIntro, 'dashboardIntro');
-        // Modals: Milestone / Note / Generic
-        try {
-          setKey('#milestoneTitle', 'milestoneTitleText');
-          setKey('#btnMilestoneClose', 'btnMilestoneClose');
-          setKey('#noteTitle', 'noteTitle');
-          setKeyAttr('#noteText', 'notePlaceholder', 'placeholder');
-          setKey('#btnSummarizeNote', 'noteSummarize');
-          setKey('#btnSkipNote', 'noteSkip');
-          setKey('#btnSaveNote', 'noteSave');
-          setKey('#genericTitle', 'genericTitleDefault');
-          setKey('#btnGenericCancel', 'genericCancel');
-          setKey('#btnGenericOk', 'genericOk');
-        } catch(_) {}
-      } catch(_) {}
     }
-    // i18n: extend translations with additional labels for Settings/Integrations/Dashboard
-    (function(){
-      const add = {
-        vi: {
-          labelWorkMinutes: 'LÀM VIỆC (phút)',
-          labelShortMinutes: 'NGHỈ NGẮN (phút)',
-          labelLongMinutes: 'NGHỈ DÀI (phút)',
-          labelWinddownMinutes: 'Hạ nhiệt (phút)',
-          labelPomodoroCycles: 'Chu kỳ Pomodoro',
-          labelLongBreakInterval: 'Chu kỳ nghỉ dài',
-          flowtimeHeader: 'Flowtime',
-          labelFlowRatio: 'Tỉ lệ nghỉ (Làm việc / X)',
-          flowRatioHint: 'Gợi ý: Nghỉ = tổng thời gian làm việc / X. Mặc định là 5.',
-          labelAutoStartNext: 'Tự động bắt đầu phiên tiếp theo',
-          labelEnableWinddown: 'Bật Hạ nhiệt sau phiên làm',
-          labelEnableSessionNotes: 'Nhắc ghi chú sau mỗi phiên',
-          uiHeaderAppearance: 'Giao diện',
-          labelThemeColor: 'Theme Giao Diện',
-          optThemeDefault: 'Mặc định (Dark Blue)',
-          optThemeLight: 'Light - Trà Sữa',
-          optThemePastel: 'Pastel - Dễ thương',
-          optThemeLofi: 'Lofi Study Room',
-          optThemeSpace: 'Space Station',
-          labelBackgroundMode: 'Chế độ hiển thị nền',
-          optBgCover: 'Lấp đầy (Mặc định)',
-          optBgContain: 'Vừa vặn (Sắc nét)',
-          optBgAuto: 'Kích thước gốc (Lặp lại)',
-          labelBackground: 'Hình nền',
-          uploadBgButton: 'Tải ảnh mới',
-          btnClearBgLabel: 'Xóa nền',
-          labelPanelOpacity: 'Độ trong suốt của nền',
-          uiHeaderSound: 'Âm thanh',
-          labelVolume: 'Âm lượng (0-1)',
-          labelSoundTheme: 'Kiểu âm báo',
-          optSoundBeep: 'Beep',
-          optSoundChime: 'Chime',
-          btnTestSound: 'Test',
-          btnToggleCustomSounds: 'Tùy chỉnh âm báo',
-          labelSoundWorkEnd: 'Âm báo hết LÀM VIỆC',
-          labelSoundShortEnd: 'Âm báo hết NGHỈ NGẮN',
-          labelSoundLongEnd: 'Âm báo hết NGHỈ DÀI',
-          integrationsHeaderAI: 'Tích hợp AI',
-          labelApiKey: 'Gemini API Key',
-          phApiKey: 'Dán API Key của bạn vào đây...',
-          integrationsHeaderYtBg: 'Nhạc nền YouTube',
-          phYtUrl: 'Dán link YouTube vào đây...',
-          labelYtThumbAsBg: 'Dùng ảnh bìa video làm nền',
-          ytVolumeLabel: 'Âm lượng',
-          backupHeader: 'Cài đặt sao lưu',
-          labelBackupDays: 'Số ngày sao lưu cần giữ lại',
-          restoreHeader: 'Phục hồi dữ liệu',
-          restoreWarning: 'Hành động này sẽ ghi đè dữ liệu hiện tại của bạn.',
-          btnRestore: 'Phục hồi',
-          btnDefaults: 'Mặc định',
-          dashboardTitleText: 'Tổng quan',
-          btnCloseDashboard: 'Đóng',
-          dashboardIntro: 'Tổng hợp thời gian và số phiên đã hoàn thành trên tất cả các chủ đề.',
-          'backup.selectDatePrompt': '-- Chọn ngày để phục hồi --',
-          'backup.none': 'Không có bản sao lưu nào',
-          // Modals: Milestone / Note / Generic
-          milestoneTitleText: '🎉 Chúc mừng Bạn!',
-          btnMilestoneClose: 'Tiếp tục hành trình!',
-          noteTitle: '📝 Ghi chú cho phiên vừa hoàn thành',
-          notePlaceholder: 'Bạn học được gì? Khó khăn? Next steps?',
-          noteSummarize: '✨ Tóm tắt & Gợi ý',
-          noteSkip: 'Bỏ qua',
-          noteSave: 'Lưu ghi chú',
-          genericTitleDefault: 'Tiêu đề',
-          genericCancel: 'Hủy',
-          genericOk: 'OK'
-        },
-        en: {
-          labelWorkMinutes: 'FOCUS (minutes)',
-          labelShortMinutes: 'SHORT BREAK (minutes)',
-          labelLongMinutes: 'LONG BREAK (minutes)',
-          labelWinddownMinutes: 'Wind down (minutes)',
-          labelPomodoroCycles: 'Pomodoro cycles',
-          labelLongBreakInterval: 'Long break interval',
-          flowtimeHeader: 'Flowtime',
-          labelFlowRatio: 'Break ratio (Work / X)',
-          flowRatioHint: 'Hint: Break = total focus time / X. Default is 5.',
-          labelAutoStartNext: 'Auto-start next session',
-          labelEnableWinddown: 'Enable wind down after focus',
-          labelEnableSessionNotes: 'Remind notes after each session',
-          uiHeaderAppearance: 'Appearance',
-          labelThemeColor: 'Theme',
-          optThemeDefault: 'Default (Dark Blue)',
-          optThemeLight: 'Light - Milk Tea',
-          optThemePastel: 'Pastel - Cute',
-          optThemeLofi: 'Lofi Study Room',
-          optThemeSpace: 'Space Station',
-          labelBackgroundMode: 'Background mode',
-          optBgCover: 'Cover (Default)',
-          optBgContain: 'Contain (Crisp)',
-          optBgAuto: 'Original size (Repeat)',
-          labelBackground: 'Background',
-          uploadBgButton: 'Upload image',
-          btnClearBgLabel: 'Clear background',
-          labelPanelOpacity: 'Panel transparency',
-          uiHeaderSound: 'Sound',
-          labelVolume: 'Volume (0-1)',
-          labelSoundTheme: 'Alert style',
-          optSoundBeep: 'Beep',
-          optSoundChime: 'Chime',
-          btnTestSound: 'Test',
-          btnToggleCustomSounds: 'Customize alerts',
-          labelSoundWorkEnd: 'Alert at end of FOCUS',
-          labelSoundShortEnd: 'Alert at end of SHORT BREAK',
-          labelSoundLongEnd: 'Alert at end of LONG BREAK',
-          integrationsHeaderAI: 'AI Integrations',
-          labelApiKey: 'Gemini API Key',
-          phApiKey: 'Paste your API Key here...',
-          integrationsHeaderYtBg: 'YouTube background music',
-          phYtUrl: 'Paste YouTube link here...',
-          labelYtThumbAsBg: 'Use video thumbnail as background',
-          ytVolumeLabel: 'Volume',
-          backupHeader: 'Backup settings',
-          labelBackupDays: 'Days to keep backups',
-          restoreHeader: 'Restore data',
-          restoreWarning: 'Restore will overwrite your current data.',
-          btnRestore: 'Restore',
-          btnDefaults: 'Defaults',
-          dashboardTitleText: 'Overview',
-          btnCloseDashboard: 'Close',
-          dashboardIntro: 'Summary of time and completed sessions across all topics.',
-          'backup.selectDatePrompt': '-- Select a date to restore --',
-          'backup.none': 'No backups',
-          // Modals: Milestone / Note / Generic
-          milestoneTitleText: '🎉 Congratulations!',
-          btnMilestoneClose: 'Continue the journey!',
-          noteTitle: '📝 Notes for the completed session',
-          notePlaceholder: 'What did you learn? Challenges? Next steps?',
-          noteSummarize: '✨ Summarize & Suggest',
-          noteSkip: 'Skip',
-          noteSave: 'Save Note',
-          genericTitleDefault: 'Title',
-          genericCancel: 'Cancel',
-          genericOk: 'OK'
-        }
-      };
-      try { Object.assign(translations.vi, add.vi); Object.assign(translations.en, add.en);} catch(_) {}
-    })();
-    // i18n: extend translations with Method Editor labels
-    (function(){
-      const add2 = {
-        vi: {
-          methodEditorEditHeader: 'Chỉnh-sửa Tri thức',
-          methodEditorAddHeader: 'Thêm Tri thức mới',
-          methodEditorTitleLabel: 'Tiêu-đề',
-          methodEditorToolH4Title: 'Tiêu-đề nhỏ',
-          methodEditorToolBoldTitle: 'In đậm',
-          methodEditorToolItalicTitle: 'In nghiêng',
-          methodEditorToolListTitle: 'Danh-sách',
-          methodEditorToolBulletTitle: 'Danh sách chấm tròn',
-          methodEditorToolColorTitle: 'Màu chữ',
-          methodEditorAutoFormatLabel: '✨ Tự động định dạng',
-          methodEditorAutoFormatNeedKeyTitle: 'Tính năng này yêu cầu Gemini API Key',
-          methodEditorAutoFormatReadyTitle: 'Dùng AI để tự động định dạng văn bản',
-          methodEditorCancel: 'Hủy',
-          methodEditorSave: 'Lưu'
-        },
-        en: {
-          methodEditorEditHeader: 'Edit Knowledge',
-          methodEditorAddHeader: 'Add New Knowledge',
-          methodEditorTitleLabel: 'Title',
-          methodEditorToolH4Title: 'Small heading',
-          methodEditorToolBoldTitle: 'Bold',
-          methodEditorToolItalicTitle: 'Italic',
-          methodEditorToolListTitle: 'Ordered list',
-          methodEditorToolBulletTitle: 'Unordered list',
-          methodEditorToolColorTitle: 'Text color',
-          methodEditorAutoFormatLabel: '✨ Auto format',
-          methodEditorAutoFormatNeedKeyTitle: 'This feature requires a Gemini API Key',
-          methodEditorAutoFormatReadyTitle: 'Use AI to auto format text',
-          methodEditorCancel: 'Cancel',
-          methodEditorSave: 'Save'
-        }
-      };
-      try { Object.assign(translations.vi, add2.vi); Object.assign(translations.en, add2.en);} catch(_) {}
-    })();
     function ensureYouTubeAPI(){
       if (IS_FILE_PROTOCOL) return Promise.resolve(false);
       try { if (window.YT && window.YT.Player) return Promise.resolve(true); } catch(_) {}
@@ -2422,6 +2226,7 @@ header.app-header{display:flex; align-items:center; justify-content:space-betwee
             durations: { ...defaults.settings.durations, ...(s.durations || {}) }
         };
         if (!Array.isArray(mergedSettings.achievedMilestones)) mergedSettings.achievedMilestones = [];
+        if (typeof mergedSettings.useCustomSounds !== 'boolean') mergedSettings.useCustomSounds = false;
         obj.settings = mergedSettings;
         obj.topics = Array.isArray(obj.topics) ? obj.topics : [];
         obj.topics.forEach(t => {
@@ -2435,7 +2240,7 @@ header.app-header{display:flex; align-items:center; justify-content:space-betwee
                 st.methods = Array.isArray(st.methods) ? st.methods : [];
                 st.stats = st.stats || { totalMinutes: 0, sessionsCompleted: 0, tasksCompleted: 0 };
                 st.sessions = st.sessions || [];
-                st.timerState = st.timerState || { state: 'idle', prevState: null, remaining: 0, segmentTotal: 0, cycleIndex: 0, endAt: null };
+                st.timerState = st.timerState || { state: 'idle', prevState: null, remaining: 0, segmentTotal: 0, cycleIndex: 0 };
             });
         });
     }
@@ -2572,6 +2377,7 @@ header.app-header{display:flex; align-items:center; justify-content:space-betwee
             selectedSubtopicId: '',
             collapsedTopics: {},
             customBg: '',
+            useCustomSounds: false,
             customSounds: { work_end: '', break_end: '', long_end: '' },
             youtubeUrl: '',
             youtubeVolume: 80,
@@ -2627,7 +2433,8 @@ header.app-header{display:flex; align-items:center; justify-content:space-betwee
     function playSound(kind){
       if(!data.settings.soundOn) return;
       const vol = Math.max(0, Math.min(1, data.settings.volume ?? 0.8));
-      const ref = data.settings.customSounds?.[kind];
+      const useCustom = !!data.settings.useCustomSounds;
+      const ref = useCustom ? data.settings.customSounds?.[kind] : '';
       let audioEl;
       if (kind === 'work_end') audioEl = $('#audioWorkEnd'); else if (kind === 'break_end') audioEl = $('#audioBreakEnd'); else if (kind === 'long_end') audioEl = $('#audioLongEnd');
       if (ref && audioEl) {
@@ -2658,7 +2465,7 @@ header.app-header{display:flex; align-items:center; justify-content:space-betwee
           await storageManager.save(data);
         } catch (err) {
           console.error('Failed to save data:', err);
-          toast(t('error.saveData', { message: err.message }));
+          toast(`Lỗi lưu dữ liệu: ${err.message}`);
         }
       }
         async function ensureValidSelection(){
@@ -2879,7 +2686,7 @@ header.app-header{display:flex; align-items:center; justify-content:space-betwee
             box.classList.add('menu-active');
           }
         });
-        bAdd.addEventListener('click', ()=> showInputModal('Tên Chủ đề con mới?', async (name) => { if(!name) return; const newSub = { id: uid('s'), topicId: topic.id, name, tasks: [], generalNotes: [], summaries: [], chatHistory: [], methods: [], stats:{ totalMinutes:0, sessionsCompleted:0, tasksCompleted: 0 }, sessions: [], timerState: { state: 'idle', prevState: null, remaining: 0, segmentTotal: 0, cycleIndex: 0, endAt: null } }; topic.subtopics.push(newSub); await storageManager.add('subtopics', newSub); renderTopics(); }));
+        bAdd.addEventListener('click', ()=> showInputModal('Tên Chủ đề con mới?', async (name) => { if(!name) return; const newSub = { id: uid('s'), topicId: topic.id, name, tasks: [], generalNotes: [], summaries: [], chatHistory: [], methods: [], stats:{ totalMinutes:0, sessionsCompleted:0, tasksCompleted: 0 }, sessions: [], timerState: { state: 'idle', prevState: null, remaining: 0, segmentTotal: 0, cycleIndex: 0 } }; topic.subtopics.push(newSub); await storageManager.add('subtopics', newSub); renderTopics(); }));
         bEdit.addEventListener('click', ()=> showInputModal('Đổi tên Chủ đề', async (newName) => { if(!newName) return; topic.name=newName; await storageManager.update('topics', topic); renderTopics(); }, topic.name));
         bDel.addEventListener('click', ()=> showConfirmModal('Xác nhận xóa', `Bạn có chắc muốn xóa Chủ đề "${topic.name}"? Mọi chủ đề con và dữ liệu liên quan sẽ bị mất.`, async (ok) => { if(!ok) return; data.topics = data.topics.filter(t=>t.id!==topic.id); delete collapsedMap[topic.id]; if(data.settings.selectedTopicId===topic.id){ data.settings.selectedTopicId=''; data.settings.selectedSubtopicId=''; ensureValidSelection(); } await storageManager.delete('topics', topic.id); for(const sub of topic.subtopics){ await storageManager.delete('subtopics', sub.id); } renderAll(); }));
         // Prevent header toggle when clicking action buttons
@@ -2947,8 +2754,7 @@ header.app-header{display:flex; align-items:center; justify-content:space-betwee
                 prevState: timer.prevState,
                 remaining: timer.remaining,
                 segmentTotal: timer.segmentTotal,
-                cycleIndex: timer.cycleIndex,
-                endAt: timer.endAt
+                cycleIndex: timer.cycleIndex
             };
         }
         mainEl.classList.add('reloading');
@@ -2962,9 +2768,6 @@ header.app-header{display:flex; align-items:center; justify-content:space-betwee
                 timer.remaining = newSubtopic.timerState.remaining;
                 timer.segmentTotal = newSubtopic.timerState.segmentTotal;
                 timer.cycleIndex = newSubtopic.timerState.cycleIndex;
-                timer.endAt = newSubtopic.timerState.endAt || null;
-                timer.lastTick = null;
-                timer.syncWithNow();
             } else {
                 timer.reset();
             }
@@ -3040,7 +2843,7 @@ header.app-header{display:flex; align-items:center; justify-content:space-betwee
         }
     }
     const timer = {
-      state:'idle', prevState:null, tickHandle:null, endAt:null, lastTick:null,
+      state:'idle', prevState:null, tickHandle:null, endAt:null,
       remaining:0, segmentTotal:0, cyclesTarget:4, cycleIndex:0, mode:'A',
       persistInterval: 60*1000,
       lastPersist: 0,
@@ -3103,78 +2906,20 @@ header.app-header{display:flex; align-items:center; justify-content:space-betwee
       persistTimerState(force=false){
         try{
           const s = getCurrentSubtopic(); if(!s) return;
-          const state = { state:this.state, prevState:this.prevState, remaining:this.remaining, segmentTotal:this.segmentTotal, cycleIndex:this.cycleIndex, endAt:this.endAt };
+          const state = { state:this.state, prevState:this.prevState, remaining:this.remaining, segmentTotal:this.segmentTotal, cycleIndex:this.cycleIndex };
           s.timerState = state; try{ localStorage.setItem('timerState_'+s.id, JSON.stringify(state)); }catch(_){ }
           this.lastPersist = Date.now();
         }catch(_){ }
       },
       _startTick(){
-        if(this.tickHandle){ clearInterval(this.tickHandle); this.tickHandle=null; }
-        this.lastTick = null;
+        if(this.tickHandle) clearInterval(this.tickHandle);
         if (this.mode === 'C' && this.state === 'work') {
-          this.lastTick = Date.now();
-          const flowTick = () => {
-            const now = Date.now();
-            const last = this.lastTick || now;
-            const delta = Math.floor((now - last) / 1000);
-            if (delta <= 0) { return; }
-            this.lastTick = last + delta * 1000;
-            this.remaining += delta;
-            this.updateUI();
-            this.persistTimerState();
-          };
-          this.tickHandle = setInterval(flowTick, 1000);
+          this.tickHandle = setInterval(()=>{ this.remaining += 1; this.updateUI(); this.persistTimerState(); }, 1000);
           return;
         }
-        if (this.remaining > 0) {
-          this.endAt = Date.now() + this.remaining * 1000;
-        } else if (!this.endAt) {
-          this.endAt = Date.now();
-        }
-        const countdownTick = () => {
-          if (!this.endAt) {
-            this.endAt = Date.now() + (this.remaining > 0 ? this.remaining * 1000 : 0);
-          }
-          const diffMs = this.endAt - Date.now();
-          const secondsRemaining = Math.ceil(diffMs / 1000);
-          this.remaining = Math.max(0, secondsRemaining);
-          this.updateUI();
-          this.persistTimerState();
-          if (this.remaining <= 0) {
-            if (this.tickHandle) { clearInterval(this.tickHandle); this.tickHandle = null; }
-            this._onFinishSegment();
-          }
-        };
-        countdownTick();
-        this.tickHandle = setInterval(countdownTick, 1000);
-      },
-      syncWithNow(){
-        if (this.state === 'idle' || this.state === 'paused') { return; }
-        if (this.mode === 'C' && this.state === 'work') {
-          if (!this.lastTick) { this.lastTick = Date.now(); }
-          const now = Date.now();
-          const delta = Math.floor((now - this.lastTick) / 1000);
-          if (delta > 0) {
-            this.lastTick += delta * 1000;
-            this.remaining += delta;
-            this.updateUI();
-            this.persistTimerState();
-          }
-          return;
-        }
-        if (!this.endAt) { return; }
-        const diff = Math.ceil((this.endAt - Date.now()) / 1000);
-        this.remaining = Math.max(0, diff);
-        if (this.remaining <= 0) {
-          if (this.tickHandle) { clearInterval(this.tickHandle); this.tickHandle = null; }
-          this._onFinishSegment();
-        } else {
-          this.updateUI();
-        }
+        this.tickHandle = setInterval(()=>{ if(this.remaining>0){ this.remaining -= 1; this.updateUI(); this.persistTimerState(); } if(this.remaining<=0){ clearInterval(this.tickHandle); this.tickHandle=null; this._onFinishSegment(); } }, 1000);
       },
       _onFinishSegment(){
-        this.endAt = null;
-        this.lastTick = null;
         if (this.state === 'work') {
             const s = getCurrentSubtopic();
             if (s) {
@@ -3220,7 +2965,7 @@ header.app-header{display:flex; align-items:center; justify-content:space-betwee
           this.state = 'idle';
           this.prevState = null;
           this.updateUI();
-          toast(t('session.completed'));
+          toast("Phiên đã hoàn thành! Nhấn Bắt đầu để bắt đầu phiên tiếp theo.");
         }
       },
       beginWindDown(){
@@ -3232,7 +2977,7 @@ header.app-header{display:flex; align-items:center; justify-content:space-betwee
         this.segmentTotal = d;
         this.remaining = d;
         try { playSound('break_end'); } catch(_){}
-        try { toast(t('session.windDownStart')); } catch(_){}
+        try { toast('Đến giờ hạ nhiệt. Hãy kết thúc công việc và chuẩn bị nghỉ ngơi.'); } catch(_){}
         this._startTick();
         this.updateUI();
       },
@@ -3255,8 +3000,6 @@ header.app-header{display:flex; align-items:center; justify-content:space-betwee
       finishFlowSession(){
         if (this.mode !== 'C' || this.state !== 'work') return;
         if (this.tickHandle) { clearInterval(this.tickHandle); this.tickHandle = null; }
-        this.lastTick = null;
-        this.endAt = null;
         const ratio = Math.max(1, parseInt((data.settings.flowtimeBreakRatio ?? 5), 10));
         const workSec = Math.max(0, this.remaining|0);
         const restSec = Math.max(60, Math.floor(workSec / ratio));
@@ -3283,7 +3026,7 @@ header.app-header{display:flex; align-items:center; justify-content:space-betwee
         this._startTick();
         this.updateUI();
         this.persistTimerState(true);
-        try { toast(t('flowtime.rest', { minutes: Math.round(restSec/60), ratio })); } catch(_) {}
+        try { toast(`Nghỉ ${Math.round(restSec/60)} phút theo Flowtime (${ratio}).`); } catch(_) {}
       },
       beginBreak() {
         this.prevState = this.state;
@@ -3294,7 +3037,7 @@ header.app-header{display:flex; align-items:center; justify-content:space-betwee
           const d = durations.long * 60;
           this.segmentTotal = d;
           if (this.prevState !== 'paused') this.remaining = d;
-          toast(t('session.longBreakStart'));
+          toast(`Tuyệt vời! Đã đến lúc nghỉ dài.`);
         } else {
           this.state = 'break';
           const d = durations.short * 60;
@@ -3310,8 +3053,8 @@ header.app-header{display:flex; align-items:center; justify-content:space-betwee
         this._startTick();
         this.updateUI();
       },
-      async start(){ if(!getCurrentSubtopic()){ toast(t('timer.selectSubtopicPrompt')); return; } ensureAudio(); if(this.mode==='C' && this.state==='idle'){ this.state='work'; this.remaining=0; this.segmentTotal=0; this.cycleIndex=0; this._startTick(); this.updateUI(); } else if(this.state==='idle'){ this.cycleIndex = this.cycleIndex || 0; this.beginWork(); } else if(this.state==='paused'){ this.resume(); } await this.persistTimerState(true); },
-      async pause(){ if(this.tickHandle){ clearInterval(this.tickHandle); this.tickHandle=null; } this.endAt=null; this.lastTick=null; this.prevState=this.state; this.state='paused'; this.updateUI(); await this.persistTimerState(true); },
+      async start(){ if(!getCurrentSubtopic()){ toast('Hãy chọn một Chủ đề con trước khi bắt đầu'); return; } ensureAudio(); if(this.mode==='C' && this.state==='idle'){ this.state='work'; this.remaining=0; this.segmentTotal=0; this.cycleIndex=0; this._startTick(); this.updateUI(); } else if(this.state==='idle'){ this.cycleIndex = this.cycleIndex || 0; this.beginWork(); } else if(this.state==='paused'){ this.resume(); } await this.persistTimerState(true); },
+      async pause(){ if(this.tickHandle){ clearInterval(this.tickHandle); this.tickHandle=null; } this.prevState=this.state; this.state='paused'; this.updateUI(); await this.persistTimerState(true); },
       async resume(){ if(this.state!=='paused'){ return; } this.state=this.prevState||'work'; this._startTick(); this.updateUI(); await this.persistTimerState(true); },
       async skip(){
         if(this.mode==='C' && this.state==='work'){ this.finishFlowSession(); await this.persistTimerState(true); return; }
@@ -3326,8 +3069,6 @@ header.app-header{display:flex; align-items:center; justify-content:space-betwee
       },
       async reset(){
         if (this.tickHandle) { clearInterval(this.tickHandle); this.tickHandle = null; }
-        this.endAt = null;
-        this.lastTick = null;
         this.state = 'idle';
         this.prevState = null;
         this.remaining = 0;
@@ -3350,11 +3091,11 @@ header.app-header{display:flex; align-items:center; justify-content:space-betwee
             try {
                 await storageManager.update('subtopics', s);
                 renderSummaries();
-                toast(t('notes.summaryCleared'));
+                toast('Đã xóa tóm tắt.');
             } catch (err) {
                 console.error('Failed to delete summary:', err);
                 s.summaries = original;
-                toast(t('error.cannotSaveChanges'));
+                toast('Không thể lưu thay đổi.');
             }
         });
     }
@@ -3554,7 +3295,7 @@ function exportSummary(sum) {
         showInputModal('Thêm ghi chú', async (text) => {
             if (!text) return;
             const s = getCurrentSubtopic();
-        if (!s) { toast(t('timer.selectSubtopicPrompt')); return; }
+        if (!s) { toast('Chọn một chủ đề con trước.'); return; }
             s.generalNotes = s.generalNotes || [];
             s.generalNotes.unshift({ id: uid('gn'), text, createdAt: todayISO() });
             await saveData();
@@ -3563,9 +3304,9 @@ function exportSummary(sum) {
     }
     async function summarizeNotes(){
         const s = getCurrentSubtopic();
-        if (!s) { toast(t('timer.selectSubtopicPrompt')); return; }
+        if (!s) { toast('Chọn chủ đề con trước.'); return; }
         const notes = (s.generalNotes || []).map(n => (typeof n === 'string' ? n : (n.text||''))).filter(Boolean);
-        if (notes.length === 0) { toast(t('notes.noNotesToSummarize')); return; }
+        if (notes.length === 0) { toast('Chưa có ghi chú để tóm tắt.'); return; }
         const btn = $('#btnSummarize');
         if (btn) { btn.disabled = true; btn.innerHTML = '<div class="spinner"></div>'; }
         try {
@@ -3577,7 +3318,7 @@ function exportSummary(sum) {
             renderSummaries();
         } catch (e) {
             console.error(e);
-            toast(t('notes.summarizeFailed'));
+            toast('Tóm tắt thất bại.');
         } finally {
             if (btn) { btn.disabled = false; btn.textContent = 'Tóm tắt'; }
         }
@@ -3648,6 +3389,12 @@ function exportSummary(sum) {
           highlightPresetSelector();
           $('#set_volume').value=s.volume ?? 0.8;
           $('#set_theme').value=s.soundTheme || 'beep';
+          const customToggle = $('#set_useCustomSounds');
+          const customContainer = $('#customSoundsContainer');
+          if (customToggle) {
+              customToggle.checked = !!s.useCustomSounds;
+              if (customContainer) customContainer.classList.toggle('hidden', !customToggle.checked);
+          }
           // THAY ĐỔI: Cập nhật giá trị dropdown
           $('#set_theme_color').value = s.theme || 'default';
           const activeUrl = getActiveYoutubeUrl();
@@ -3670,7 +3417,7 @@ function exportSummary(sum) {
         const backupListEl = $('#backupList');
         if (backupListEl) {
             storageManager.getBackupList().then(backups => {
-                backupListEl.innerHTML = `<option value="">${t('backup.selectDatePrompt')}</option>`;
+                backupListEl.innerHTML = '<option value="">-- Chọn ngày để phục hồi --</option>';
                 if (backups && backups.length > 0) {
                     backups.forEach(backup => {
                         const option = document.createElement('option');
@@ -3679,7 +3426,7 @@ function exportSummary(sum) {
                         backupListEl.appendChild(option);
                     });
                 } else {
-                    backupListEl.innerHTML = `<option value="">${t('backup.none')}</option>`;
+                    backupListEl.innerHTML = '<option value="">Không có bản sao lưu nào</option>';
                 }
             });
         }
@@ -3697,7 +3444,8 @@ function exportSummary(sum) {
           data.settings.preset='A';
           data.settings.volume=0.8;
           data.settings.soundTheme='beep';
-          await saveData(); openSettings(); toast(t('settings.restoredDefaults')); }
+          data.settings.useCustomSounds = false;
+          await saveData(); openSettings(); toast('Đã khôi phục mặc định'); }
       async function saveSettings(){
           const s = data.settings;
           s.apiKey = $('#set_apiKey').value.trim();
@@ -3730,6 +3478,7 @@ function exportSummary(sum) {
           s.autoStartNext = !!($('#set_autoStartNext') && $('#set_autoStartNext').checked);
           s.enableWinddown = !!($('#set_enableWinddown') && $('#set_enableWinddown').checked);
           s.enableSessionNotes = !!($('#set_enableSessionNotes') && $('#set_enableSessionNotes').checked);
+          if ($('#set_useCustomSounds')) { s.useCustomSounds = !!$('#set_useCustomSounds').checked; }
           if ($('#set_backupDays')) { s.backupDaysToKeep = clampInt($('#set_backupDays').value, 1, 30); }
 
           // Bổ sung: Nếu chọn theme sáng, luôn tắt thumbnail YouTube làm nền
@@ -3769,7 +3518,7 @@ function exportSummary(sum) {
           // Không can thiệp trạng thái đang phát: tránh cue/pause lại khi nhấn Lưu
 
           closeSettings();
-          toast(t('settings.saved'));
+          toast('Đã lưu cài đặt');
       }
     function clampInt(v,min,max){ v=parseInt(v||0,10); if(isNaN(v)) v=min; return Math.max(min, Math.min(max, v)); }
     function clampFloat(v,min,max,def){ v=parseFloat(v); if(Number.isNaN(v)) v=def; return Math.max(min, Math.min(max, v)); }
@@ -3787,7 +3536,7 @@ function exportSummary(sum) {
             const tx = db.transaction('files', 'readwrite');
             tx.objectStore('files').put(file, id);
             tx.oncomplete = () => callback(id);
-            tx.onerror = () => toast(t('error.fileSave'));
+            tx.onerror = () => toast("Lỗi lưu file.");
         });
     }
     function getStoredFileUrl(id){
@@ -3999,7 +3748,7 @@ function exportSummary(sum) {
         const noteTextEl = $('#noteText');
         const noteText = noteTextEl.value.trim();
         const subtopic = getCurrentSubtopic();
-        if (!noteText) { toast(t('notes.enterBeforeSummarize')); return; }
+        if (!noteText) { toast("Vui lòng nhập ghi chú trước khi tóm tắt."); return; }
         const originalContent = btn.innerHTML;
         btn.innerHTML = '<div class="spinner"></div>'; btn.disabled = true;
         const prompt = `Dựa vào thông tin sau:\n- Chủ đề: "${subtopic?.name || 'không rõ'}"\n- Ghi chú của người dùng sau một phiên làm việc: "${noteText}"\n\nHãy tạo một bản tóm tắt ngắn gọn về những gì đã làm và đề xuất một bước hợp lý tiếp theo. Định dạng câu trả lời như sau:\n\n---\n**✨ Tóm tắt AI:**\n[Tóm tắt ở đây]\n\n**🚀 Gợi ý tiếp theo:**\n[Gợi ý ở đây]`;
@@ -4017,7 +3766,7 @@ function exportSummary(sum) {
                 s.chatHistory = [];
                 await saveData();
                 renderChat();
-                toast(t('chat.cleared'));
+                toast("Đã xóa lịch sử chat.");
             }
         });
     }
@@ -4138,7 +3887,7 @@ function exportSummary(sum) {
         _ytUnlocked = true;
         try { localStorage.setItem('sound_unlocked','1'); } catch(_) {}
         hideSoundPermission();
-        toast(t('audio.enabled'));
+        toast('Âm thanh đã được bật!');
     }
     function onPlayerReady(event) {
         try {
@@ -4270,22 +4019,22 @@ function exportSummary(sum) {
         if (IS_FILE_PROTOCOL) {
             const vid = getActiveVideoId();
             if (!ytFallbackFrame || !ytFallbackFrame.isConnected) {
-                if (!vid) { toast(t('yt.invalidLink')); return; }
+                if (!vid) { toast('Chưa có link hợp lệ. Dán link rồi bấm ▶️.'); return; }
                 fallbackLoadVideo(vid, { autoplay: 1, mute: 0 });
                 ytFallbackIsPlaying = true;
                 try { const btn = document.getElementById('btnToggleYtSound'); if (btn) btn.textContent = '⏸️'; } catch(_) {}
-                toast(t('yt.playing'));
+                toast('Đang phát nhạc nền...');
                 return;
             }
             if (ytFallbackIsPlaying) {
                 fallbackPostMessage('pauseVideo');
                 ytFallbackIsPlaying = false;
-                toast(t('yt.stopped'));
+                toast('Đã dừng nhạc nền.');
             } else {
-                if (!vid) { toast(t('yt.invalidLink')); return; }
+                if (!vid) { toast('Chưa có link hợp lệ. Dán link rồi bấm ▶️.'); return; }
                 fallbackPostMessage('playVideo');
                 ytFallbackIsPlaying = true;
-                toast(t('yt.playing'));
+                toast('Đang phát nhạc nền...');
             }
             try { 
                 const btn = document.getElementById('btnToggleYtSound'); 
@@ -4298,11 +4047,11 @@ function exportSummary(sum) {
         if (playerState === YT.PlayerState.PLAYING || playerState === YT.PlayerState.BUFFERING) {
             ytFadeOutPause();
             ytUserPaused = true;
-            toast(t('yt.stopped'));
+            toast('Đã dừng nhạc nền.');
         } else {
             ytFadeInPlay();
             ytUserPaused = false;
-            toast(t('yt.playing'));
+            toast('Đang phát nhạc nền...');
         }
     }
     function bindEvents(){
@@ -4325,23 +4074,23 @@ function exportSummary(sum) {
             normalizeDataStructure(data);
             await ensureValidSelection();
             await seedAchievedMilestones();
-            toast(t('import.success'));
+            toast('Đã nhập dữ liệu thành công!');
             renderAll();
-          }).catch(err => toast(t('import.failed', { message: err.message })));
+          }).catch(err => toast('Nhập thất bại: ' + err.message));
           e.target.value = null;
         });
       on($('#btnRestoreBackup'), 'click', () => {
           const backupListEl = $('#backupList');
           const selectedDate = backupListEl ? backupListEl.value : '';
-          if (!selectedDate) { toast(t('backup.selectOne')); return; }
+          if (!selectedDate) { toast('Vui lòng chọn một bản sao lưu.'); return; }
           showConfirmModal('Xác nhận phục hồi', `Bạn có chắc muốn phục hồi dữ liệu từ ngày ${new Date(selectedDate).toLocaleDateString()}? Dữ liệu hiện tại sẽ bị ghi đè.`, (ok) => {
               if (ok) {
                   storageManager.restoreBackup(selectedDate).then((d) => {
                       data = d;
-                      toast(t('backup.restoreSuccess'));
+                      toast('Phục hồi dữ liệu thành công! Tải lại trang...');
                       setTimeout(() => window.location.reload(), 1500);
                   }).catch(err => {
-                      toast(t('backup.error', { message: err.message }));
+                      toast(`Lỗi: ${err.message}`);
                   });
               }
           });
@@ -4353,7 +4102,7 @@ function exportSummary(sum) {
               const ytThumbCheckbox = $('#set_ytThumbAsBg');
               if (ytThumbCheckbox) {
                   ytThumbCheckbox.checked = false;
-                  toast(t('yt.thumbDisabledLightTheme'), 2000);
+                  toast('Đã tắt nền YouTube để hợp với theme sáng.', 2000);
               }
               // Đảm bảo xem trước nền gốc cho theme sáng
               try { document.body.style.setProperty('--bg-image', 'none'); } catch(_) {}
@@ -4386,18 +4135,16 @@ function exportSummary(sum) {
         if (window.data && data.settings) { data.settings.language = newLang; saveData(); }
       });
       on($('#btnDefaults'), 'click', setDefaults);
-      document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) {
-          try { timer.syncWithNow(); timer.updateUI(); } catch(_) {}
-        }
-      });
       on($('#btnTestSound'), 'click', ()=>{ ensureAudio(); playSound('work_end'); });
-      on($('#btnToggleCustomSounds'), 'click', (e) => {
-          e.preventDefault();
-          const container = $('#customSoundsContainer');
-          if (container) container.classList.toggle('hidden');
-      });
-      on($('#btnSaveNote'), 'click', async ()=>{ const s=getCurrentSubtopic(); if(!s) return; const id=pendingNoteSessionId; const sess=s.sessions.find(x=>x.id===id); if(sess){ sess.note=$('#noteText').value.trim(); await saveData(); renderStatsHistory(); toast(t('notes.saved')); } closeNoteModal(); });
+      const customSoundsToggle = $('#set_useCustomSounds');
+      if (customSoundsToggle) {
+          on(customSoundsToggle, 'change', (e) => {
+              const enabled = !!e.target.checked;
+              const container = $('#customSoundsContainer');
+              if (container) container.classList.toggle('hidden', !enabled);
+          });
+      }
+      on($('#btnSaveNote'), 'click', async ()=>{ const s=getCurrentSubtopic(); if(!s) return; const id=pendingNoteSessionId; const sess=s.sessions.find(x=>x.id===id); if(sess){ sess.note=$('#noteText').value.trim(); await saveData(); renderStatsHistory(); toast('Đã lưu ghi chú'); } closeNoteModal(); });
       on($('#btnSkipNote'), 'click', ()=> closeNoteModal());
       on($('#btnAddGeneralNote'), 'click', addGeneralNote);
       on($('#btnSummarizeNote'), 'click', handleSummarizeNote);
@@ -4496,12 +4243,12 @@ function exportSummary(sum) {
       });
       function openMethodEditor(id){
         const s = getCurrentSubtopic();
-        if (!s) { toast(t('timer.selectSubtopicPrompt')); return; }
+        if (!s) { toast('Vui lòng chọn một Chủ đề con trước.'); return; }
         s.methods = Array.isArray(s.methods) ? s.methods : [];
         const list = s.methods;
         const m = id ? list.find(x => x.id === id) : null;
         $('#methodEditorId').value = (m && m.id) || '';
-        $('#methodEditorTitle').textContent = m ? t('methodEditorEditHeader') : t('methodEditorAddHeader');
+        $('#methodEditorTitle').textContent = m ? 'Chỉnh-sửa Tri thức' : 'Thêm Tri thức mới';
         $('#methodEditorTitleInput').value = (m && m.title) || '';
         const ed = $('#methodEditorContentInput');
         if (ed) ed.innerHTML = (m && m.content) || '';
@@ -4513,14 +4260,14 @@ function exportSummary(sum) {
           if (autoBtn) {
             const hasApiKey = !!(data?.settings?.apiKey && data.settings.apiKey.trim());
             autoBtn.disabled = !hasApiKey;
-            autoBtn.title = hasApiKey ? t('methodEditorAutoFormatReadyTitle') : t('methodEditorAutoFormatNeedKeyTitle');
+            autoBtn.title = hasApiKey ? 'Dùng AI để tự động định dạng văn bản' : 'Vui lòng thêm Gemini API Key trong Cài đặt để sử dụng tính năng này.';
           }
         } catch(_) {}
       }
       on($('#btnCancelMethodEditor'), 'click', () => { $('#modalMethodEditor').classList.remove('show'); try { releaseFocus(); } catch(_) {} });
       on($('#btnSaveMethod'), 'click', async () => {
         const s = getCurrentSubtopic();
-        if (!s) { toast(t('timer.selectSubtopicPrompt')); return; }
+        if (!s) { toast('Vui lòng chọn một Chủ đề con trước.'); return; }
         s.methods = Array.isArray(s.methods) ? s.methods : [];
         const id = $('#methodEditorId').value || uid('m');
         const title = ($('#methodEditorTitleInput').value || '').trim();
@@ -4538,14 +4285,14 @@ function exportSummary(sum) {
         const ed = $('#methodEditorContentInput');
         if (!ed) return;
         const plainText = (ed.textContent || '').trim();
-        if (!plainText || plainText.length < 20) { toast(t('ai.formatNeedContent')); return; }
+        if (!plainText || plainText.length < 20) { toast('Cần có nội dung để AI định dạng.'); return; }
         const btn = $('#btnAutoFormat');
         if (btn) { btn.disabled = true; btn.innerHTML = '<div class="spinner"></div>'; }
         const prompt = `Phân tích và định dạng lại đoạn văn bản sau đây thành mã HTML sạch. Sử dụng các thẻ sau:\n- Dùng <h4> cho các tiêu đề chính.\n- Dùng <strong> để nhấn mạnh các thuật ngữ hoặc ý tưởng quan trọng.\n- Dùng <i> cho các câu ghi chú hoặc trích dẫn.\n- Dùng <ol> và <li> cho các danh sách có thứ tự.\n- Dùng <ul> và <li> cho các danh sách không có thứ tự.\n- Bọc các đoạn văn thông thường trong thẻ <p>.\nVăn bản cần định dạng:\n\n"${plainText}"`;
         const formattedHtml = await callGeminiAPI(prompt);
-        if (formattedHtml) { ed.innerHTML = formattedHtml; toast(t('ai.formatted')); }
-        else { toast(t('ai.formatFailed')); }
-        if (btn) { btn.disabled = false; btn.innerHTML = t('methodEditorAutoFormatLabel'); }
+        if (formattedHtml) { ed.innerHTML = formattedHtml; toast('AI đã định dạng xong!'); }
+        else { toast('AI không thể định dạng lúc này.'); }
+        if (btn) { btn.disabled = false; btn.innerHTML = '✨ Tự động định dạng'; }
       });
       on($('#btnAddMethod'), 'click', () => {
         if (!getCurrentSubtopic()) { toast('Vui lòng chọn một Chủ đề con trước.'); return; }
@@ -4603,7 +4350,7 @@ function exportSummary(sum) {
                   timer.reset();
                   timer.setPreset(newPreset);
                   renderAll();
-          toast(t('preset.switched', { newPreset }));
+                  toast(`Đã chuyển sang Kiểu ${newPreset}.`);
                 }
               }
             );
@@ -4611,7 +4358,7 @@ function exportSummary(sum) {
           else {
             timer.setPreset(newPreset);
             renderAll();
-            toast(t('preset.switched', { newPreset }));
+            toast(`Đã chuyển sang Kiểu ${newPreset}.`);
           }
         });
       });
@@ -4622,21 +4369,21 @@ function exportSummary(sum) {
       on($('#btnSkip'), 'click', ()=> timer.skip());
       on($('#btnReset'), 'click', ()=> timer.reset());
       on($('#btnBreakEarly'), 'click', ()=> timer.beginBreak());
-      on($('#uploadBg'), 'change', (e) => { handleFileUpload(e.target.files[0], async (id) => { data.settings.customBg = id; await saveData(); applyCustomBg(); toast(t('bg.updated')); }); e.target.value = null; });
+      on($('#uploadBg'), 'change', (e) => { handleFileUpload(e.target.files[0], async (id) => { data.settings.customBg = id; await saveData(); applyCustomBg(); toast("Đã cập nhật hình nền."); }); e.target.value = null; });
       on($('#btnClearBg'), 'click', async () => {
           data.settings.customBg = '';
           data.settings.useYtThumbnailAsBg = false;
           await saveData();
           applyCustomBg();
-          toast(t('bg.cleared'));
+          toast("Đã xóa hình nền tùy chỉnh.");
           if ($('#modalSettings').classList.contains('show')) {
               openSettings();
           }
       });
       
-      on($('#uploadSoundWork'), 'change', (e) => { handleFileUpload(e.target.files[0], async (id) => { data.settings.customSounds.work_end = id; await saveData(); toast(t('sound.savedWorkEnd')); }); e.target.value = null; });
-      on($('#uploadSoundBreak'), 'change', (e) => { handleFileUpload(e.target.files[0], async (id) => { data.settings.customSounds.break_end = id; await saveData(); toast(t('sound.savedShortEnd')); }); e.target.value = null; });
-      on($('#uploadSoundLong'), 'change', (e) => { handleFileUpload(e.target.files[0], async (id) => { data.settings.customSounds.long_end = id; await saveData(); toast(t('sound.savedLongEnd')); }); e.target.value = null; });
+      on($('#uploadSoundWork'), 'change', (e) => { handleFileUpload(e.target.files[0], async (id) => { data.settings.customSounds.work_end = id; await saveData(); toast("Đã lưu âm báo hết LÀM VIỆC."); }); e.target.value = null; });
+      on($('#uploadSoundBreak'), 'change', (e) => { handleFileUpload(e.target.files[0], async (id) => { data.settings.customSounds.break_end = id; await saveData(); toast("Đã lưu âm báo hết NGHỈ NGẮN."); }); e.target.value = null; });
+      on($('#uploadSoundLong'), 'change', (e) => { handleFileUpload(e.target.files[0], async (id) => { data.settings.customSounds.long_end = id; await saveData(); toast("Đã lưu âm báo hết NGHỈ DÀI."); }); e.target.value = null; });
       on($('#btnFullscreen'), 'click', toggleFullScreen);
       document.addEventListener('fullscreenchange', updateFullscreenButton);
       window.addEventListener('keydown', (e)=>{
@@ -4817,7 +4564,7 @@ function exportSummary(sum) {
     function toggleFullScreen() {
         if (!document.fullscreenElement) {
             document.documentElement.requestFullscreen().catch(err => {
-                toast(t('error.fullscreen', { message: err.message }));
+                toast(`Lỗi: Không thể bật chế độ toàn màn hình: ${err.message}`);
             });
         } else {
             if (document.exitFullscreen) {
@@ -4873,39 +4620,161 @@ function exportSummary(sum) {
         applyTheme();
       } catch (err) {
         console.error('Initialization error:', err);
-        toast(t('error.init', { message: err.message }));
+        toast(`Lỗi khởi tạo: ${err.message}`);
       }
     }
-    callGeminiAPI = async function(prompt, retries = 3, delay = 1000) {
-        const apiKey = data?.settings?.apiKey || "";
+    // =========================================================
+    // START: SMART API KEY LOAD BALANCER (DEVELOPER KEYS)
+    // =========================================================
+
+    // !!! QUAN TRỌNG: Dán 5 API key của bạn vào đây !!!
+    const DEV_API_KEYS = [
+        "AIzaSyD8E1bD0QNkUGlq7MKKkp9eNsaOcQyfhPc", // Thay thế bằng key 1
+        "AIzaSyCt7WR2hjW2GPxMWDQio8oq6s_DWx_Xw3c", // Thay thế bằng key 2
+        "AIzaSyAUHA8NhgR1HZJHdSY5PpDazk9TYtEzPK4", // Thay thế bằng key 3
+        "AIzaSyDq7pp49556F9sNCoKI-yKasvwQITe88ZQ", // Thay thế bằng key 4
+        "AIzaSyBPSxO2QIFhgc9vcytVVNO_CYPUShPTCRc" // Thay thế bằng key 5
+    ].filter(Boolean); // Lọc ra các key rỗng (nếu bạn dán thiếu)
+
+    const geminiKeyManager = {
+        health: {}, // Lưu trạng thái: { "key_string": { healthy: true } }
+
+        /**
+         * Khởi tạo trạng thái health cho các key
+         */
+        initializeHealth: function() {
+            this.health = {};
+            for (const key of DEV_API_KEYS) {
+                // Đảm bảo key là string và không rỗng
+                if (typeof key === 'string' && key.trim()) {
+                    this.health[key.trim()] = { healthy: true };
+                }
+            }
+        },
+
+        /**
+         * Chọn key tốt nhất (ưu tiên key "healthy")
+         */
+        selectBestKey: function() {
+            const validKeys = DEV_API_KEYS.filter(k => k && this.health[k]);
+            if (validKeys.length === 0) return null;
+
+            const healthyKeys = validKeys.filter(k => this.health[k]?.healthy);
+            
+            if (healthyKeys.length > 0) {
+                // Đơn giản là chọn key đầu tiên trong danh sách healthy
+                return healthyKeys[0]; 
+            }
+
+            // Nếu tất cả đều unhealthy, thử reset và chọn lại
+            console.warn("Tất cả Gemini keys đều bị đánh dấu unhealthy. Reset và thử lại...");
+            this.resetHealth(); // Reset tất cả về 'healthy: true'
+            
+            // Nếu sau khi reset vẫn có key, trả về key đầu tiên
+            const resetKeys = DEV_API_KEYS.filter(k => k && this.health[k]);
+            if (resetKeys.length > 0) return resetKeys[0];
+
+            return null; // Thực sự không có key nào
+        },
+
+        /**
+         * Báo cáo lỗi cho một key (ví dụ: lỗi 429 - hết quota)
+         */
+        reportFailure: function(key) {
+            if (this.health[key]) {
+                this.health[key].healthy = false;
+                console.warn(`Gemini key ...${key.slice(-4)} bị đánh dấu unhealthy.`);
+            }
+        },
+
+        /**
+         * Báo cáo key hoạt động thành công
+         */
+        reportSuccess: function(key) {
+            if (this.health[key]) {
+                this.health[key].healthy = true;
+            }
+        },
+
+        /**
+         * Reset health của tất cả key (để thử lại sau một thời gian)
+         */
+        resetHealth: function() {
+            Object.keys(this.health).forEach(k => {
+                if(this.health[k]) this.health[k].healthy = true;
+            });
+            if (Object.keys(this.health).length > 0) {
+                console.log("Trạng thái Gemini key health đã được reset.");
+            }
+        }
+    };
+
+    // Khởi tạo trạng thái health ngay khi tải
+    geminiKeyManager.initializeHealth();
+
+    // Tự động reset health của các key mỗi 30 phút
+    // (Giống logic "Health monitoring" trong ví dụ của bạn)
+    setInterval(() => {
+        geminiKeyManager.resetHealth();
+    }, 1800000); // 30 phút
+
+    /**
+     * Hàm gọi API MỚI với logic Smart Load Balancing
+     * @param {string} prompt - Câu lệnh prompt
+     * @param {Set<string>} visitedKeys - (Chỉ dùng nội bộ) để tránh vòng lặp vô hạn
+     */
+    callGeminiAPI = async function(prompt, visitedKeys = new Set()) {
+        
+        // 1. Chọn key tốt nhất
+        const apiKey = geminiKeyManager.selectBestKey();
+
         if (!apiKey) {
-            toast(t('ai.needApiKey'));
+            // Trường hợp này chỉ xảy ra nếu mảng DEV_API_KEYS bị rỗng
+            toast("Lỗi: Chưa cấu hình API key phía nhà phát triển.", 4000);
             return null;
         }
+
+        // 2. Kiểm tra vòng lặp (nếu đã thử key này trong 1 chuỗi failover)
+        if (visitedKeys.has(apiKey)) {
+            // Đã thử hết tất cả các key và quay lại key đầu tiên -> tất cả đều hỏng
+            toast("Tất cả API keys đều không khả dụng. Vui lòng thử lại sau.", 4000);
+            geminiKeyManager.resetHealth(); // Reset cho lần gọi tiếp theo
+            return null;
+        }
+        visitedKeys.add(apiKey); // Đánh dấu đã thử key này
+
+        // 3. Thực hiện cuộc gọi API
+        // (Sử dụng model và URL giống như trong file 02.html gốc của bạn)
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
         const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
+
         try {
             const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+
             if (!response.ok) {
-                if (response.status === 429 && retries > 0) {
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                    return callGeminiAPI(prompt, retries - 1, delay * 2);
+                // 4. Xử lý lỗi & TỰ ĐỘNG FAILOVER
+                let errorMsg = `Lỗi API Key ...${apiKey.slice(-4)}`;
+
+                if (response.status === 429) { // Rate limit (Hết Quota)
+                    errorMsg = `Key ...${apiKey.slice(-4)} hết quota. Tự động chuyển key...`;
+                    console.warn(errorMsg);
+                    toast(errorMsg, 2500);
+                } else if (response.status === 400) { // Bad key (Key sai)
+                    errorMsg = `Lỗi: Key ...${apiKey.slice(-4)} không hợp lệ. Tự động chuyển key...`;
+                    toast(errorMsg, 3000);
+                } else { // Lỗi khác (Server 500,...)
+                    errorMsg = `Lỗi máy chủ (${response.status}) với key ...${apiKey.slice(-4)}. Tự động chuyển key...`;
+                    console.error("Gemini API Error:", await response.text());
                 }
-                let errorData = null;
-                try { errorData = await response.json(); } catch (e) {}
-                let errorMessage = `Lỗi HTTP: ${response.status}`;
-                if (response.status === 400) {
-                    errorMessage = "Lỗi: Gemini API Key không hợp lệ hoặc đã bị thay đổi. Vui lòng kiểm tra lại trong Cài đặt.";
-                } else if (response.status === 429) {
-                    errorMessage = "Lỗi: Đã vượt quá hạn mức yêu cầu tới Gemini. Vui lòng thử lại sau ít phút.";
-                } else if (errorData?.error?.message) {
-                    errorMessage = `Lỗi từ Gemini: ${errorData.error.message}`;
-                }
-                toast(errorMessage, 4000);
-                console.error("Gemini API Error:", errorData || response.statusText);
-                return null;
+                
+                geminiKeyManager.reportFailure(apiKey); // Đánh dấu key này là hỏng
+                return callGeminiAPI(prompt, visitedKeys); // Đệ quy để thử key khác
             }
+
+            // 5. THÀNH CÔNG
             const result = await response.json();
+            geminiKeyManager.reportSuccess(apiKey); // Báo cáo key này OK
+
             if (result.candidates && result.candidates[0]?.content?.parts?.[0]?.text) {
                 return formatGeminiResponse(result.candidates[0].content.parts[0].text);
             } else {
@@ -4913,12 +4782,20 @@ function exportSummary(sum) {
                 if (result.promptFeedback?.blockReason) { return `Nội dung bị chặn vì: ${result.promptFeedback.blockReason}. Vui lòng thử lại với nội dung khác.`; }
                 return "Không nhận được nội dung hợp lệ từ AI.";
             }
+
         } catch (error) {
-            console.error("Lỗi khi gọi Gemini API:", error);
-            toast(t('error.networkGemini'), 4000);
-            return null;
+            // 6. LỖI MẠNG (Fetch failed) & TỰ ĐỘNG FAILOVER
+            console.error("Lỗi mạng khi gọi Gemini API:", error);
+            toast("Lỗi mạng khi kết nối. Tự động chuyển key...", 3000);
+            geminiKeyManager.reportFailure(apiKey); // Đánh dấu key hỏng
+            return callGeminiAPI(prompt, visitedKeys); // Thử key khác
         }
     }
+
+    // =========================================================
+    // END: SMART API KEY LOAD BALANCER
+    // =========================================================
+
     loadLanguage(localStorage.getItem('lang') || 'vi').then(initializeApp);
     </script>
 </body>
